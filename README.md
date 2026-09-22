@@ -11,22 +11,30 @@ lets a script pause mid-line without blocking the game.
 Everything runs on your own client. There is no server component, nothing is installed on servers you join, and the
 mod only ever does what the player could do by hand.
 
-> [!WARNING]
-> MineSkript is at **milestone 1** and has not yet been verified in a real client. The language is deliberately small:
-> no variables, loops or functions yet. Expect syntax to change.
+> [!IMPORTANT]
+> MineSkript is in **early release**. The language is deliberately small for now, with no variables, loops or functions
+> yet, and syntax may still change between versions. What is listed below works today.
 
 ## Why a custom language?
-[Minescript](https://github.com/maxuser0/minescript) already lets you drive the client from Python, and it is excellent
-at that. The reason not to embed an existing language is suspension: Python cannot be paused halfway through a
-statement, so a Python-based mod has to run scripts on their own threads and marshal every game call back to the render
-thread, which costs a tick of latency per call and lets the world change underneath you between two reads.
+Modding a client normally means Java, mappings, a build system and an API surface to learn before you can make the game
+do anything at all. MineSkript replaces all of that with near-English syntax in a text file: `if block below player is
+stone:` does what it reads like, and you press reload instead of recompiling. The barrier to entry is a text editor.
 
-Owning the interpreter removes that problem entirely. A MineSkript trigger runs directly on the render thread, so every
-block read and every key press is exact, and `wait 20 ticks` simply parks the execution's frame stack in a scheduler
-and returns. No threads, no races, no marshalling.
+MineSkript can stop a script in the middle and pick it up later, which is the thing
+[Minescript](https://github.com/maxuser0/minescript) cannot. Python has no way to freeze a half-finished statement, so
+scripts there live on their own threads and every game call has to hop back to the render thread, landing a tick late
+against a world that may already have moved.
+
+Because the interpreter is ours, a trigger runs on the render thread itself. `wait 20 ticks` sets the execution aside
+and hands control straight back to the game; twenty ticks later the next line continues from exactly where it stopped,
+reading the blocks and keys as they really are at that moment. Nothing is threaded, nothing is queued, nothing is
+stale.
 
 The cost is that the language only does what has been built into it. That trade is the whole point: correctness and
 readability over generality.
+
+In short: Minescript asks you to know Python and accept a tick of latency on every call, MineSkript asks you to write a
+sentence and gives you the exact game state.
 
 ## Requirements
 - Minecraft **26.2**
@@ -35,7 +43,7 @@ readability over generality.
 - A **Java 25** runtime
 
 ## Download
-There is no release yet. Build it yourself with the instructions under [Building](#building); the jar lands in
+No release is published yet, so build it yourself with the instructions under [Building](#building); the jar lands in
 `build/libs/`.
 
 ## Getting Started
@@ -132,7 +140,7 @@ Errors raised while a script runs appear in red as `mineskript: file:line: messa
 - [x] Lexer, pattern-matching parser and a suspendable interpreter
 - [x] Events, effects, conditions and expressions listed above
 - [x] Script loading, `/mineskript reload` and per-line error reporting
-- [ ] In-game verification on a real client
+- [x] Verified in game on a real client
 - [ ] Variables and `set`
 - [ ] `while` and looping over lists
 - [ ] Functions
