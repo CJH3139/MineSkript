@@ -16,6 +16,12 @@ class LanguageBatchTwoTest {
     }
 
     @Test
+    void numbersPrintRoundedToTwoPlacesWithoutScientificNotation() {
+        runner.run("on load:\n    send \"%1 / 3%\"\n    send \"%0.000006%\"\n    send \"%10 ^ 20 * 1.5%\"\n    send \"%0 - 2 / 3%\"\n");
+        assertEquals(List.of("0.33", "0", "150000000000000000000", "-0.67"), runner.game.messages);
+    }
+
+    @Test
     void notPrefixNegatesAnyCondition() {
         runner.run("on load:\n    if not player is sneaking:\n        send \"standing\"\n    if not 1 is 1:\n        send \"wrong\"\n    if not 1 is 2 and 3 is 3:\n        send \"both\"\n");
         assertEquals(List.of("standing", "both"), runner.game.messages);

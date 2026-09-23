@@ -37,6 +37,8 @@ public final class EventDispatcher {
 
     private static final int TIME_JUMP_TICKS = 20;
 
+    private static final double HEALTH_NOISE = 0.01;
+
     private static final Set<String> INVENTORY_EVENTS = Set.of("inventory", "held", "use start", "use stop");
 
     private static final Set<String> HELD_ITEM_EVENTS = Set.of("item break", "durability");
@@ -106,6 +108,7 @@ public final class EventDispatcher {
     private boolean onlineNamesSeen;
     private Set<String> eventNames = Set.of();
     private long lastDayTime = Long.MIN_VALUE;
+    private double reportedHealth = Double.NaN;
 
     public EventDispatcher(ScriptRegistry registry, GameBridge game, Interpreter interpreter, Scheduler scheduler) {
         this(registry, game, interpreter, scheduler, new Variables(), () -> {
@@ -443,6 +446,7 @@ public final class EventDispatcher {
                 return;
             }
             if (!before.hasWorld()) {
+                reportedHealth = after.health();
                 onlineNamesSeen = false;
                 onWorldJoin.run();
                 fireState("join", Map.of());
@@ -488,21 +492,26 @@ public final class EventDispatcher {
     }
 
     private void diffHealth(WorldSnapshot before, WorldSnapshot after) {
-        if (after.health() != before.health()) {
-            fireState("health", Map.of("health change", after.health() - before.health(), "old health", before.health()));
+        double was = Double.isNaN(reportedHealth) ? before.health() : reportedHealth;
+        double now = after.health();
+        boolean changed = Math.abs(now - was) >= HEALTH_NOISE || (now <= 0) != (was <= 0);
+        if (!changed) {
+            return;
         }
-        if (after.health() <= 0 && before.health() > 0) {
+        reportedHealth = now;
+        fireState("health", Map.of("health change", now - was, "old health", was));
+        if (now <= 0 && was > 0) {
             fireState("death", Map.of());
             return;
         }
-        if (after.health() > 0 && before.health() <= 0) {
+        if (now > 0 && was <= 0) {
             fireState("respawn", Map.of());
             return;
         }
-        if (after.health() < before.health()) {
-            fireState("damage", Map.of("damage", before.health() - after.health()));
-        } else if (after.health() > before.health() && before.health() > 0) {
-            fireState("heal", Map.of("healed", after.health() - before.health()));
+        if (now < was) {
+            fireState("damage", Map.of("damage", was - now));
+        } else if (now > was && was > 0) {
+            fireState("heal", Map.of("healed", now - was));
         }
     }
 

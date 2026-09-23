@@ -32,6 +32,9 @@ public final class ScriptError extends RuntimeException {
 
     @Override
     public String toString() {
-        return located() ? file + ":" + line + ": " + getMessage() : getMessage();
+        if (!located()) {
+            return getMessage();
+        }
+        return line > 0 ? file + ":" + line + ": " + getMessage() : file + ": " + getMessage();
     }
 }

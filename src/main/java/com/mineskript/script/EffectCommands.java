@@ -16,7 +16,8 @@ public final class EffectCommands {
         NOT_MINE,
         RAN,
         FAILED,
-        BUSY
+        BUSY,
+        EMPTY
     }
 
     private final Parser parser;
@@ -45,17 +46,21 @@ public final class EffectCommands {
             return Outcome.NOT_MINE;
         }
         if (running) {
-            game.showError(new ScriptError(FILE, 1, "an effect command cannot start another effect command").toString());
+            game.showError(new ScriptError(FILE, 0, "an effect command cannot start another effect command").toString());
             return Outcome.BUSY;
         }
         if (!game.hasWorld()) {
-            game.showError(new ScriptError(FILE, 1, "there is no world to run in").toString());
+            game.showError(new ScriptError(FILE, 0, "there is no world to run in").toString());
             return Outcome.FAILED;
         }
         String text = message.substring(current.effectCommandPrefix().length()).strip();
+        if (text.isEmpty()) {
+            game.showInfo("type an effect after " + current.effectCommandPrefix() + " to run it, like " + current.effectCommandPrefix() + "send \"hello\"");
+            return Outcome.EMPTY;
+        }
         ParsedEffect parsed;
         try {
-            parsed = parser.parseEffect(FILE, 1, new Event.EffectCommand(), text);
+            parsed = parser.parseEffect(FILE, 0, new Event.EffectCommand(), text);
         } catch (RuntimeException | StackOverflowError error) {
             game.showError(describe(error));
             return Outcome.FAILED;
@@ -64,7 +69,7 @@ public final class EffectCommands {
             game.showError(parsed.error().toString());
             return Outcome.FAILED;
         }
-        Trigger trigger = new Trigger(FILE, 1, new Event.EffectCommand(), new Block(List.of(parsed.statement())));
+        Trigger trigger = new Trigger(FILE, 0, new Event.EffectCommand(), new Block(List.of(parsed.statement())));
         running = true;
         boolean ran;
         try {
@@ -81,7 +86,7 @@ public final class EffectCommands {
 
     private static String describe(Throwable error) {
         String message = error.getMessage();
-        return new ScriptError(FILE, 1, message == null || message.isBlank()
+        return new ScriptError(FILE, 0, message == null || message.isBlank()
                 ? error.getClass().getSimpleName()
                 : message).toString();
     }

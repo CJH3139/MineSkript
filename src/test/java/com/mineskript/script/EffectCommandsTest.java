@@ -94,7 +94,7 @@ class EffectCommandsTest {
         assertEquals(EffectCommands.Outcome.FAILED, effects.run("?frobnicate the widget"));
         assertEquals(List.of(), game.messages);
         assertEquals(List.of(), game.infos);
-        assertEquals(List.of("effect command:1: unknown effect \"frobnicate the widget\""), game.errors);
+        assertEquals(List.of("effect command: unknown effect \"frobnicate the widget\""), game.errors);
     }
 
     @Test
@@ -103,13 +103,13 @@ class EffectCommandsTest {
     }
 
     @Test
-    void aBarePrefixIsSwallowedAndAnsweredRatherThanSent() {
-        assertEquals(EffectCommands.Outcome.FAILED, effects.run("?"));
-        assertEquals(List.of("effect command:1: there is nothing here to run"), game.errors);
-        assertEquals(List.of(), game.infos);
+    void aBarePrefixIsSwallowedAndAnsweredWithAHintRatherThanSent() {
+        assertEquals(EffectCommands.Outcome.EMPTY, effects.run("?"));
+        assertEquals(List.of(), game.errors);
+        assertEquals(List.of("type an effect after ? to run it, like ?send \"hello\""), game.infos);
         assertFalse(effects.allowChat("?   "));
-        assertEquals(List.of("effect command:1: there is nothing here to run",
-                "effect command:1: there is nothing here to run"), game.errors);
+        assertEquals(2, game.infos.size());
+        assertEquals(List.of(), game.errors);
     }
 
     @Test
@@ -129,7 +129,7 @@ class EffectCommandsTest {
         DefaultSyntax.registerAll(syntax);
         EffectCommands throwing = new EffectCommands(new Parser(syntax), dispatcher, config, game);
         assertEquals(EffectCommands.Outcome.FAILED, throwing.run("?give up halfway"));
-        assertEquals(List.of("effect command:1: the effect gave up halfway"), game.errors);
+        assertEquals(List.of("effect command: the effect gave up halfway"), game.errors);
         assertEquals(List.of(), game.infos);
         assertFalse(throwing.allowChat("?give up halfway"));
     }
@@ -137,7 +137,7 @@ class EffectCommandsTest {
     @Test
     void anEventValueIsRefusedWithAMessageThatSaysWhy() {
         assertEquals(EffectCommands.Outcome.FAILED, effects.run("?send \"%event-damage%\""));
-        assertEquals(List.of("effect command:1: event-damage needs an event, and an effect command typed in chat has none"), game.errors);
+        assertEquals(List.of("effect command: event-damage needs an event, and an effect command typed in chat has none"), game.errors);
     }
 
     @Test
@@ -152,8 +152,7 @@ class EffectCommandsTest {
         assertEquals(List.of("quiet"), game.messages);
         typeInChat("hello everyone");
         assertEquals(List.of("quiet", "sent hello everyone"), game.messages);
-        assertEquals(List.of("effect command:1: unknown effect \"frobnicate the widget\"",
-                "effect command:1: there is nothing here to run"), game.errors);
+        assertEquals(List.of("effect command: unknown effect \"frobnicate the widget\""), game.errors);
     }
 
     @Test
@@ -222,7 +221,7 @@ class EffectCommandsTest {
         assertEquals(EffectCommands.Outcome.RAN, effects.run("?wait until player is sneaking"));
         ticks(WaitUntil.TIMEOUT_TICKS + 2);
         assertEquals(0, dispatcher.parkedSize());
-        assertEquals(List.of("effect command:1: wait until timed out after 30 seconds"), game.errors);
+        assertEquals(List.of("effect command: wait until timed out after 30 seconds"), game.errors);
     }
 
     @Test
@@ -281,7 +280,7 @@ class EffectCommandsTest {
         assertEquals(EffectCommands.Outcome.RAN, loop.effects.run("?set {-inner} to \"?set {-reached} to 1\""));
         assertEquals(EffectCommands.Outcome.RAN, loop.effects.run("?make player say \"%{-inner}%\""));
         assertEquals(List.of("chat:?set {-reached} to 1"), loop.game.calls);
-        assertEquals(List.of("effect command:1: an effect command cannot start another effect command"), loop.game.errors);
+        assertEquals(List.of("effect command: an effect command cannot start another effect command"), loop.game.errors);
         assertFalse(loop.variables.ram().containsKey("reached"));
     }
 
@@ -314,7 +313,7 @@ class EffectCommandsTest {
         DefaultSyntax.registerAll(syntax);
         EffectCommands brittle = new EffectCommands(new Parser(syntax), dispatcher, config, game);
         assertEquals(EffectCommands.Outcome.FAILED, brittle.run("?fall over"));
-        assertEquals(List.of("effect command:1: the parser fell over"), game.errors);
+        assertEquals(List.of("effect command: the parser fell over"), game.errors);
         assertEquals(List.of(), game.infos);
         assertEquals(List.of(), game.messages);
         assertFalse(brittle.allowChat("?fall over"));
@@ -327,7 +326,7 @@ class EffectCommandsTest {
         DefaultSyntax.registerAll(syntax);
         EffectCommands brittle = new EffectCommands(new Parser(syntax), dispatcher, config, game);
         assertEquals(EffectCommands.Outcome.FAILED, brittle.run("?go too deep"));
-        assertEquals(List.of("effect command:1: StackOverflowError"), game.errors);
+        assertEquals(List.of("effect command: StackOverflowError"), game.errors);
         assertEquals(List.of(), game.infos);
     }
 
@@ -377,14 +376,14 @@ class EffectCommandsTest {
         DefaultSyntax.registerAll(syntax);
         EffectCommands throwing = new EffectCommands(new Parser(syntax), dispatcher, config, game);
         assertEquals(EffectCommands.Outcome.FAILED, throwing.run("?give up after sending"));
-        assertEquals(List.of("message:half done", "error:effect command:1: the effect gave up halfway"), game.shown);
+        assertEquals(List.of("message:half done", "error:effect command: the effect gave up halfway"), game.shown);
     }
 
     @Test
     void anEffectCommandWithNoWorldRunsNothingAndSaysWhyRatherThanClaimingItRan() {
         game.hasWorld = false;
         assertEquals(EffectCommands.Outcome.FAILED, effects.run("?send \"hello\""));
-        assertEquals(List.of("effect command:1: there is no world to run in"), game.errors);
+        assertEquals(List.of("effect command: there is no world to run in"), game.errors);
         assertEquals(List.of(), game.messages);
         assertEquals(List.of(), game.infos);
         assertFalse(effects.allowChat("?send \"hello\""));
@@ -410,7 +409,7 @@ class EffectCommandsTest {
         assertEquals(List.of("info:ran wait until player is sneaking"), game.shown);
         ticks(WaitUntil.TIMEOUT_TICKS + 2);
         assertEquals(List.of("info:ran wait until player is sneaking",
-                "error:effect command:1: wait until timed out after 30 seconds"), game.shown);
+                "error:effect command: wait until timed out after 30 seconds"), game.shown);
     }
 
     private static Optional<Statement> overflow() {

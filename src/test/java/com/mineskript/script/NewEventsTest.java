@@ -53,6 +53,20 @@ class NewEventsTest {
     }
 
     @Test
+    void tinyHealthChangesAreIgnoredButAddUp() {
+        load("on health change:\n    send \"changed %event-health change%\"\non heal:\n    send \"healed\"\n");
+        ticks(1);
+        game.health = 19.999994;
+        ticks(1);
+        assertEquals(List.of(), game.messages);
+        game.health = 19.995;
+        ticks(1);
+        game.health = 19.989;
+        ticks(1);
+        assertEquals(List.of("changed -0.01"), game.messages);
+    }
+
+    @Test
     void durabilityBelowFiresOnceWhenCrossed() {
         load("on durability below 10:\n    send \"low %event-durability%\"\n");
         game.slots[0] = new ItemValue("minecraft:iron_pickaxe", "iron pickaxe", 1, 240, 250);

@@ -8,10 +8,14 @@ import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PlayerRef;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Timespan;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Locale;
 
 public final class Converters {
+    public static final int DISPLAY_DECIMALS = 2;
+
     private Converters() {
     }
 
@@ -91,10 +95,14 @@ public final class Converters {
     }
 
     private static String formatNumber(double number) {
+        if (!Double.isFinite(number)) {
+            return Double.toString(number);
+        }
         if (number == Math.rint(number) && Math.abs(number) < 1.0e15) {
             return Long.toString((long) number);
         }
-        return Double.toString(number);
+        BigDecimal rounded = BigDecimal.valueOf(number).setScale(DISPLAY_DECIMALS, RoundingMode.HALF_UP).stripTrailingZeros();
+        return rounded.signum() == 0 ? "0" : rounded.toPlainString();
     }
 
     private static String joinList(List<?> list, Context context) {

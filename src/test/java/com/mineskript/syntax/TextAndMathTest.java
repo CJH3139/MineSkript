@@ -104,7 +104,7 @@ class TextAndMathTest {
                     send "%min of -3 and -8% %max of -3 and -8%"
                     send "%square root of 16% %sqrt of 2%"
                 """);
-        assertEquals(List.of("3 8", "-8 -3", "4 1.4142135623730951"), runner.game.messages);
+        assertEquals(List.of("3 8", "-8 -3", "4 1.41"), runner.game.messages);
     }
 
     @Test

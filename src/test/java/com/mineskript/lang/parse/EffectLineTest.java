@@ -19,7 +19,7 @@ class EffectLineTest {
     private final Parser parser = new Parser(DefaultSyntax.registry());
 
     private ParsedEffect parse(String text) {
-        return parser.parseEffect("effect command", 1, new Event.EffectCommand(), text);
+        return parser.parseEffect("effect command", 0, new Event.EffectCommand(), text);
     }
 
     private String error(String text) {
@@ -41,42 +41,42 @@ class EffectLineTest {
     @Test
     void theLineIsStrippedBeforeItIsParsed() {
         assertFalse(parse("   send \"hi\"   ").failed());
-        assertEquals("effect command:1: unknown effect \"frobnicate the widget\"", error("   frobnicate the widget   "));
+        assertEquals("effect command: unknown effect \"frobnicate the widget\"", error("   frobnicate the widget   "));
     }
 
     @Test
     void anEmptyLineIsAnError() {
-        assertEquals("effect command:1: there is nothing here to run", error("   "));
+        assertEquals("effect command: there is nothing here to run", error("   "));
     }
 
     @Test
     void anUnknownEffectIsAnErrorInTheUsualShape() {
-        assertEquals("effect command:1: unknown effect \"frobnicate the widget\"", error("frobnicate the widget"));
+        assertEquals("effect command: unknown effect \"frobnicate the widget\"", error("frobnicate the widget"));
     }
 
     @Test
     void anUnterminatedStringIsAnErrorInTheUsualShape() {
-        assertEquals("effect command:1: unterminated string", error("send \"oops"));
+        assertEquals("effect command: unterminated string", error("send \"oops"));
     }
 
     @Test
     void anEventValueIsRefusedWithAMessageThatSaysWhy() {
-        assertEquals("effect command:1: event-damage needs an event, and an effect command typed in chat has none",
+        assertEquals("effect command: event-damage needs an event, and an effect command typed in chat has none",
                 error("send \"%event-damage%\""));
-        assertEquals("effect command:1: event-item needs an event, and an effect command typed in chat has none",
+        assertEquals("effect command: event-item needs an event, and an effect command typed in chat has none",
                 error("send \"%event-item%\""));
     }
 
     @Test
     void theMessageExpressionIsStillRefusedByItsOwnWording() {
-        assertEquals("effect command:1: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\"",
+        assertEquals("effect command: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\"",
                 error("send message"));
     }
 
     @Test
     void loopOnlyEffectsAreRefusedBecauseTheScopeHasNoLoop() {
-        assertEquals("effect command:1: continue is only available inside a loop", error("continue"));
-        assertEquals("effect command:1: exit loop is only available inside a loop", error("exit loop"));
+        assertEquals("effect command: continue is only available inside a loop", error("continue"));
+        assertEquals("effect command: exit loop is only available inside a loop", error("exit loop"));
     }
 
     @Test
@@ -96,13 +96,13 @@ class EffectLineTest {
 
     @Test
     void aSectionHeadIsNotAnEffectAndIsRefused() {
-        assertEquals("effect command:1: unknown effect \"if player is sneaking:\"", error("if player is sneaking:"));
+        assertEquals("effect command: unknown effect \"if player is sneaking:\"", error("if player is sneaking:"));
     }
 
     @Test
     void oneParserGivesEachScopeItsOwnAnswerHoweverTheTwoAreInterleaved() {
         String first = error("send \"%event-damage%\"");
-        assertEquals("effect command:1: event-damage needs an event, and an effect command typed in chat has none", first);
+        assertEquals("effect command: event-damage needs an event, and an effect command typed in chat has none", first);
         assertEquals("t.ms:2: event-damage is not available in this event",
                 parser.parse("t.ms", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
         assertEquals(first, error("send \"%event-damage%\""));
