@@ -15,12 +15,16 @@ public final class Interpreter {
         this.stepBudget = stepBudget;
     }
 
+    public int stepBudget() {
+        return stepBudget;
+    }
+
     public Outcome run(Execution execution) {
-        String file = execution.context().file();
         int steps = 0;
         Statement statement;
         while ((statement = execution.next()) != null) {
             if (++steps > stepBudget) {
+                String file = execution.context().file();
                 execution.stop();
                 throw new ScriptError(file, statement.line(), "step limit exceeded");
             }
@@ -34,6 +38,8 @@ public final class Interpreter {
                     case Flow.NextIteration ignored -> execution.nextIteration();
                     case Flow.ExitLoop ignored -> execution.exitLoop();
                     case Flow.Stop ignored -> execution.stop();
+                    case Flow.Call call -> execution.call(call.function(), call.arguments(), statement.line());
+                    case Flow.Return result -> execution.returnFrom(result.value());
                     case Flow.Wait wait -> {
                         execution.suspend(wait.ticks());
                         return Outcome.WAITING;
@@ -44,9 +50,11 @@ public final class Interpreter {
                     }
                 }
             } catch (ScriptError error) {
+                String file = execution.context().file();
                 execution.stop();
                 throw error.at(file, statement.line());
             } catch (RuntimeException error) {
+                String file = execution.context().file();
                 execution.stop();
                 String message = error.getMessage();
                 throw new ScriptError(file, statement.line(), message == null ? error.getClass().getSimpleName() : message);

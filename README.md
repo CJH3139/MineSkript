@@ -12,8 +12,7 @@ Everything runs on your own client. There is no server component, nothing is ins
 mod only ever does what you could do by hand.
 
 > [!IMPORTANT]
-> MineSkript is in **early release**. Syntax may still change between versions, and functions and list variables are
-> not in yet.
+> MineSkript is in **early release**. Syntax may still change between versions, and list variables are not in yet.
 
 ## Why a custom language?
 Modding a client normally means Java, mappings, a build system and an API surface to learn before you can make the
@@ -64,6 +63,25 @@ looking at and carrying. Effects that press keys, aim the camera, pick hotbar sl
 commands. Variables in three scopes, arithmetic, `and` and `or`, loops, text and maths functions, and
 `wait until <condition>`.
 
+Functions take typed parameters, which arrive as local variables, and can return a value. Called on its own line, a
+function may `wait`; used as a value, it must not. `local function` keeps it private to its file, and a function that
+calls itself more than 100 levels deep stops with an error instead of freezing the game. An `options:` block defines
+constants you paste in with `{@name}`.
+
+```
+options:
+    greeting: hello
+
+function label(n: number, unit: text = "blocks") :: text:
+    return "%{_n}% %{_unit}%" if {_n} is not 1 else "1 block"
+
+on key press of "g":
+    if {home} is not set:
+        send "{@greeting}, no home yet"
+    loop "a,b,c" split at ",":
+        send label(loop-iteration)
+```
+
 The example scripts in your `mineskript` folder are the working reference, and `/ms help` lists the commands. A parse
 error names the file, the line and the text it objected to.
 
@@ -104,7 +122,7 @@ running rather than dropping it.
 - [x] Text and maths expressions, and `wait until <condition>`
 - [x] A real command tree with single-file reload and completion
 - [x] Effect commands typed into chat, and the first config file
-- [ ] Functions
+- [x] Functions, options, `is set` and `x if condition else y`
 - [ ] List variables and dynamic variable names
 - [ ] Syntax highlighting for editors
 

@@ -8,7 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -27,6 +29,9 @@ public final class ScriptLoader {
                 if health of player is less than 6:
                     make player say "low hp!"
             """;
+
+    private record Source(String text, String error) {
+    }
 
     private final Parser parser;
 
@@ -48,11 +53,22 @@ public final class ScriptLoader {
                 Files.writeString(dir.resolve("example.ms"), EXAMPLE, StandardCharsets.UTF_8);
                 files = listScripts(dir);
             }
+            Map<Path, Source> texts = new LinkedHashMap<>();
             for (Path file : files) {
-                scripts.add(parseFile(file, sources));
+                texts.put(file, read(file));
+            }
+            texts.forEach((file, source) -> {
+                if (source.text() != null) {
+                    parser.declare(file.getFileName().toString(), source.text());
+                }
+            });
+            for (Path file : files) {
+                scripts.add(parse(file, texts.get(file), sources));
             }
         } catch (IOException error) {
             scripts.add(new ParsedScript(dir.toString(), List.of(), List.of(new ParseError(dir.toString(), 0, "cannot read scripts folder: " + error.getMessage()))));
+        } finally {
+            parser.functions().forgetDeclared();
         }
         return new LoadReport(List.copyOf(scripts));
     }
@@ -90,17 +106,27 @@ public final class ScriptLoader {
     }
 
     private ParsedScript parseFile(Path file, ScriptSources sources) {
-        String name = file.getFileName().toString();
+        return parse(file, read(file), sources);
+    }
+
+    private static Source read(Path file) {
         try {
-            String text = Files.readString(file, StandardCharsets.UTF_8);
-            ParsedScript script = parser.parse(name, text);
-            sources.capture(name, text, script.errors());
-            return script;
+            return new Source(Files.readString(file, StandardCharsets.UTF_8), null);
         } catch (IOException error) {
-            ParsedScript script = new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, "cannot read file: " + error.getMessage())));
+            return new Source(null, error.getMessage());
+        }
+    }
+
+    private ParsedScript parse(Path file, Source source, ScriptSources sources) {
+        String name = file.getFileName().toString();
+        if (source.text() == null) {
+            ParsedScript script = new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, "cannot read file: " + source.error())));
             sources.capture(name, "", script.errors());
             return script;
         }
+        ParsedScript script = parser.parse(name, source.text());
+        sources.capture(name, source.text(), script.errors());
+        return script;
     }
 
     private static List<Path> listScripts(Path dir) throws IOException {

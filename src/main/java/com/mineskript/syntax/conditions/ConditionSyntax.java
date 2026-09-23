@@ -7,6 +7,7 @@ public final class ConditionSyntax {
     }
 
     public static void register(SyntaxRegistry registry) {
+        CondIsSet.register(registry);
         CondPlayerState.register(registry);
         CondPlayerFlag.register(registry);
         CondCanSeeSky.register(registry);

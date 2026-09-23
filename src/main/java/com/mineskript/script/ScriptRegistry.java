@@ -1,11 +1,15 @@
 package com.mineskript.script;
 
 import com.mineskript.lang.ast.Event;
+import com.mineskript.lang.ast.Function;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.parse.ParsedScript;
+import com.mineskript.lang.runtime.Functions;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class ScriptRegistry {
@@ -13,11 +17,22 @@ public final class ScriptRegistry {
     private List<Trigger> triggers = List.of();
     private Set<String> watchedKeys = Set.of();
     private int generation;
+    private final Functions functions;
+
+    public ScriptRegistry() {
+        this(new Functions());
+    }
+
+    public ScriptRegistry(Functions functions) {
+        this.functions = functions;
+    }
 
     public void replace(List<ParsedScript> loaded) {
         List<Trigger> all = new ArrayList<>();
         Set<String> keys = new LinkedHashSet<>();
+        Map<String, List<Function>> byFile = new HashMap<>();
         for (ParsedScript script : loaded) {
+            byFile.put(script.file(), script.functions());
             for (Trigger trigger : script.triggers()) {
                 all.add(trigger);
                 if (trigger.event() instanceof Event.KeyPress press) {
@@ -30,6 +45,7 @@ public final class ScriptRegistry {
         scripts = List.copyOf(loaded);
         triggers = List.copyOf(all);
         watchedKeys = Set.copyOf(keys);
+        functions.replace(byFile);
         generation++;
     }
 

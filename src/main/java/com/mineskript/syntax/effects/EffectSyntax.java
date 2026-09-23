@@ -18,6 +18,7 @@ public final class EffectSyntax {
         EffSelectSlot.register(registry);
         EffSwapHands.register(registry);
         EffDrop.register(registry);
+        EffEat.register(registry);
         EffLookAt.register(registry);
         EffSetRotation.register(registry);
         EffHudText.register(registry);

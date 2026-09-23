@@ -16,9 +16,14 @@ public final class ExpressionParser implements SlotResolver {
     private final Set<String> inProgress = new HashSet<>();
     private final Map<String, Optional<Expression>> cache = new HashMap<>();
     private boolean blocked;
+    private Parser owner;
 
     public ExpressionParser(SyntaxRegistry registry) {
         this.registry = registry;
+    }
+
+    void attach(Parser parser) {
+        owner = parser;
     }
 
     public void clearCache() {
@@ -57,9 +62,21 @@ public final class ExpressionParser implements SlotResolver {
     }
 
     private Optional<Expression> parseUncached(List<Token> tokens, List<SkType> types, ParseScope scope) {
+        if (owner != null) {
+            Optional<Expression> call = owner.functionCall(tokens, scope).flatMap(expression -> typed(expression, types));
+            if (call.isPresent()) {
+                return call;
+            }
+        }
         Optional<Expression> literal = literal(tokens, types, scope);
         if (literal.isPresent()) {
             return literal;
+        }
+        if (owner != null) {
+            Optional<Expression> ternary = owner.ternary(tokens, types, scope).flatMap(expression -> typed(expression, types));
+            if (ternary.isPresent()) {
+                return ternary;
+            }
         }
         Optional<Expression> list = list(tokens, types, scope);
         if (list.isPresent()) {

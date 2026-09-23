@@ -1,5 +1,7 @@
 package com.mineskript.lang.ast;
 
+import java.util.List;
+
 public sealed interface Flow {
     Flow CONTINUE = new Continue();
     Flow STOP = new Stop();
@@ -28,5 +30,11 @@ public sealed interface Flow {
     }
 
     record ExitLoop() implements Flow {
+    }
+
+    record Call(Function function, List<Object> arguments) implements Flow {
+    }
+
+    record Return(Object value) implements Flow {
     }
 }

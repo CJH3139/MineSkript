@@ -3,6 +3,7 @@ package com.mineskript;
 import com.mineskript.game.MinecraftBridge;
 import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.Parser;
+import com.mineskript.lang.runtime.Functions;
 import com.mineskript.lang.runtime.Interpreter;
 import com.mineskript.lang.runtime.Scheduler;
 import com.mineskript.lang.runtime.Variables;
@@ -42,7 +43,8 @@ public final class MineSkriptClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         MinecraftBridge bridge = new MinecraftBridge();
-        ScriptRegistry registry = new ScriptRegistry();
+        Functions functions = new Functions();
+        ScriptRegistry registry = new ScriptRegistry(functions);
         Variables variables = new Variables();
         Path dir = FabricLoader.getInstance().getGameDir().resolve("mineskript");
         VariablePersistence persistence = new VariablePersistence(new VariableStore(), dir.resolve("variables.json"), variables, bridge);
@@ -51,8 +53,8 @@ public final class MineSkriptClient implements ClientModInitializer {
             persistence.flushWarning();
             config.flushTo(bridge);
         });
-        service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry())), registry, dispatcher, persistence, config);
-        EffectCommands effects = new EffectCommands(new Parser(DefaultSyntax.registry()), dispatcher, config, bridge);
+        service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry(), functions)), registry, dispatcher, persistence, config);
+        EffectCommands effects = new EffectCommands(new Parser(DefaultSyntax.registry(), functions), dispatcher, config, bridge);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> dispatcher.tick());
         ClientReceiveMessageEvents.CHAT.register((message, signed, profile, params, timestamp) -> dispatcher.onChat(message.getString()));

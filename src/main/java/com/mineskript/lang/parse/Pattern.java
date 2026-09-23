@@ -50,6 +50,10 @@ public final class Pattern {
         return new Pattern(source, root, compiler.slotCount);
     }
 
+    public static SkType typeNamed(String name) {
+        return TYPE_NAMES.get(name.toLowerCase(Locale.ROOT));
+    }
+
     public String source() {
         return source;
     }

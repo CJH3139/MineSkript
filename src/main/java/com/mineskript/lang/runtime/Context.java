@@ -10,11 +10,13 @@ import java.util.Map;
 
 public final class Context {
     private final GameBridge game;
-    private final String file;
     private final Map<String, Object> eventValues;
     private final Variables variables;
-    private final Map<String, Object> locals = new HashMap<>();
+    private final Deque<Scope> scopes = new ArrayDeque<>();
     private final Deque<LoopState> loops = new ArrayDeque<>();
+
+    private record Scope(String file, Map<String, Object> locals) {
+    }
 
     public Context(GameBridge game, String file, Map<String, Object> eventValues) {
         this(game, file, eventValues, new Variables());
@@ -22,9 +24,9 @@ public final class Context {
 
     public Context(GameBridge game, String file, Map<String, Object> eventValues, Variables variables) {
         this.game = game;
-        this.file = file;
         this.eventValues = Map.copyOf(eventValues);
         this.variables = variables;
+        scopes.push(new Scope(file, new HashMap<>()));
     }
 
     public GameBridge game() {
@@ -32,7 +34,7 @@ public final class Context {
     }
 
     public String file() {
-        return file;
+        return scopes.peek().file();
     }
 
     public Variables variables() {
@@ -55,13 +57,13 @@ public final class Context {
     }
 
     public Object getVariable(VariableScope scope, String name) {
-        Object value = scope == VariableScope.LOCAL ? locals.get(name) : variables.get(scope, name);
+        Object value = scope == VariableScope.LOCAL ? locals().get(name) : variables.get(scope, name);
         return value == null ? None.NONE : value;
     }
 
     public void setVariable(VariableScope scope, String name, Object value) {
         if (scope == VariableScope.LOCAL) {
-            locals.put(name, value);
+            locals().put(name, value);
         } else {
             variables.set(scope, name, value);
         }
@@ -69,10 +71,28 @@ public final class Context {
 
     public void deleteVariable(VariableScope scope, String name) {
         if (scope == VariableScope.LOCAL) {
-            locals.remove(name);
+            locals().remove(name);
         } else {
             variables.delete(scope, name);
         }
+    }
+
+    public int functionDepth() {
+        return scopes.size() - 1;
+    }
+
+    void enterFunction(String functionFile, Map<String, Object> arguments) {
+        scopes.push(new Scope(functionFile, new HashMap<>(arguments)));
+    }
+
+    void exitFunction() {
+        if (scopes.size() > 1) {
+            scopes.pop();
+        }
+    }
+
+    private Map<String, Object> locals() {
+        return scopes.peek().locals();
     }
 
     public void pushLoop(LoopState state) {

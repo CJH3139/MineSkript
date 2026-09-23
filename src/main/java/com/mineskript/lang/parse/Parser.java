@@ -6,10 +6,12 @@ import com.mineskript.lang.ast.Block;
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.Function;
 import com.mineskript.lang.ast.IfChain;
 import com.mineskript.lang.ast.LoopKind;
 import com.mineskript.lang.ast.LoopStatement;
 import com.mineskript.lang.ast.OrCondition;
+import com.mineskript.lang.ast.Return;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Statement;
 import com.mineskript.lang.ast.Trigger;
@@ -17,13 +19,18 @@ import com.mineskript.lang.ast.WaitUntil;
 import com.mineskript.lang.lexer.LexResult;
 import com.mineskript.lang.lexer.Lexer;
 import com.mineskript.lang.lexer.Node;
+import com.mineskript.lang.runtime.Converters;
+import com.mineskript.lang.runtime.FunctionCall;
+import com.mineskript.lang.runtime.Functions;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 
 public final class Parser {
     private static final class Failure extends RuntimeException {
@@ -35,33 +42,357 @@ public final class Parser {
         }
     }
 
+    private record Prepared(List<Node> nodes, List<ParseError> errors) {
+    }
+
+    private record Declared(Node node, Function function) {
+    }
+
+    private static final java.util.regex.Pattern HEADER = java.util.regex.Pattern.compile(
+            "(?i)(local\\s+)?function\\s+(.*?)\\s*\\((.*)\\)\\s*(?:(?:::|returns?)\\s*(.*))?");
+    private static final java.util.regex.Pattern PARAMETER = java.util.regex.Pattern.compile(
+            "(?i)([a-z_][a-z0-9_]*)\\s*(?::\\s*([a-z ]+?))?\\s*(?:=\\s*(.+))?");
+    private static final java.util.regex.Pattern NAME = java.util.regex.Pattern.compile("[a-z_][a-z0-9_]*");
+    private static final java.util.regex.Pattern OPTION = java.util.regex.Pattern.compile("\\{@([^}]*)}");
+
     private final SyntaxRegistry registry;
     private final ExpressionParser expressions;
+    private final Functions functions;
     private final Map<String, Optional<Condition>> conditionCache = new HashMap<>();
+    private Map<String, Function> fileFunctions = Map.of();
+    private Function current;
 
     public Parser(SyntaxRegistry registry) {
+        this(registry, new Functions());
+    }
+
+    public Parser(SyntaxRegistry registry, Functions functions) {
         this.registry = registry;
+        this.functions = functions;
         this.expressions = new ExpressionParser(registry);
+        expressions.attach(this);
+    }
+
+    public Functions functions() {
+        return functions;
+    }
+
+    public void declare(String file, String source) {
+        expressions.clearCache();
+        List<Function> declared = new ArrayList<>();
+        for (Declared entry : declareAll(file, prepare(file, source).nodes(), new ArrayList<>())) {
+            declared.add(entry.function());
+        }
+        functions.declare(file, declared);
     }
 
     public ParsedScript parse(String file, String source) {
         expressions.clearCache();
+        conditionCache.clear();
+        Prepared prepared = prepare(file, source);
+        List<ParseError> errors = new ArrayList<>(prepared.errors());
+        List<Trigger> triggers = new ArrayList<>();
+        List<Function> loaded = new ArrayList<>();
+        List<Declared> declared = declareAll(file, prepared.nodes(), errors);
+        Map<String, Function> own = new LinkedHashMap<>();
+        for (Declared entry : declared) {
+            own.put(entry.function().name(), entry.function());
+        }
+        fileFunctions = own;
+        try {
+            for (Declared entry : declared) {
+                try {
+                    entry.function().define(parseFunctionBody(file, entry.node(), entry.function()));
+                    loaded.add(entry.function());
+                } catch (Failure failure) {
+                    errors.add(new ParseError(file, failure.line, failure.getMessage()));
+                }
+            }
+            for (Node node : prepared.nodes()) {
+                if (isFunctionHeader(node) || isOptions(node)) {
+                    continue;
+                }
+                try {
+                    triggers.add(parseTrigger(file, node));
+                } catch (Failure failure) {
+                    errors.add(new ParseError(file, failure.line, failure.getMessage()));
+                }
+            }
+        } finally {
+            fileFunctions = Map.of();
+        }
+        errors.sort((a, b) -> Integer.compare(a.line(), b.line()));
+        return new ParsedScript(file, List.copyOf(triggers), List.copyOf(errors), List.copyOf(loaded));
+    }
+
+    private Prepared prepare(String file, String source) {
         LexResult lexed = Lexer.lex(file, source);
         List<ParseError> errors = new ArrayList<>(lexed.errors());
-        List<Trigger> triggers = new ArrayList<>();
+        Map<String, String> options = new HashMap<>();
+        for (Node node : lexed.nodes()) {
+            if (!isOptions(node)) {
+                continue;
+            }
+            for (Node option : node.children()) {
+                int colon = option.text().indexOf(':');
+                if (option.section() || colon <= 0) {
+                    errors.add(new ParseError(file, option.line(), "an option looks like \"name: value\""));
+                    continue;
+                }
+                options.put(option.text().substring(0, colon).strip().toLowerCase(Locale.ROOT), option.text().substring(colon + 1).strip());
+            }
+        }
+        List<Node> nodes = new ArrayList<>();
         for (Node node : lexed.nodes()) {
             try {
-                triggers.add(parseTrigger(file, node));
+                nodes.add(isOptions(node) ? node : substitute(node, options));
             } catch (Failure failure) {
                 errors.add(new ParseError(file, failure.line, failure.getMessage()));
             }
         }
-        errors.sort((a, b) -> Integer.compare(a.line(), b.line()));
-        return new ParsedScript(file, List.copyOf(triggers), List.copyOf(errors));
+        return new Prepared(nodes, errors);
+    }
+
+    private static Node substitute(Node node, Map<String, String> options) {
+        Matcher matcher = OPTION.matcher(node.text());
+        StringBuilder text = new StringBuilder();
+        while (matcher.find()) {
+            String name = matcher.group(1).strip().toLowerCase(Locale.ROOT);
+            String value = options.get(name);
+            if (value == null) {
+                throw new Failure(node.line(), "unknown option \"" + name + "\"");
+            }
+            matcher.appendReplacement(text, Matcher.quoteReplacement(value));
+        }
+        matcher.appendTail(text);
+        List<Node> children = new ArrayList<>();
+        for (Node child : node.children()) {
+            children.add(substitute(child, options));
+        }
+        return new Node(text.toString(), node.line(), node.section(), List.copyOf(children));
+    }
+
+    private static boolean isOptions(Node node) {
+        return node.section() && node.text().equalsIgnoreCase("options");
+    }
+
+    private static boolean isFunctionHeader(Node node) {
+        return startsWith(node.text(), "function ") || startsWith(node.text(), "local function ");
+    }
+
+    private List<Declared> declareAll(String file, List<Node> nodes, List<ParseError> errors) {
+        List<Declared> declared = new ArrayList<>();
+        Map<String, Function> seen = new HashMap<>();
+        for (Node node : nodes) {
+            if (!isFunctionHeader(node)) {
+                continue;
+            }
+            try {
+                Function function = declareFunction(file, node);
+                Function twin = seen.get(function.name());
+                if (twin != null) {
+                    throw new Failure(node.line(), "function \"" + function.name() + "\" is already defined on line " + twin.line());
+                }
+                if (!function.local()) {
+                    Optional<Function> clash = functions.clashWith(function.name(), file);
+                    if (clash.isPresent()) {
+                        throw new Failure(node.line(), "function \"" + function.name() + "\" is already defined in " + clash.get().file());
+                    }
+                }
+                seen.put(function.name(), function);
+                declared.add(new Declared(node, function));
+            } catch (Failure failure) {
+                errors.add(new ParseError(file, failure.line, failure.getMessage()));
+            }
+        }
+        return declared;
+    }
+
+    private Function declareFunction(String file, Node node) {
+        if (!node.section()) {
+            throw new Failure(node.line(), "a function needs a body, end the line with \":\"");
+        }
+        Matcher header = HEADER.matcher(node.text());
+        if (!header.matches()) {
+            throw new Failure(node.line(), "a function looks like \"function name(a: number) :: text:\"");
+        }
+        String name = header.group(2).toLowerCase(Locale.ROOT);
+        if (!NAME.matcher(name).matches()) {
+            throw new Failure(node.line(), "\"" + header.group(2) + "\" is not a valid function name");
+        }
+        ParseScope scope = new ParseScope(file, node.line(), null);
+        List<Function.Parameter> parameters = new ArrayList<>();
+        String list = header.group(3).strip();
+        if (!list.isEmpty()) {
+            for (String raw : splitParameters(list)) {
+                parameters.add(parameter(node, raw.strip(), parameters, scope));
+            }
+        }
+        SkType returnType = header.group(4) == null ? null : typeNamed(node, header.group(4));
+        return new Function(name, file, node.line(), header.group(1) != null, parameters, returnType);
+    }
+
+    private Function.Parameter parameter(Node node, String raw, List<Function.Parameter> earlier, ParseScope scope) {
+        Matcher matcher = PARAMETER.matcher(raw);
+        if (!matcher.matches()) {
+            throw new Failure(node.line(), "a parameter looks like \"name: type\", not \"" + raw + "\"");
+        }
+        String name = matcher.group(1).toLowerCase(Locale.ROOT);
+        for (Function.Parameter other : earlier) {
+            if (other.name().equals(name)) {
+                throw new Failure(node.line(), "parameter \"" + name + "\" appears twice");
+            }
+        }
+        SkType type = matcher.group(2) == null ? SkType.OBJECT : typeNamed(node, matcher.group(2));
+        String fallbackText = matcher.group(3);
+        Expression fallback = null;
+        if (fallbackText != null) {
+            fallback = guarded(node, () -> expressions.parse(tokens(node, fallbackText), List.of(type), scope))
+                    .orElseThrow(() -> new Failure(node.line(), "cannot understand the default value \"" + fallbackText.strip() + "\""));
+        } else if (!earlier.isEmpty() && earlier.getLast().fallback() != null) {
+            throw new Failure(node.line(), "parameter \"" + name + "\" needs a default value, because the one before it has one");
+        }
+        return new Function.Parameter(name, type, fallback);
+    }
+
+    private static SkType typeNamed(Node node, String name) {
+        SkType type = Pattern.typeNamed(name.strip());
+        if (type == null) {
+            throw new Failure(node.line(), "unknown type \"" + name.strip() + "\"");
+        }
+        return type;
+    }
+
+    private static List<String> splitParameters(String list) {
+        List<String> parts = new ArrayList<>();
+        int depth = 0;
+        boolean quoted = false;
+        int start = 0;
+        for (int i = 0; i < list.length(); i++) {
+            char c = list.charAt(i);
+            if (c == '"') {
+                quoted = !quoted;
+            } else if (!quoted && c == '(') {
+                depth++;
+            } else if (!quoted && c == ')') {
+                depth--;
+            } else if (!quoted && depth == 0 && c == ',') {
+                parts.add(list.substring(start, i));
+                start = i + 1;
+            }
+        }
+        parts.add(list.substring(start));
+        return parts;
+    }
+
+    private Block parseFunctionBody(String file, Node node, Function function) {
+        current = function;
+        try {
+            return parseBlock(node.children(), new ParseScope(file, node.line(), null));
+        } finally {
+            current = null;
+        }
+    }
+
+    Optional<Expression> functionCall(List<Token> tokens, ParseScope scope) {
+        if (!callShaped(tokens)) {
+            return Optional.empty();
+        }
+        Optional<Function> found = findFunction(tokens.get(0).text(), scope.file());
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+        Function function = found.get();
+        if (!function.returns()) {
+            throw new SyntaxException("function \"" + function.name() + "\" doesn't return anything, so it can't be used as a value");
+        }
+        return Optional.of(call(function, tokens, scope));
+    }
+
+    Optional<Expression> ternary(List<Token> tokens, List<SkType> types, ParseScope scope) {
+        int condition = -1;
+        int otherwise = -1;
+        int depth = 0;
+        for (int i = 0; i < tokens.size() && otherwise < 0; i++) {
+            Token token = tokens.get(i);
+            if (token.is("(")) {
+                depth++;
+            } else if (token.is(")")) {
+                depth--;
+            } else if (depth == 0 && condition < 0 && token.is("if")) {
+                condition = i;
+            } else if (depth == 0 && condition >= 0 && token.is("else")) {
+                otherwise = i;
+            }
+        }
+        if (condition <= 0 || otherwise <= condition + 1 || otherwise >= tokens.size() - 1) {
+            return Optional.empty();
+        }
+        Optional<Condition> test = combine(tokens.subList(condition + 1, otherwise), scope);
+        if (test.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<Expression> whenTrue = expressions.parse(tokens.subList(0, condition), types, scope);
+        if (whenTrue.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<Expression> whenFalse = expressions.parse(tokens.subList(otherwise + 1, tokens.size()), types, scope);
+        return whenFalse.map(value -> new TernaryExpression(whenTrue.get(), test.get(), value));
+    }
+
+    private Optional<Function> findFunction(String name, String file) {
+        Function own = fileFunctions.get(name);
+        return own != null ? Optional.of(own) : functions.visibleFrom(name, file);
+    }
+
+    private FunctionCall call(Function function, List<Token> tokens, ParseScope scope) {
+        List<List<Token>> parts = new ArrayList<>();
+        List<Token> inner = tokens.subList(2, tokens.size() - 1);
+        if (!inner.isEmpty()) {
+            int depth = 0;
+            int start = 0;
+            for (int i = 0; i < inner.size(); i++) {
+                Token token = inner.get(i);
+                if (token.is("(")) {
+                    depth++;
+                } else if (token.is(")")) {
+                    depth--;
+                } else if (depth == 0 && token.is(",")) {
+                    parts.add(inner.subList(start, i));
+                    start = i + 1;
+                }
+            }
+            parts.add(inner.subList(start, inner.size()));
+        }
+        List<Function.Parameter> parameters = function.parameters();
+        if (parts.size() > parameters.size() || parts.size() < function.requiredParameters()) {
+            String expected = function.requiredParameters() == parameters.size()
+                    ? String.valueOf(parameters.size())
+                    : function.requiredParameters() + " to " + parameters.size();
+            throw new SyntaxException("function \"" + function.name() + "\" takes " + expected + " argument"
+                    + (parameters.size() == 1 ? "" : "s") + ", not " + parts.size());
+        }
+        List<Expression> arguments = new ArrayList<>();
+        for (int i = 0; i < parts.size(); i++) {
+            Function.Parameter parameter = parameters.get(i);
+            int position = i + 1;
+            arguments.add(expressions.parse(parts.get(i), List.of(parameter.type()), scope)
+                    .orElseThrow(() -> new SyntaxException("argument " + position + " of \"" + function.name() + "\" should be "
+                            + Converters.typeName(parameter.type()))));
+        }
+        return new FunctionCall(function, scope.file(), functions, arguments, scope.line());
+    }
+
+    private static boolean callShaped(List<Token> tokens) {
+        if (tokens.size() < 3 || tokens.get(0).quoted() || !NAME.matcher(tokens.get(0).text()).matches() || !tokens.get(1).is("(")) {
+            return false;
+        }
+        return tokens.size() == 3 ? tokens.get(2).is(")") : Arithmetic.wrapped(tokens.subList(1, tokens.size()));
     }
 
     public ParsedEffect parseEffect(String file, int line, Event event, String text) {
         expressions.clearCache();
+        conditionCache.clear();
         String trimmed = text.strip();
         if (trimmed.isEmpty()) {
             return new ParsedEffect(null, new ParseError(file, line, "there is nothing here to run"));
@@ -222,7 +553,7 @@ public final class Parser {
                 .orElseThrow(() -> new Failure(node.line(), "unknown condition \"" + text.trim() + "\""));
     }
 
-    private Optional<Condition> combine(List<Token> tokens, ParseScope scope) {
+    Optional<Condition> combine(List<Token> tokens, ParseScope scope) {
         if (tokens.isEmpty()) {
             return Optional.empty();
         }
@@ -258,7 +589,7 @@ public final class Parser {
         return Optional.empty();
     }
 
-    private Optional<Condition> splitAt(List<Token> tokens, String word, ParseScope scope, Function<List<Condition>, Condition> combinator) {
+    private Optional<Condition> splitAt(List<Token> tokens, String word, ParseScope scope, java.util.function.Function<List<Condition>, Condition> combinator) {
         int depth = 0;
         for (int i = 0; i < tokens.size(); i++) {
             Token token = tokens.get(i);
@@ -282,6 +613,7 @@ public final class Parser {
     }
 
     private Statement parseEffect(Node node, ParseScope scope) {
+        conditionCache.clear();
         String text = node.text();
         if (startsWith(text, "wait until ")) {
             return new WaitUntil(scope.line(), parseCondition(node, text.substring(11), scope));
@@ -289,8 +621,36 @@ public final class Parser {
         if (startsWith(text, "halt until ")) {
             return new WaitUntil(scope.line(), parseCondition(node, text.substring(11), scope));
         }
-        return guarded(node, () -> registry.matchFirst(registry.effects(), tokens(node, text), expressions, scope)
-                .orElseThrow(() -> new Failure(node.line(), "unknown effect \"" + text + "\"")));
+        if (text.equalsIgnoreCase("return") || startsWith(text, "return ")) {
+            return parseReturn(node, text.substring(6).strip(), scope);
+        }
+        List<Token> tokens = tokens(node, text);
+        if (callShaped(tokens)) {
+            Optional<Function> function = findFunction(tokens.get(0).text(), scope.file());
+            if (function.isPresent()) {
+                return guarded(node, () -> call(function.get(), tokens, scope));
+            }
+        }
+        return guarded(node, () -> registry.matchFirst(registry.effects(), tokens, expressions, scope)
+                .orElseThrow(() -> new Failure(node.line(), callShaped(tokens)
+                        ? "unknown function \"" + tokens.get(0).text() + "\""
+                        : "unknown effect \"" + text + "\"")));
+    }
+
+    private Statement parseReturn(Node node, String value, ParseScope scope) {
+        if (current == null) {
+            throw new Failure(node.line(), "return is only available inside a function");
+        }
+        if (value.isEmpty()) {
+            return new Return(scope.line(), null, null);
+        }
+        if (!current.returns()) {
+            throw new Failure(node.line(), "function \"" + current.name() + "\" doesn't return a value, add \":: type\" to its header");
+        }
+        SkType type = current.returnType();
+        Expression expression = guarded(node, () -> expressions.parse(tokens(node, value), List.of(type), scope))
+                .orElseThrow(() -> new Failure(node.line(), "unknown expression \"" + value + "\""));
+        return new Return(scope.line(), expression, type);
     }
 
     private static ParseScope at(ParseScope scope, Node node) {
