@@ -20,6 +20,7 @@ public final class ExprWorld implements Expression {
 
     public static void register(SyntaxRegistry registry) {
         simple(registry, SkType.NUMBER, game -> (double) game.gameTime(), "[the] game time");
+        simple(registry, SkType.NUMBER, game -> (double) Math.floorMod(game.dayTime(), 24000L), "[the] (time of day|day time)");
         simple(registry, SkType.NUMBER, game -> (double) game.playersOnline(), "[the] players online");
         simple(registry, SkType.TEXT, GameBridge::difficulty, "[the] difficulty");
     }

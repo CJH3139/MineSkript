@@ -15,6 +15,7 @@ public final class Context {
     private final Deque<Scope> scopes = new ArrayDeque<>();
     private final Deque<LoopState> loops = new ArrayDeque<>();
     private ScriptControl control = ScriptControl.NONE;
+    private boolean cancelled;
 
     private record Scope(String file, Map<String, Object> locals) {
     }
@@ -37,6 +38,14 @@ public final class Context {
     public Context control(ScriptControl control) {
         this.control = control;
         return this;
+    }
+
+    public void cancel() {
+        cancelled = true;
+    }
+
+    public boolean cancelled() {
+        return cancelled;
     }
 
     public String triggerFile() {

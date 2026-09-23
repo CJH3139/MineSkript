@@ -1,0 +1,16 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.mineskript.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "AdvancementToastAccessor",
+    "ClientCommonPacketListenerImplMixin",
+    "ClientPacketListenerMixin",
+    "MinecraftMixin",
+    "ToastManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

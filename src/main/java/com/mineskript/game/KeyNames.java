@@ -3,7 +3,9 @@ package com.mineskript.game;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.parse.ConstantExpression;
 import com.mineskript.lang.parse.SyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +45,42 @@ public final class KeyNames {
         }
         String key = ALIASES.getOrDefault(normalised, normalised);
         return KEYBOARD.contains(key) ? Optional.of("key.keyboard." + key) : Optional.empty();
+    }
+
+    public record Combo(String keyId, List<String> modifiers) {
+    }
+
+    private static final Map<String, String> MODIFIERS = Map.of(
+            "ctrl", "control",
+            "control", "control",
+            "shift", "shift",
+            "alt", "alt",
+            "win", "win",
+            "super", "win",
+            "cmd", "win",
+            "meta", "win");
+
+    public static Combo comboOf(Expression expression) {
+        if (!(expression instanceof ConstantExpression constant) || !(constant.value() instanceof String name)) {
+            throw new SyntaxException("key name must be a plain string like \"r\"");
+        }
+        if (name.strip().length() <= 1 || !name.contains("+")) {
+            return new Combo(keyIdOf(expression), List.of());
+        }
+        String[] parts = name.split("\\+");
+        List<String> modifiers = new ArrayList<>();
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i].strip().toLowerCase(Locale.ROOT);
+            String generic = MODIFIERS.get(part);
+            if (generic != null) {
+                modifiers.add("key.keyboard.left." + generic + "|key.keyboard.right." + generic);
+            } else {
+                modifiers.add(toKeyId(part).orElseThrow(() -> new SyntaxException("unknown key \"" + part + "\" in \"" + name + "\"")));
+            }
+        }
+        String last = parts[parts.length - 1].strip();
+        String keyId = toKeyId(last).orElseThrow(() -> new SyntaxException("unknown key \"" + last + "\" in \"" + name + "\""));
+        return new Combo(keyId, List.copyOf(modifiers));
     }
 
     public static String keyIdOf(Expression expression) {

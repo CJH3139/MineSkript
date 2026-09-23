@@ -122,6 +122,8 @@ public interface GameBridge {
 
     long gameTime();
 
+    long dayTime();
+
     boolean isRaining();
 
     boolean isThundering();

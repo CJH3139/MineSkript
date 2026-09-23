@@ -1,6 +1,7 @@
 package com.mineskript;
 
 import com.mineskript.game.BlockChange;
+import com.mineskript.game.GameSignals;
 import com.mineskript.game.MinecraftBridge;
 import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.Parser;
@@ -20,16 +21,22 @@ import com.mineskript.script.VariablePersistence;
 import com.mineskript.script.VariableStore;
 import com.mineskript.syntax.DefaultSyntax;
 import java.nio.file.Path;
+import java.util.Map;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +73,33 @@ public final class MineSkriptClient implements ClientModInitializer {
                     dispatcher.onBlockPlace(placed);
                 }
             }
+            for (GameSignals.Signal signal : GameSignals.drain()) {
+                dispatcher.onSignal(signal);
+            }
             dispatcher.tick();
         });
+        GameSignals.onFrame(dispatcher::onFrame);
+        ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+            if (GameSignals.wants("entity spawn") && entity != Minecraft.getInstance().player) {
+                GameSignals.emit("entity spawn", Map.of("entity", bridge.entityValue(entity)));
+            }
+        });
+        ClientEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+            if (entity == Minecraft.getInstance().player || Minecraft.getInstance().player == null) {
+                return;
+            }
+            boolean died = entity instanceof LivingEntity living && living.isDeadOrDying();
+            String event = died ? "entity death" : "entity despawn";
+            if (GameSignals.wants(event)) {
+                GameSignals.emit(event, Map.of("entity", bridge.entityValue(entity)));
+            }
+        });
+        ClientChunkEvents.CHUNK_LOAD.register((level, chunk) -> GameSignals.emit("chunk load",
+                Map.of("chunk x", (double) chunk.getPos().x(), "chunk z", (double) chunk.getPos().z())));
+        ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) -> GameSignals.emit("chunk unload",
+                Map.of("chunk x", (double) chunk.getPos().x(), "chunk z", (double) chunk.getPos().z())));
+        ClientHotbarScrollEvents.AFTER.register((inventory, currentSlot, newSlot, xOffset, yOffset) ->
+                GameSignals.emit("scroll", Map.of("scroll", yOffset)));
         ClientPlayerBlockBreakEvents.AFTER.register((level, player, pos, state) -> dispatcher.onBlockBreak(bridge.brokenBlock(pos, state)));
         UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
             if (level.isClientSide()) {
@@ -81,11 +113,18 @@ public final class MineSkriptClient implements ClientModInitializer {
                 dispatcher.onChat(message.getString());
             }
         });
-        ClientSendMessageEvents.CHAT.register(dispatcher::onChatSend);
-        ClientSendMessageEvents.ALLOW_CHAT.register(effects::allowChat);
-        ClientSendMessageEvents.COMMAND.register(dispatcher::onCommandSend);
+        ClientSendMessageEvents.ALLOW_CHAT.register(message -> effects.allowChat(message) && dispatcher.onChatSend(message));
+        ClientSendMessageEvents.ALLOW_COMMAND.register(dispatcher::onCommandSend);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(dispatcher::onDisconnect));
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> logReport(service.start()));
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            client.getSoundManager().addListener((sound, events, range) -> {
+                if (GameSignals.wants("sound")) {
+                    GameSignals.emit("sound", Map.of("sound", sound.getIdentifier().toString(),
+                            "x", sound.getX(), "y", sound.getY(), "z", sound.getZ()));
+                }
+            });
+            logReport(service.start());
+        });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> service.saveVariables());
         MineSkriptCommand.register(service);
         LOGGER.info("MineSkript loaded, scripts folder {}", dir);

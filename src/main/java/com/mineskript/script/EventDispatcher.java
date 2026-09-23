@@ -2,6 +2,7 @@ package com.mineskript.script;
 
 import com.mineskript.game.BlockChange;
 import com.mineskript.game.GameBridge;
+import com.mineskript.game.GameSignals;
 import com.mineskript.game.SnapshotNeeds;
 import com.mineskript.game.WorldSnapshot;
 import com.mineskript.lang.ast.BlockType;
@@ -33,6 +34,8 @@ public final class EventDispatcher {
     public static final int SAVE_DELAY_TICKS = 60;
 
     private static final int TICKS_PER_SECOND = 20;
+
+    private static final int TIME_JUMP_TICKS = 20;
 
     private static final Set<String> INVENTORY_EVENTS = Set.of("inventory", "held", "use start", "use stop");
 
@@ -101,6 +104,8 @@ public final class EventDispatcher {
     private long parkedEpoch;
     private boolean worldExpected;
     private boolean onlineNamesSeen;
+    private Set<String> eventNames = Set.of();
+    private long lastDayTime = Long.MIN_VALUE;
 
     public EventDispatcher(ScriptRegistry registry, GameBridge game, Interpreter interpreter, Scheduler scheduler) {
         this(registry, game, interpreter, scheduler, new Variables(), () -> {
@@ -174,6 +179,16 @@ public final class EventDispatcher {
         if (!game.hasWorld()) {
             return;
         }
+        trackTime();
+        if (!game.hasWorld()) {
+            return;
+        }
+        if (eventNames.contains("client tick")) {
+            fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("client tick"), Map.of());
+            if (!game.hasWorld()) {
+                return;
+            }
+        }
         trackVariables();
     }
 
@@ -184,28 +199,46 @@ public final class EventDispatcher {
         fireAll(trigger -> trigger.event() instanceof Event.Chat, Map.of("message", message));
     }
 
-    public void onChatSend(String message) {
+    public boolean onChatSend(String message) {
         if (chatSending) {
-            return;
+            return true;
         }
         chatSending = true;
         try {
-            fireMessage(Event.ChatSend.class, message);
+            return fireMessage(Event.ChatSend.class, message);
         } finally {
             chatSending = false;
         }
     }
 
-    public void onCommandSend(String command) {
+    public boolean onCommandSend(String command) {
         if (commandSending) {
-            return;
+            return true;
         }
         commandSending = true;
         try {
-            fireMessage(Event.CommandSend.class, command);
+            return fireMessage(Event.CommandSend.class, command);
         } finally {
             commandSending = false;
         }
+    }
+
+    public void onSignal(GameSignals.Signal signal) {
+        if (signal.event().equals("disconnect")) {
+            fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("disconnect"), signal.values());
+            return;
+        }
+        if (!game.hasWorld()) {
+            return;
+        }
+        fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals(signal.event()), signal.values());
+    }
+
+    public void onFrame() {
+        if (!game.hasWorld()) {
+            return;
+        }
+        fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("frame"), Map.of());
     }
 
     public boolean runOneOff(Trigger trigger) {
@@ -221,11 +254,28 @@ public final class EventDispatcher {
         }
     }
 
-    private void fireMessage(Class<? extends Event> type, String message) {
+    private boolean fireMessage(Class<? extends Event> type, String message) {
         if (!game.hasWorld()) {
-            return;
+            return true;
         }
-        fireAll(trigger -> type.isInstance(trigger.event()), Map.of("message", message));
+        boolean allowed = true;
+        boolean outer = worldExpected;
+        worldExpected = true;
+        try {
+            for (Trigger trigger : List.copyOf(registry.triggers())) {
+                if (worldEnded()) {
+                    return allowed;
+                }
+                if (type.isInstance(trigger.event())) {
+                    Context context = context(trigger, Map.of("message", message));
+                    runSafely(new Execution(trigger, context));
+                    allowed &= !context.cancelled();
+                }
+            }
+        } finally {
+            worldExpected = outer;
+        }
+        return allowed;
     }
 
     public void onLoad() {
@@ -277,6 +327,7 @@ public final class EventDispatcher {
         if (generation != neededGeneration) {
             neededGeneration = generation;
             Set<String> names = new HashSet<>();
+            eventNames = names;
             for (Trigger trigger : registry.triggers()) {
                 if (trigger.event() instanceof Event.State state) {
                     names.add(state.name());
@@ -293,6 +344,7 @@ public final class EventDispatcher {
                     wanted(names, VEHICLE_EVENTS),
                     wanted(names, DIMENSION_EVENTS),
                     wanted(names, ONLINE_NAME_EVENTS));
+            GameSignals.listen(names);
         }
         return needed;
     }
@@ -316,6 +368,20 @@ public final class EventDispatcher {
             }
         }
         return false;
+    }
+
+    private void trackTime() {
+        if (!eventNames.contains("time change")) {
+            lastDayTime = Long.MIN_VALUE;
+            return;
+        }
+        long now = game.dayTime();
+        long previousTime = lastDayTime;
+        lastDayTime = now;
+        if (previousTime != Long.MIN_VALUE && Math.abs(now - (previousTime + 1)) > TIME_JUMP_TICKS) {
+            fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("time change"),
+                    Map.of("time", (double) Math.floorMod(now, 24000L)));
+        }
     }
 
     private void trackVariables() {
@@ -344,13 +410,26 @@ public final class EventDispatcher {
                 if (!game.hasWorld()) {
                     return;
                 }
-                if (down && trigger.event() instanceof Event.KeyPress press && press.keyId().equals(keyId)) {
+                if (down && trigger.event() instanceof Event.KeyPress press && press.keyId().equals(keyId) && modifiersHeld(press)) {
                     start(trigger, Map.of());
                 } else if (!down && trigger.event() instanceof Event.KeyRelease release && release.keyId().equals(keyId)) {
                     start(trigger, Map.of());
                 }
             }
         }
+    }
+
+    private boolean modifiersHeld(Event.KeyPress press) {
+        for (String modifier : press.modifiers()) {
+            boolean held = false;
+            for (String keyId : modifier.split("\\|")) {
+                held |= game.isKeyDown(keyId);
+            }
+            if (!held) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void diff(WorldSnapshot before, WorldSnapshot after) {
@@ -433,6 +512,9 @@ public final class EventDispatcher {
         }
         if (before.xpLevel() != after.xpLevel()) {
             fireState("level", Map.of("level change", (double) (after.xpLevel() - before.xpLevel())));
+        }
+        if (after.xpLevel() > before.xpLevel()) {
+            fireState("level up", Map.of("level change", (double) (after.xpLevel() - before.xpLevel())));
         }
         if (!justEnabled.experience() && before.xpLevel() == after.xpLevel() && before.totalExperience() != after.totalExperience()) {
             fireState("xp", Map.of("xp change", (double) (after.totalExperience() - before.totalExperience())));
@@ -616,7 +698,11 @@ public final class EventDispatcher {
     }
 
     private boolean start(Trigger trigger, Map<String, Object> values) {
-        return runSafely(new Execution(trigger, new Context(game, trigger.file(), values, variables).control(control)));
+        return runSafely(new Execution(trigger, context(trigger, values)));
+    }
+
+    private Context context(Trigger trigger, Map<String, Object> values) {
+        return new Context(game, trigger.file(), values, variables).control(control);
     }
 
     private void resumeParked() {

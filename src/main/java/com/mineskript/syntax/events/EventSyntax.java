@@ -20,7 +20,10 @@ public final class EventSyntax {
         registry.addEvent((match, scope) -> Optional.of(new Event.Chat()), "on chat");
         registry.addEvent((match, scope) -> Optional.of(new Event.ChatSend()), "on chat send");
         registry.addEvent((match, scope) -> Optional.of(new Event.CommandSend()), "on command send");
-        registry.addEvent((match, scope) -> Optional.of(new Event.KeyPress(KeyNames.keyIdOf(match.slot(0)))), "on [key] press of %string%");
+        registry.addEvent((match, scope) -> {
+            KeyNames.Combo combo = KeyNames.comboOf(match.slot(0));
+            return Optional.of(new Event.KeyPress(combo.keyId(), combo.modifiers()));
+        }, "on [key] press of %string%", "on key combo %string%");
         registry.addEvent((match, scope) -> Optional.of(new Event.KeyRelease(KeyNames.keyIdOf(match.slot(0)))), "on [key] release of %string%");
         state(registry, "on move", "move");
         state(registry, "on jump", "jump");
@@ -57,8 +60,29 @@ public final class EventSyntax {
         state(registry, "on (block break|break block|break of block)", "block break");
         state(registry, "on (block place|place block|placing of block)", "block place");
         registry.addEvent(EventSyntax::durability, "on [held item] durability (below|under|less than) %number%");
-        state(registry, "on player join", "player join");
-        state(registry, "on player leave", "player leave");
+        state(registry, "on (player join|player join server|player joins server)", "player join");
+        state(registry, "on (player leave|player leave server|player leaves server)", "player leave");
+        state(registry, "on tab list (change|update)", "tab list");
+        state(registry, "on (actionbar|action bar) [(update|change|message)]", "actionbar");
+        state(registry, "on title [(update|change)]", "title");
+        state(registry, "on subtitle [(update|change)]", "subtitle");
+        state(registry, "on (bossbar|boss bar) [(update|change)]", "bossbar");
+        state(registry, "on scoreboard (update|change)", "scoreboard");
+        state(registry, "on sound [(play|played)]", "sound");
+        state(registry, "on particle [(spawn|spawned)]", "particle");
+        state(registry, "on entity spawn", "entity spawn");
+        state(registry, "on entity despawn", "entity despawn");
+        state(registry, "on entity death", "entity death");
+        state(registry, "on chunk load", "chunk load");
+        state(registry, "on chunk unload", "chunk unload");
+        state(registry, "on client tick", "client tick");
+        state(registry, "on (render tick|frame|render frame)", "frame");
+        state(registry, "on [mouse] scroll", "scroll");
+        state(registry, "on toast", "toast");
+        state(registry, "on advancement [(get|earned|done|complete)]", "advancement");
+        state(registry, "on [server] disconnect", "disconnect");
+        state(registry, "on level up", "level up");
+        state(registry, "on time change", "time change");
     }
 
     private static void state(SyntaxRegistry registry, String pattern, String name) {

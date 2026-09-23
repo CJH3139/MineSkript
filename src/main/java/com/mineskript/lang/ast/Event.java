@@ -16,7 +16,10 @@ public sealed interface Event {
     record CommandSend() implements Event {
     }
 
-    record KeyPress(String keyId) implements Event {
+    record KeyPress(String keyId, java.util.List<String> modifiers) implements Event {
+        public KeyPress(String keyId) {
+            this(keyId, java.util.List.of());
+        }
     }
 
     record KeyRelease(String keyId) implements Event {

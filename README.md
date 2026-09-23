@@ -1,7 +1,7 @@
 # MineSkript
 **MineSkript** is a client-side Fabric mod where you write what you want your client to do in plain English. Scripts
 are text files you drop in a folder, they reload without restarting the game, and they react to ticks, key presses,
-chat and thirty-nine other things that happen around you.
+chat and sixty other things that happen around you.
 
 The language is modelled on [Skript](https://github.com/SkriptLang/Skript), so `wait 5 seconds`,
 `if health of player is less than 6` and `send "hello"` all mean what a Skript user would expect. The interpreter is
@@ -66,6 +66,11 @@ commands. Variables in three scopes, arithmetic, `and`, `or` and `not`, chained 
 changes, tools running low with `on durability below 10`, and the title of any screen that opens are all events.
 `stop all scripts` and `stop script "name"` cancel what is running.
 
+Scripts can also react to the action bar, titles and boss bars, the tab list and scoreboard, sounds and particles the
+server sends, entities spawning, despawning and dying, chunks loading, every client tick or rendered frame, key combos
+like `on key press of "ctrl+shift+x"`, the scroll wheel, toasts and advancements, level ups, time jumps, and being
+disconnected (`event-reason` says why). `cancel event` inside `on chat send` stops the message from ever leaving.
+
 A line ending in `\` carries on onto the next one, and everything between two `###` lines is a comment.
 
 Functions take typed parameters, which arrive as local variables, and can return a value. Called on its own line, a
@@ -123,7 +128,7 @@ running rather than dropping it.
 - [x] Lexer, pattern-matching parser and a suspendable interpreter
 - [x] Variables, arithmetic, combined conditions and loops
 - [x] Items, the inventory, entities, the world and targeting
-- [x] Thirty-nine events, from `on move` to `on block place`
+- [x] Sixty events, from `on move` to `on server disconnect`
 - [x] Text and maths expressions, and `wait until <condition>`
 - [x] A real command tree with single-file reload and completion
 - [x] Effect commands typed into chat, and the first config file

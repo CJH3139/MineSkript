@@ -477,6 +477,15 @@ public final class MinecraftBridge implements GameBridge {
     }
 
     @Override
+    public long dayTime() {
+        return minecraft().level.getDefaultClockTime();
+    }
+
+    public EntityValue entityValue(Entity target) {
+        return entity(target);
+    }
+
+    @Override
     public boolean isRaining() {
         return minecraft().level.isRaining();
     }

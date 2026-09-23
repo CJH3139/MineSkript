@@ -72,6 +72,7 @@ public final class FakeGameBridge implements GameBridge {
     public String screenTitle = "";
     public String screenType = "";
     public long gameTime;
+    public long dayTime;
     public boolean raining;
     public boolean thundering;
     public String difficulty = "normal";
@@ -431,6 +432,11 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public long gameTime() {
         return gameTime;
+    }
+
+    @Override
+    public long dayTime() {
+        return dayTime;
     }
 
     @Override
