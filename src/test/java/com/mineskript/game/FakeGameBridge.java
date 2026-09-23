@@ -69,6 +69,8 @@ public final class FakeGameBridge implements GameBridge {
     public boolean swimming;
     public boolean invisible;
     public boolean screenOpen;
+    public String screenTitle = "";
+    public String screenType = "";
     public long gameTime;
     public boolean raining;
     public boolean thundering;
@@ -414,6 +416,16 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public boolean screenOpen() {
         return screenOpen;
+    }
+
+    @Override
+    public String screenTitle() {
+        return screenOpen ? screenTitle : "";
+    }
+
+    @Override
+    public String screenType() {
+        return screenOpen ? screenType : "";
     }
 
     @Override

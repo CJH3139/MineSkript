@@ -121,6 +121,18 @@ public final class ExpressionParser implements SlotResolver {
         if (tokens.size() == 1 && !tokens.get(0).quoted() && tokens.get(0).text().startsWith("{")) {
             return typed(VariableExpression.of(tokens.get(0).text()), types);
         }
+        if (tokens.size() == 1 && !tokens.get(0).quoted()) {
+            switch (tokens.get(0).text()) {
+                case "true", "yes" -> {
+                    return typed(new ConstantExpression(SkType.BOOLEAN, Boolean.TRUE), types);
+                }
+                case "false", "no" -> {
+                    return typed(new ConstantExpression(SkType.BOOLEAN, Boolean.FALSE), types);
+                }
+                default -> {
+                }
+            }
+        }
         if (tokens.size() == 1 && tokens.get(0).quoted()) {
             return TextLiteral.parse(tokens.get(0).text(), this, scope).flatMap(expression -> typed(expression, types));
         }

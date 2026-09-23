@@ -1,7 +1,7 @@
 # MineSkript
 **MineSkript** is a client-side Fabric mod where you write what you want your client to do in plain English. Scripts
 are text files you drop in a folder, they reload without restarting the game, and they react to ticks, key presses,
-chat and thirty-five other things that happen around you.
+chat and thirty-nine other things that happen around you.
 
 The language is modelled on [Skript](https://github.com/SkriptLang/Skript), so `wait 5 seconds`,
 `if health of player is less than 6` and `send "hello"` all mean what a Skript user would expect. The interpreter is
@@ -60,8 +60,13 @@ every 5 seconds:
 Events for movement, health, hunger, xp, the inventory, held items, effects, mounts, weather, screens, dimensions,
 players joining and leaving, your own outgoing chat, and more. Conditions on what you are holding, standing in,
 looking at and carrying. Effects that press keys, aim the camera, pick hotbar slots, show titles, play sounds and run
-commands. Variables in three scopes, arithmetic, `and` and `or`, loops, text and maths functions, and
-`wait until <condition>`.
+commands. Variables in three scopes, arithmetic, `and`, `or` and `not`, chained comparisons like `1 < {x} < 5`,
+`true` and `false`, loops, text and maths functions, `"42" parsed as number`, `wait until <condition>`, and
+`try:` with `on error:` to catch a failing line (the message is in `{_error}`). Blocks broken and placed, health
+changes, tools running low with `on durability below 10`, and the title of any screen that opens are all events.
+`stop all scripts` and `stop script "name"` cancel what is running.
+
+A line ending in `\` carries on onto the next one, and everything between two `###` lines is a comment.
 
 Functions take typed parameters, which arrive as local variables, and can return a value. Called on its own line, a
 function may `wait`; used as a value, it must not. `local function` keeps it private to its file, and a function that
@@ -118,7 +123,7 @@ running rather than dropping it.
 - [x] Lexer, pattern-matching parser and a suspendable interpreter
 - [x] Variables, arithmetic, combined conditions and loops
 - [x] Items, the inventory, entities, the world and targeting
-- [x] Thirty-five events, from `on move` to `on player leave`
+- [x] Thirty-nine events, from `on move` to `on block place`
 - [x] Text and maths expressions, and `wait until <condition>`
 - [x] A real command tree with single-file reload and completion
 - [x] Effect commands typed into chat, and the first config file

@@ -15,6 +15,7 @@ import com.mineskript.lang.ast.Return;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Statement;
 import com.mineskript.lang.ast.Trigger;
+import com.mineskript.lang.ast.TryStatement;
 import com.mineskript.lang.ast.WaitUntil;
 import com.mineskript.lang.lexer.LexResult;
 import com.mineskript.lang.lexer.Lexer;
@@ -54,6 +55,8 @@ public final class Parser {
             "(?i)([a-z_][a-z0-9_]*)\\s*(?::\\s*([a-z ]+?))?\\s*(?:=\\s*(.+))?");
     private static final java.util.regex.Pattern NAME = java.util.regex.Pattern.compile("[a-z_][a-z0-9_]*");
     private static final java.util.regex.Pattern OPTION = java.util.regex.Pattern.compile("\\{@([^}]*)}");
+
+    private static final java.util.Set<String> COMPARISONS = java.util.Set.of("<", ">", "<=", ">=", "=", "!=");
 
     private final SyntaxRegistry registry;
     private final ExpressionParser expressions;
@@ -446,6 +449,21 @@ public final class Parser {
                 i++;
                 continue;
             }
+            if (head.equalsIgnoreCase("try")) {
+                Block body = parseBlock(node.children(), scope);
+                Node next = i + 1 < nodes.size() ? nodes.get(i + 1) : null;
+                Block handler = new Block(List.of());
+                if (next != null && next.section() && isErrorHandler(next.text())) {
+                    handler = parseBlock(next.children(), scope);
+                    i++;
+                }
+                statements.add(new TryStatement(node.line(), body, handler));
+                i++;
+                continue;
+            }
+            if (isErrorHandler(head)) {
+                throw new Failure(node.line(), "\"" + head + "\" without a matching \"try\"");
+            }
             if (startsWith(head, "else if ") || head.equalsIgnoreCase("else")) {
                 throw new Failure(node.line(), "\"else\" without a matching \"if\"");
             }
@@ -583,10 +601,63 @@ public final class Parser {
         if (split.isPresent()) {
             return split;
         }
+        Optional<Condition> chain = chain(tokens, scope);
+        if (chain.isPresent()) {
+            return chain;
+        }
+        if (tokens.get(0).is("not") && tokens.size() > 1) {
+            Optional<Condition> inner = combine(tokens.subList(1, tokens.size()), scope);
+            if (inner.isPresent()) {
+                Condition negated = inner.get();
+                return Optional.of(context -> !negated.test(context));
+            }
+        }
         if (Arithmetic.wrapped(tokens)) {
             return combine(tokens.subList(1, tokens.size() - 1), scope);
         }
-        return Optional.empty();
+        return truthy(tokens, scope);
+    }
+
+    private Optional<Condition> chain(List<Token> tokens, ParseScope scope) {
+        List<Integer> operators = new ArrayList<>();
+        int depth = 0;
+        for (int i = 0; i < tokens.size(); i++) {
+            Token token = tokens.get(i);
+            if (token.is("(")) {
+                depth++;
+            } else if (token.is(")")) {
+                depth--;
+            } else if (depth == 0 && !token.quoted() && COMPARISONS.contains(token.text())) {
+                operators.add(i);
+            }
+        }
+        if (operators.size() < 2) {
+            return Optional.empty();
+        }
+        List<Condition> links = new ArrayList<>();
+        int start = 0;
+        for (int k = 0; k < operators.size(); k++) {
+            int end = k + 1 < operators.size() ? operators.get(k + 1) : tokens.size();
+            if (operators.get(k) == start || end == operators.get(k) + 1) {
+                return Optional.empty();
+            }
+            Optional<Condition> link = registry.matchFirst(registry.conditions(), tokens.subList(start, end), expressions, scope);
+            if (link.isEmpty()) {
+                return Optional.empty();
+            }
+            links.add(link.get());
+            start = operators.get(k) + 1;
+        }
+        return Optional.of(new AndCondition(List.copyOf(links)));
+    }
+
+    private Optional<Condition> truthy(List<Token> tokens, ParseScope scope) {
+        Optional<Expression> value = expressions.parse(tokens, List.of(SkType.BOOLEAN), scope);
+        if (value.isEmpty() || value.get().isList()) {
+            return Optional.empty();
+        }
+        Expression expression = value.get() instanceof ConvertedExpression converted ? converted.inner() : value.get();
+        return Optional.of(context -> Boolean.TRUE.equals(expression.evaluate(context)));
     }
 
     private Optional<Condition> splitAt(List<Token> tokens, String word, ParseScope scope, java.util.function.Function<List<Condition>, Condition> combinator) {
@@ -675,6 +746,10 @@ public final class Parser {
         } catch (SyntaxException error) {
             throw new Failure(node.line(), error.getMessage());
         }
+    }
+
+    private static boolean isErrorHandler(String text) {
+        return text.equalsIgnoreCase("on error") || text.equalsIgnoreCase("catch");
     }
 
     private static boolean startsWith(String text, String prefix) {

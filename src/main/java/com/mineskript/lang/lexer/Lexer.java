@@ -19,9 +19,31 @@ public final class Lexer {
     private static List<Line> readLines(String file, String source, List<ParseError> errors) {
         List<Line> lines = new ArrayList<>();
         String[] raw = source.split("\r?\n", -1);
+        int blockCommentStart = 0;
+        StringBuilder continued = null;
+        int continuedFrom = 0;
         for (int i = 0; i < raw.length; i++) {
             int number = i + 1;
+            if (raw[i].strip().startsWith("###")) {
+                blockCommentStart = blockCommentStart == 0 ? number : 0;
+                continue;
+            }
+            if (blockCommentStart != 0) {
+                continue;
+            }
             String withoutComment = stripComment(raw[i]);
+            if (continued != null) {
+                continued.append(' ').append(withoutComment.strip());
+                withoutComment = continued.toString();
+                number = continuedFrom;
+                continued = null;
+            }
+            if (withoutComment.stripTrailing().endsWith("\\")) {
+                String head = withoutComment.stripTrailing();
+                continued = new StringBuilder(head.substring(0, head.length() - 1).stripTrailing());
+                continuedFrom = number;
+                continue;
+            }
             if (withoutComment.isBlank()) {
                 continue;
             }
@@ -42,6 +64,12 @@ public final class Lexer {
                 continue;
             }
             lines.add(new Line(withoutComment.substring(indentEnd).stripTrailing(), number, indentEnd));
+        }
+        if (blockCommentStart != 0) {
+            errors.add(new ParseError(file, blockCommentStart, "block comment \"###\" is never closed"));
+        }
+        if (continued != null) {
+            errors.add(new ParseError(file, continuedFrom, "the last line ends with \"\\\" but nothing follows it"));
         }
         return lines;
     }

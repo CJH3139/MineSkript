@@ -10,6 +10,7 @@ public final class EffectSyntax {
         EffWait.register(registry);
         EffExitLoop.register(registry);
         EffContinue.register(registry);
+        EffStopScripts.register(registry);
         EffStop.register(registry);
         EffMakeSay.register(registry);
         EffCommand.register(registry);

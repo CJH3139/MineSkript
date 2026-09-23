@@ -1,5 +1,6 @@
 package com.mineskript;
 
+import com.mineskript.game.BlockChange;
 import com.mineskript.game.MinecraftBridge;
 import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.Parser;
@@ -25,7 +26,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.world.InteractionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +60,21 @@ public final class MineSkriptClient implements ClientModInitializer {
         service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry(), functions)), registry, dispatcher, persistence, config);
         EffectCommands effects = new EffectCommands(new Parser(DefaultSyntax.registry(), functions), dispatcher, config, bridge);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> dispatcher.tick());
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.level != null) {
+                for (BlockChange placed : bridge.drainPlacedBlocks()) {
+                    dispatcher.onBlockPlace(placed);
+                }
+            }
+            dispatcher.tick();
+        });
+        ClientPlayerBlockBreakEvents.AFTER.register((level, player, pos, state) -> dispatcher.onBlockBreak(bridge.brokenBlock(pos, state)));
+        UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+            if (level.isClientSide()) {
+                bridge.notePlaceAttempt(hit, player.getItemInHand(hand));
+            }
+            return InteractionResult.PASS;
+        });
         ClientReceiveMessageEvents.CHAT.register((message, signed, profile, params, timestamp) -> dispatcher.onChat(message.getString()));
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!overlay) {

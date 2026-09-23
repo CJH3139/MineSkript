@@ -14,6 +14,7 @@ public final class Context {
     private final Variables variables;
     private final Deque<Scope> scopes = new ArrayDeque<>();
     private final Deque<LoopState> loops = new ArrayDeque<>();
+    private ScriptControl control = ScriptControl.NONE;
 
     private record Scope(String file, Map<String, Object> locals) {
     }
@@ -27,6 +28,19 @@ public final class Context {
         this.eventValues = Map.copyOf(eventValues);
         this.variables = variables;
         scopes.push(new Scope(file, new HashMap<>()));
+    }
+
+    public ScriptControl control() {
+        return control;
+    }
+
+    public Context control(ScriptControl control) {
+        this.control = control;
+        return this;
+    }
+
+    public String triggerFile() {
+        return scopes.peekLast().file();
     }
 
     public GameBridge game() {

@@ -21,8 +21,20 @@ public final class Interpreter {
 
     public Outcome run(Execution execution) {
         int steps = 0;
-        Statement statement;
-        while ((statement = execution.next()) != null) {
+        while (true) {
+            Statement statement;
+            try {
+                statement = execution.next();
+            } catch (ScriptError error) {
+                if (execution.recover(error)) {
+                    continue;
+                }
+                execution.stop();
+                throw error;
+            }
+            if (statement == null) {
+                return Outcome.DONE;
+            }
             if (++steps > stepBudget) {
                 String file = execution.context().file();
                 execution.stop();
@@ -35,6 +47,7 @@ public final class Interpreter {
                     }
                     case Flow.Enter enter -> execution.enter(enter.block());
                     case Flow.EnterLoop loop -> execution.enterLoop(loop.block(), loop.controller(), statement.line());
+                    case Flow.EnterTry attempt -> execution.enterTry(attempt.block(), attempt.handler());
                     case Flow.NextIteration ignored -> execution.nextIteration();
                     case Flow.ExitLoop ignored -> execution.exitLoop();
                     case Flow.Stop ignored -> execution.stop();
@@ -50,16 +63,20 @@ public final class Interpreter {
                     }
                 }
             } catch (ScriptError error) {
-                String file = execution.context().file();
-                execution.stop();
-                throw error.at(file, statement.line());
+                ScriptError located = error.at(execution.context().file(), statement.line());
+                if (!execution.recover(located)) {
+                    execution.stop();
+                    throw located;
+                }
             } catch (RuntimeException error) {
-                String file = execution.context().file();
-                execution.stop();
                 String message = error.getMessage();
-                throw new ScriptError(file, statement.line(), message == null ? error.getClass().getSimpleName() : message);
+                ScriptError located = new ScriptError(execution.context().file(), statement.line(),
+                        message == null ? error.getClass().getSimpleName() : message);
+                if (!execution.recover(located)) {
+                    execution.stop();
+                    throw located;
+                }
             }
         }
-        return Outcome.DONE;
     }
 }

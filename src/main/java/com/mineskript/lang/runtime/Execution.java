@@ -21,13 +21,19 @@ public final class Execution {
         private final LoopController loop;
         private final int line;
         private final boolean function;
+        private final Block handler;
         private int index;
 
         private Frame(Block block, LoopController loop, int line, boolean function) {
+            this(block, loop, line, function, null);
+        }
+
+        private Frame(Block block, LoopController loop, int line, boolean function, Block handler) {
             this.block = block;
             this.loop = loop;
             this.line = line;
             this.function = function;
+            this.handler = handler;
         }
     }
 
@@ -113,16 +119,12 @@ public final class Execution {
         try {
             return frame.loop.advance(context);
         } catch (ScriptError error) {
-            String file = context.file();
             context.pushLoop(frame.loop.state());
-            stop();
-            throw error.at(file, frame.line);
+            throw error.at(context.file(), frame.line);
         } catch (RuntimeException error) {
-            String file = context.file();
             context.pushLoop(frame.loop.state());
-            stop();
             String message = error.getMessage();
-            throw new ScriptError(file, frame.line, message == null ? error.getClass().getSimpleName() : message);
+            throw new ScriptError(context.file(), frame.line, message == null ? error.getClass().getSimpleName() : message);
         }
     }
 
@@ -143,6 +145,32 @@ public final class Execution {
     void enterLoop(Block block, LoopController loop, int line) {
         frames.push(new Frame(block, loop, line, false));
         context.pushLoop(loop.state());
+    }
+
+    void enterTry(Block block, Block handler) {
+        frames.push(new Frame(block, null, -1, false, handler));
+    }
+
+    boolean recover(ScriptError error) {
+        boolean guarded = false;
+        for (Frame frame : frames) {
+            if (frame.handler != null) {
+                guarded = true;
+                break;
+            }
+        }
+        if (!guarded) {
+            return false;
+        }
+        while (true) {
+            Frame frame = frames.peek();
+            popFrame();
+            if (frame.handler != null) {
+                context.setVariable(VariableScope.LOCAL, "error", error.getMessage());
+                frames.push(new Frame(frame.handler, null, -1, false));
+                return true;
+            }
+        }
     }
 
     void call(Function function, List<Object> arguments, int line) {

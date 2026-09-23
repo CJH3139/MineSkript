@@ -116,6 +116,10 @@ public interface GameBridge {
 
     boolean screenOpen();
 
+    String screenTitle();
+
+    String screenType();
+
     long gameTime();
 
     boolean isRaining();

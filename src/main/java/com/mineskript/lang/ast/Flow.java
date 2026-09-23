@@ -26,6 +26,9 @@ public sealed interface Flow {
     record EnterLoop(Block block, LoopController controller) implements Flow {
     }
 
+    record EnterTry(Block block, Block handler) implements Flow {
+    }
+
     record NextIteration() implements Flow {
     }
 

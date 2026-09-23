@@ -25,6 +25,9 @@ public sealed interface Event {
     record State(String name) implements Event {
     }
 
+    record Durability(double threshold) implements Event {
+    }
+
     record EffectCommand() implements Event {
     }
 }

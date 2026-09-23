@@ -37,9 +37,11 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -68,6 +70,14 @@ public final class MinecraftBridge implements GameBridge {
     private List<String> onlineNamesValue = List.of();
     private ClientLevel dimensionLevel;
     private String dimensionValue = "";
+
+    private static final int PLACE_WINDOW_TICKS = 5;
+
+    private record PendingPlace(int attempt, BlockPos pos, String before, long deadline) {
+    }
+
+    private final List<PendingPlace> pendingPlaces = new ArrayList<>();
+    private int placeAttempts;
 
     private static Minecraft minecraft() {
         return Minecraft.getInstance();
@@ -404,6 +414,61 @@ public final class MinecraftBridge implements GameBridge {
     @Override
     public boolean screenOpen() {
         return minecraft().gui.screen() != null;
+    }
+
+    @Override
+    public String screenTitle() {
+        Screen screen = minecraft().gui.screen();
+        return screen == null ? "" : screen.getTitle().getString();
+    }
+
+    @Override
+    public String screenType() {
+        Screen screen = minecraft().gui.screen();
+        return screen == null ? "" : screen.getClass().getSimpleName();
+    }
+
+    public BlockChange brokenBlock(BlockPos pos, BlockState state) {
+        return new BlockChange(BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString(), pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public void notePlaceAttempt(BlockHitResult hit, ItemStack stack) {
+        ClientLevel level = minecraft().level;
+        if (level == null || !(stack.getItem() instanceof BlockItem)) {
+            return;
+        }
+        long deadline = level.getGameTime() + PLACE_WINDOW_TICKS;
+        int attempt = ++placeAttempts;
+        for (BlockPos pos : List.of(hit.getBlockPos(), hit.getBlockPos().relative(hit.getDirection()))) {
+            pendingPlaces.add(new PendingPlace(attempt, pos.immutable(), blockName(level, pos), deadline));
+        }
+    }
+
+    public List<BlockChange> drainPlacedBlocks() {
+        ClientLevel level = minecraft().level;
+        if (level == null) {
+            pendingPlaces.clear();
+            return List.of();
+        }
+        List<BlockChange> placed = new ArrayList<>();
+        Set<Integer> done = new HashSet<>();
+        for (PendingPlace pending : List.copyOf(pendingPlaces)) {
+            if (done.contains(pending.attempt())) {
+                continue;
+            }
+            String now = blockName(level, pending.pos());
+            if (!now.equals(pending.before()) && !now.equals("minecraft:air")) {
+                placed.add(new BlockChange(now, pending.pos().getX(), pending.pos().getY(), pending.pos().getZ()));
+                done.add(pending.attempt());
+            }
+        }
+        long time = level.getGameTime();
+        pendingPlaces.removeIf(pending -> done.contains(pending.attempt()) || time > pending.deadline());
+        return placed;
+    }
+
+    private static String blockName(ClientLevel level, BlockPos pos) {
+        return BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()).toString();
     }
 
     @Override

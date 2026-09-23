@@ -1,18 +1,22 @@
 package com.mineskript.script;
 
+import com.mineskript.game.BlockChange;
 import com.mineskript.game.GameBridge;
 import com.mineskript.game.SnapshotNeeds;
 import com.mineskript.game.WorldSnapshot;
+import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.WaitUntil;
+import com.mineskript.lang.parse.ParsedScript;
 import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.Execution;
 import com.mineskript.lang.runtime.Interpreter;
 import com.mineskript.lang.runtime.Scheduler;
+import com.mineskript.lang.runtime.ScriptControl;
 import com.mineskript.lang.runtime.ScriptError;
 import com.mineskript.lang.runtime.Variables;
 import java.util.ArrayList;
@@ -32,7 +36,7 @@ public final class EventDispatcher {
 
     private static final Set<String> INVENTORY_EVENTS = Set.of("inventory", "held", "use start", "use stop");
 
-    private static final Set<String> HELD_ITEM_EVENTS = Set.of("item break");
+    private static final Set<String> HELD_ITEM_EVENTS = Set.of("item break", "durability");
 
     private static final Set<String> CONSUME_EVENTS = Set.of("consume");
 
@@ -58,6 +62,26 @@ public final class EventDispatcher {
 
     private record Waiting(long resumeTick, long generation) {
     }
+
+    private final ScriptControl control = new ScriptControl() {
+        @Override
+        public void stopAll() {
+            for (ParsedScript script : registry.scripts()) {
+                fileGeneration.merge(script.file(), 1L, Long::sum);
+            }
+            dropParked();
+            game.releaseAll();
+        }
+
+        @Override
+        public void stopScript(String file) {
+            for (ParsedScript script : registry.scripts()) {
+                if (script.file().equalsIgnoreCase(file)) {
+                    dropFrames(script.file());
+                }
+            }
+        }
+    };
 
     private final Map<String, Boolean> keyState = new HashMap<>();
     private final List<Parked> parked = new ArrayList<>();
@@ -256,6 +280,8 @@ public final class EventDispatcher {
             for (Trigger trigger : registry.triggers()) {
                 if (trigger.event() instanceof Event.State state) {
                     names.add(state.name());
+                } else if (trigger.event() instanceof Event.Durability) {
+                    names.add("durability");
                 }
             }
             needed = new SnapshotNeeds(
@@ -383,6 +409,9 @@ public final class EventDispatcher {
     }
 
     private void diffHealth(WorldSnapshot before, WorldSnapshot after) {
+        if (after.health() != before.health()) {
+            fireState("health", Map.of("health change", after.health() - before.health(), "old health", before.health()));
+        }
         if (after.health() <= 0 && before.health() > 0) {
             fireState("death", Map.of());
             return;
@@ -444,6 +473,14 @@ public final class EventDispatcher {
                 && after.heldItem().isEmpty()) {
             fireState("item break", Map.of("item", wasHeld));
         }
+        ItemValue nowHeld = after.heldItem();
+        if (before.selectedSlot() == after.selectedSlot() && wasHeld.id().equals(nowHeld.id()) && nowHeld.maxDamage() > 0) {
+            double wasLeft = wasHeld.maxDamage() - wasHeld.damage();
+            double nowLeft = nowHeld.maxDamage() - nowHeld.damage();
+            fireWhere(trigger -> trigger.event() instanceof Event.Durability durability
+                            && wasLeft >= durability.threshold() && nowLeft < durability.threshold(),
+                    Map.of("item", nowHeld, "durability", nowLeft));
+        }
     }
 
     private void diffPresence(WorldSnapshot before, WorldSnapshot after) {
@@ -504,7 +541,11 @@ public final class EventDispatcher {
 
     private void diffWorldState(WorldSnapshot before, WorldSnapshot after) {
         if (before.screenOpen() != after.screenOpen()) {
-            fireState(after.screenOpen() ? "screen open" : "screen close", Map.of());
+            if (after.screenOpen()) {
+                fireState("screen open", Map.of("screen title", game.screenTitle(), "screen type", game.screenType()));
+            } else {
+                fireState("screen close", Map.of());
+            }
         }
         if (!before.gamemode().equals(after.gamemode())) {
             fireState("gamemode", Map.of("gamemode", after.gamemode()));
@@ -520,14 +561,37 @@ public final class EventDispatcher {
     }
 
     private void fireState(String name, Map<String, Object> values) {
+        fireWhere(trigger -> trigger.event() instanceof Event.State state && state.name().equals(name), values);
+    }
+
+    private void fireWhere(Predicate<Trigger> match, Map<String, Object> values) {
         for (Trigger trigger : List.copyOf(registry.triggers())) {
             if (worldEnded()) {
                 return;
             }
-            if (trigger.event() instanceof Event.State state && state.name().equals(name)) {
+            if (match.test(trigger)) {
                 start(trigger, values);
             }
         }
+    }
+
+    public void onBlockBreak(BlockChange change) {
+        fireBlock("block break", change);
+    }
+
+    public void onBlockPlace(BlockChange change) {
+        fireBlock("block place", change);
+    }
+
+    private void fireBlock(String name, BlockChange change) {
+        if (!game.hasWorld()) {
+            return;
+        }
+        fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals(name), Map.of(
+                "block", new BlockType(change.id()),
+                "block x", (double) change.x(),
+                "block y", (double) change.y(),
+                "block z", (double) change.z()));
     }
 
     private void fireAll(Predicate<Trigger> match, Map<String, Object> values) {
@@ -552,7 +616,7 @@ public final class EventDispatcher {
     }
 
     private boolean start(Trigger trigger, Map<String, Object> values) {
-        return runSafely(new Execution(trigger, new Context(game, trigger.file(), values, variables)));
+        return runSafely(new Execution(trigger, new Context(game, trigger.file(), values, variables).control(control)));
     }
 
     private void resumeParked() {

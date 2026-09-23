@@ -26,6 +26,8 @@ public final class ExpressionSyntax {
         ExprBlock.register(registry);
         ExprText.register(registry);
         ExprSplit.register(registry);
+        ExprParsedAs.register(registry);
+        ExprScreen.register(registry);
         ExprMath.register(registry);
         ExprClient.register(registry);
         ExprEffectLevel.register(registry);
