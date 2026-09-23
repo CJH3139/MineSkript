@@ -22,12 +22,21 @@ public final class Tokenizer {
                 }
                 tokens.add(new Token(line.substring(i + 1, end), true));
                 i = end + 1;
+            } else if (c == '{') {
+                flush(tokens, word);
+                int end = line.indexOf('}', i + 1);
+                if (end < 0) {
+                    throw new TokenizeException("unterminated variable");
+                }
+                String inner = line.substring(i + 1, end).trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
+                tokens.add(new Token("{" + inner + "}", false));
+                i = end + 1;
             } else if (Character.isWhitespace(c)) {
                 flush(tokens, word);
                 i++;
-            } else if (c == ',') {
+            } else if (c == ',' || c == '(' || c == ')') {
                 flush(tokens, word);
-                tokens.add(new Token(",", false));
+                tokens.add(new Token(String.valueOf(c), false));
                 i++;
             } else {
                 word.append(c);

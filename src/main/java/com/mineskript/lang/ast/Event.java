@@ -10,9 +10,18 @@ public sealed interface Event {
     record Chat() implements Event {
     }
 
+    record ChatSend() implements Event {
+    }
+
+    record CommandSend() implements Event {
+    }
+
     record KeyPress(String keyId) implements Event {
     }
 
     record KeyRelease(String keyId) implements Event {
+    }
+
+    record State(String name) implements Event {
     }
 }

@@ -24,9 +24,25 @@ public final class Interpreter {
                 execution.stop();
                 throw new ScriptError(file, statement.line(), "step limit exceeded");
             }
-            Flow flow;
             try {
-                flow = statement.execute(execution.context());
+                Flow flow = statement.execute(execution.context());
+                switch (flow) {
+                    case Flow.Continue ignored -> {
+                    }
+                    case Flow.Enter enter -> execution.enter(enter.block());
+                    case Flow.EnterLoop loop -> execution.enterLoop(loop.block(), loop.controller(), statement.line());
+                    case Flow.NextIteration ignored -> execution.nextIteration();
+                    case Flow.ExitLoop ignored -> execution.exitLoop();
+                    case Flow.Stop ignored -> execution.stop();
+                    case Flow.Wait wait -> {
+                        execution.suspend(wait.ticks());
+                        return Outcome.WAITING;
+                    }
+                    case Flow.Park park -> {
+                        execution.park(park.condition(), park.timeoutTicks(), statement.line());
+                        return Outcome.WAITING;
+                    }
+                }
             } catch (ScriptError error) {
                 execution.stop();
                 throw error.at(file, statement.line());
@@ -34,16 +50,6 @@ public final class Interpreter {
                 execution.stop();
                 String message = error.getMessage();
                 throw new ScriptError(file, statement.line(), message == null ? error.getClass().getSimpleName() : message);
-            }
-            switch (flow) {
-                case Flow.Continue ignored -> {
-                }
-                case Flow.Enter enter -> execution.enter(enter.block());
-                case Flow.Stop ignored -> execution.stop();
-                case Flow.Wait wait -> {
-                    execution.suspend(wait.ticks());
-                    return Outcome.WAITING;
-                }
             }
         }
         return Outcome.DONE;

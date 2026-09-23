@@ -28,6 +28,10 @@ class ParserTest {
         Interpreter interpreter = new Interpreter(1000);
         Execution execution = new Execution(trigger, new Context(game, "test.ms", values));
         while (interpreter.run(execution) == Interpreter.Outcome.WAITING) {
+            if (execution.waitCondition() != null) {
+                game.calls.add("waitUntil");
+                break;
+            }
             game.calls.add("wait:" + execution.waitTicks());
         }
     }
@@ -145,11 +149,11 @@ class ParserTest {
     @Test
     void specificErrorMessages() {
         assertEquals(List.of("test.ms:1: unknown event \"on sunrise\""), errors("on sunrise:\n    stop\n"));
-        assertEquals(List.of("test.ms:2: unknown condition \"player is flying\""), errors("on load:\n    if player is flying:\n        stop\n"));
+        assertEquals(List.of("test.ms:2: unknown condition \"player is nonsense\""), errors("on load:\n    if player is nonsense:\n        stop\n"));
         assertEquals(List.of("test.ms:2: \"else\" without a matching \"if\""), errors("on load:\n    else:\n        stop\n"));
         assertEquals(List.of("test.ms:3: \"else\" without a matching \"if\""), errors("on load:\n    stop\n    else if player is sneaking:\n        stop\n"));
-        assertEquals(List.of("test.ms:2: \"message\" is only available inside \"on chat\""), errors("on load:\n    send message\n"));
-        assertEquals(List.of("test.ms:2: unknown section \"while true\""), errors("on load:\n    while true:\n        stop\n"));
+        assertEquals(List.of("test.ms:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""), errors("on load:\n    send message\n"));
+        assertEquals(List.of("test.ms:2: unknown section \"until true\""), errors("on load:\n    until true:\n        stop\n"));
         assertEquals(List.of("test.ms:2: unterminated string"), errors("on load:\n    send \"oops\n"));
         assertEquals(List.of("test.ms:1: expected an event section"), errors("send \"x\"\n"));
         assertEquals(List.of("test.ms:1: unknown key \"banana\""), errors("on key press of \"banana\":\n    stop\n"));

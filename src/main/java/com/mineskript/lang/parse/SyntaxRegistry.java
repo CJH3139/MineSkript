@@ -37,7 +37,7 @@ public final class SyntaxRegistry {
     }
 
     public void addExpression(SkType returnType, Tier tier, SyntaxFactory<Expression> factory, String... patterns) {
-        expressions.get(tier).add(new ExpressionEntry(compile(patterns), returnType, tier, factory));
+        expressions.get(tier).add(new ExpressionEntry(compileExpressionPatterns(patterns), returnType, tier, factory));
     }
 
     public List<SyntaxEntry<Event>> events() {
@@ -86,5 +86,20 @@ public final class SyntaxRegistry {
 
     private static List<Pattern> compile(String... patterns) {
         return Arrays.stream(patterns).map(Pattern::compile).toList();
+    }
+
+    private static List<Pattern> compileExpressionPatterns(String... patterns) {
+        List<Pattern> compiled = compile(patterns);
+        for (Pattern pattern : compiled) {
+            if (PatternElement.canMatchAsSlotAlone(pattern.root())) {
+                throw new IllegalArgumentException("expression pattern can match as a single slot with nothing else required: "
+                        + pattern.source()
+                        + ". Such a pattern offers its slot the entire token list it is already parsing, so every nested"
+                        + " expression re-parses the same tokens and parsing becomes exponential, freezing the client"
+                        + " instead of failing. Add a required literal or a second required slot so at least one token is"
+                        + " always consumed outside the slot.");
+            }
+        }
+        return compiled;
     }
 }

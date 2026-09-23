@@ -38,7 +38,7 @@ public final class ExpressionParser implements SlotResolver {
         if (tokens.isEmpty()) {
             return Optional.empty();
         }
-        String key = tokens + "|" + types + "|" + scope.event();
+        String key = tokens + "|" + types + "|" + scope.event() + "|" + scope.loopDepth() + "|" + scope.loop();
         Optional<Expression> cached = cache.get(key);
         if (cached != null) {
             return cached;
@@ -65,6 +65,10 @@ public final class ExpressionParser implements SlotResolver {
         if (list.isPresent()) {
             return list;
         }
+        Optional<Expression> arithmetic = Arithmetic.parse(tokens, this, types, scope).flatMap(expression -> typed(expression, types));
+        if (arithmetic.isPresent()) {
+            return arithmetic;
+        }
         for (Tier tier : Tier.values()) {
             for (ExpressionEntry entry : registry.expressions(tier)) {
                 if (!accepted(entry.returnType(), types)) {
@@ -80,7 +84,9 @@ public final class ExpressionParser implements SlotResolver {
                     if (matched.isPresent()) {
                         Optional<Expression> typed = typed(matched.get(), types);
                         if (typed.isPresent()) {
-                            return typed;
+                            return expectsBlockType(types)
+                                    ? Optional.of(AmbiguousExpression.of(typed.get(), tokens))
+                                    : typed;
                         }
                     }
                 } finally {
@@ -95,6 +101,9 @@ public final class ExpressionParser implements SlotResolver {
     }
 
     private Optional<Expression> literal(List<Token> tokens, List<SkType> types, ParseScope scope) {
+        if (tokens.size() == 1 && !tokens.get(0).quoted() && tokens.get(0).text().startsWith("{")) {
+            return typed(VariableExpression.of(tokens.get(0).text()), types);
+        }
         if (tokens.size() == 1 && tokens.get(0).quoted()) {
             return TextLiteral.parse(tokens.get(0).text(), this, scope).flatMap(expression -> typed(expression, types));
         }
@@ -126,6 +135,10 @@ public final class ExpressionParser implements SlotResolver {
     }
 
     private static Optional<Expression> typed(Expression expression, List<SkType> types) {
+        if (expression.type() == SkType.OBJECT && !expression.isList()) {
+            SkType target = types.get(0);
+            return Optional.of(target == SkType.OBJECT ? expression : new ConvertedExpression(expression, target));
+        }
         for (SkType type : types) {
             if (type.accepts(expression.type())) {
                 return Optional.of(expression);
@@ -139,7 +152,11 @@ public final class ExpressionParser implements SlotResolver {
         return Optional.empty();
     }
 
+    private static boolean expectsBlockType(List<SkType> types) {
+        return types.stream().anyMatch(type -> type == SkType.OBJECT || type == SkType.BLOCKTYPE || type == SkType.BLOCK || type == SkType.ITEM);
+    }
+
     private static boolean accepted(SkType returnType, List<SkType> types) {
-        return types.stream().anyMatch(type -> type.accepts(returnType) || Converters.canConvert(returnType, type));
+        return returnType == SkType.OBJECT || types.stream().anyMatch(type -> type.accepts(returnType) || Converters.canConvert(returnType, type));
     }
 }

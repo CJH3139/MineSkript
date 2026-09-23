@@ -2,7 +2,9 @@ package com.mineskript.syntax.conditions;
 
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
+import com.mineskript.lang.parse.AmbiguousExpression;
 import com.mineskript.lang.parse.ListExpression;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.SyntaxRegistry;
@@ -36,10 +38,10 @@ public final class CondCompare implements Condition {
         registry.addCondition((match, scope) -> create(match, Relation.EQUAL, true),
                 "%objects% (is not|isn't|aren't|are not|!=) [equal to] %objects%");
         registry.addCondition((match, scope) -> create(match, Relation.GREATER_OR_EQUAL, false),
-                "%objects% (is|are) (greater|more|higher|bigger|larger|above) [than] or (equal to|the same as) %objects%",
+                "%objects% (is|are) ((greater|more|higher|bigger|larger|above) [than] or (equal to|the same as)|at least) %objects%",
                 "%objects% >= %objects%");
         registry.addCondition((match, scope) -> create(match, Relation.LESS_OR_EQUAL, false),
-                "%objects% (is|are) (less|smaller|lower|below) [than] or (equal to|the same as) %objects%",
+                "%objects% (is|are) ((less|smaller|lower|below) [than] or (equal to|the same as)|at most) %objects%",
                 "%objects% <= %objects%");
         registry.addCondition((match, scope) -> create(match, Relation.GREATER, false),
                 "%objects% (is|are) ((greater|more|higher|bigger|larger) than|above|>) %objects%",
@@ -61,7 +63,12 @@ public final class CondCompare implements Condition {
         }
         SkType rightType = right instanceof ListExpression list ? list.type() : right.type();
         if (!Comparators.canCompare(left.type(), rightType)) {
-            return Optional.empty();
+            Optional<Expression> other = AmbiguousExpression.alternative(right);
+            if (other.isEmpty() || !Comparators.canCompare(left.type(), other.get().type())) {
+                return Optional.empty();
+            }
+            right = other.get();
+            rightType = right.type();
         }
         if (relation.ordered() && !Comparators.canOrder(left.type(), rightType)) {
             return Optional.empty();
@@ -93,15 +100,19 @@ public final class CondCompare implements Condition {
         if (high != null) {
             Object lowValue = right.evaluate(context);
             Object highValue = high.evaluate(context);
-            result = Comparators.relate(leftValue, lowValue) >= 0 && Comparators.relate(leftValue, highValue) <= 0;
+            if (leftValue == None.NONE || lowValue == None.NONE || highValue == None.NONE) {
+                result = false;
+            } else {
+                result = Comparators.relate(leftValue, lowValue) >= 0 && Comparators.relate(leftValue, highValue) <= 0;
+            }
         } else {
             Object rightValue = right.evaluate(context);
             if (rightValue instanceof List<?> items) {
-                result = disjunctive
-                        ? items.stream().anyMatch(item -> relation.holds(Comparators.relate(leftValue, item)))
-                        : items.stream().allMatch(item -> relation.holds(Comparators.relate(leftValue, item)));
+                result = !items.isEmpty() && (disjunctive
+                        ? items.stream().anyMatch(item -> Comparators.test(relation, leftValue, item))
+                        : items.stream().allMatch(item -> Comparators.test(relation, leftValue, item)));
             } else {
-                result = relation.holds(Comparators.relate(leftValue, rightValue));
+                result = Comparators.test(relation, leftValue, rightValue);
             }
         }
         return negate != result;

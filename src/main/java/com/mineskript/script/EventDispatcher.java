@@ -1,90 +1,306 @@
 package com.mineskript.script;
 
 import com.mineskript.game.GameBridge;
+import com.mineskript.game.SnapshotNeeds;
+import com.mineskript.game.WorldSnapshot;
+import com.mineskript.lang.ast.Condition;
+import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
+import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Trigger;
+import com.mineskript.lang.ast.WaitUntil;
 import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.Execution;
 import com.mineskript.lang.runtime.Interpreter;
 import com.mineskript.lang.runtime.Scheduler;
 import com.mineskript.lang.runtime.ScriptError;
+import com.mineskript.lang.runtime.Variables;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Predicate;
 
 public final class EventDispatcher {
+    public static final int SAVE_DELAY_TICKS = 60;
+
+    private static final int TICKS_PER_SECOND = 20;
+
+    private static final Set<String> INVENTORY_EVENTS = Set.of("inventory", "held", "use start", "use stop");
+
+    private static final Set<String> HELD_ITEM_EVENTS = Set.of("item break");
+
+    private static final Set<String> CONSUME_EVENTS = Set.of("consume");
+
+    private static final Set<String> EXPERIENCE_EVENTS = Set.of("xp");
+
+    private static final Set<String> EFFECT_EVENTS = Set.of("effect gain", "effect lose");
+
+    private static final Set<String> VEHICLE_EVENTS = Set.of("mount", "dismount");
+
+    private static final Set<String> DIMENSION_EVENTS = Set.of("dimension");
+
+    private static final Set<String> ONLINE_NAME_EVENTS = Set.of("player join", "player leave");
+
     private final ScriptRegistry registry;
     private final GameBridge game;
     private final Interpreter interpreter;
     private final Scheduler scheduler;
+    private final Variables variables;
+    private final Runnable saver;
+    private final Runnable onWorldJoin;
+    private record Parked(Execution execution, Condition condition, long parkTick, long deadlineTick, int line, long generation) {
+    }
+
+    private record Waiting(long resumeTick, long generation) {
+    }
+
     private final Map<String, Boolean> keyState = new HashMap<>();
+    private final List<Parked> parked = new ArrayList<>();
+    private final Map<Execution, Waiting> scheduled = new IdentityHashMap<>();
+    private final Map<String, Long> fileGeneration = new HashMap<>();
+    private WorldSnapshot previous = WorldSnapshot.empty();
     private long ticks;
+    private int lastSeenVersion;
+    private long lastChangeTick;
+    private boolean pendingSave;
+    private boolean chatSending;
+    private boolean commandSending;
+    private SnapshotNeeds needed = SnapshotNeeds.nothing();
+    private SnapshotNeeds previousNeeds = SnapshotNeeds.nothing();
+    private SnapshotNeeds justEnabled = SnapshotNeeds.nothing();
+    private int neededGeneration = -1;
+    private long parkedEpoch;
+    private boolean worldExpected;
+    private boolean onlineNamesSeen;
 
     public EventDispatcher(ScriptRegistry registry, GameBridge game, Interpreter interpreter, Scheduler scheduler) {
+        this(registry, game, interpreter, scheduler, new Variables(), () -> {
+        });
+    }
+
+    public EventDispatcher(ScriptRegistry registry, GameBridge game, Interpreter interpreter, Scheduler scheduler, Variables variables, Runnable saver) {
+        this(registry, game, interpreter, scheduler, variables, saver, () -> {
+        });
+    }
+
+    public EventDispatcher(ScriptRegistry registry, GameBridge game, Interpreter interpreter, Scheduler scheduler, Variables variables, Runnable saver, Runnable onWorldJoin) {
         this.registry = registry;
         this.game = game;
         this.interpreter = interpreter;
         this.scheduler = scheduler;
+        this.variables = variables;
+        this.saver = saver;
+        this.onWorldJoin = onWorldJoin;
     }
 
     public long ticks() {
         return ticks;
     }
 
+    int scheduledSize() {
+        return scheduled.size();
+    }
+
     public void tick() {
+        SnapshotNeeds needs = needs();
+        WorldSnapshot current = game.snapshot(needs);
+        justEnabled = newlyEnabled(previousNeeds, needs);
+        previousNeeds = needs;
+        if (game.hasWorld()) {
+            ticks++;
+        }
+        diff(previous, current);
+        previous = current;
         if (!game.hasWorld()) {
+            dropParked();
             return;
         }
-        ticks++;
         for (Execution execution : scheduler.drain(ticks)) {
+            Waiting waiting = scheduled.remove(execution);
+            if (waiting == null || waiting.generation() != generationOf(execution)) {
+                continue;
+            }
             runSafely(execution);
+            if (!game.hasWorld()) {
+                return;
+            }
+        }
+        resumeParked();
+        if (!game.hasWorld()) {
+            return;
         }
         for (Trigger trigger : registry.triggers()) {
             if (trigger.event() instanceof Event.Periodic periodic && ticks % periodic.intervalTicks() == 0) {
                 start(trigger, Map.of());
+                if (!game.hasWorld()) {
+                    return;
+                }
             }
         }
         pollKeys();
+        if (!game.hasWorld()) {
+            return;
+        }
+        trackVariables();
     }
 
     public void onChat(String message) {
         if (!game.hasWorld()) {
             return;
         }
-        for (Trigger trigger : registry.triggers()) {
-            if (trigger.event() instanceof Event.Chat) {
-                start(trigger, Map.of("message", message));
-            }
+        fireAll(trigger -> trigger.event() instanceof Event.Chat, Map.of("message", message));
+    }
+
+    public void onChatSend(String message) {
+        if (chatSending) {
+            return;
+        }
+        chatSending = true;
+        try {
+            fireMessage(Event.ChatSend.class, message);
+        } finally {
+            chatSending = false;
         }
     }
 
+    public void onCommandSend(String command) {
+        if (commandSending) {
+            return;
+        }
+        commandSending = true;
+        try {
+            fireMessage(Event.CommandSend.class, command);
+        } finally {
+            commandSending = false;
+        }
+    }
+
+    private void fireMessage(Class<? extends Event> type, String message) {
+        if (!game.hasWorld()) {
+            return;
+        }
+        fireAll(trigger -> type.isInstance(trigger.event()), Map.of("message", message));
+    }
+
     public void onLoad() {
-        for (Trigger trigger : registry.triggers()) {
-            if (trigger.event() instanceof Event.Load) {
-                start(trigger, Map.of());
+        fireAll(trigger -> trigger.event() instanceof Event.Load, Map.of());
+    }
+
+    public void onLoad(String file) {
+        fireAll(trigger -> trigger.event() instanceof Event.Load && trigger.file().equals(file), Map.of());
+    }
+
+    public void dropFrames(String file) {
+        fileGeneration.merge(file, 1L, Long::sum);
+        parked.removeIf(entry -> entry.execution().trigger().file().equals(file));
+        List<Execution> pending = scheduler.drain(Long.MAX_VALUE);
+        for (Execution execution : pending) {
+            Waiting waiting = scheduled.remove(execution);
+            if (waiting == null || execution.trigger().file().equals(file)) {
+                continue;
             }
+            scheduler.schedule(execution, waiting.resumeTick());
+            scheduled.put(execution, waiting);
         }
     }
 
     public void onDisconnect() {
-        scheduler.clear();
+        dropParked();
         keyState.clear();
         game.releaseAll();
+        pendingSave = false;
+        lastSeenVersion = variables.version();
+        saver.run();
     }
 
     public void reset() {
         onDisconnect();
         ticks = 0;
+        lastChangeTick = 0;
+    }
+
+    private void dropParked() {
+        parkedEpoch++;
+        parked.clear();
+        scheduled.clear();
+        scheduler.clear();
+    }
+
+    private SnapshotNeeds needs() {
+        int generation = registry.generation();
+        if (generation != neededGeneration) {
+            neededGeneration = generation;
+            Set<String> names = new HashSet<>();
+            for (Trigger trigger : registry.triggers()) {
+                if (trigger.event() instanceof Event.State state) {
+                    names.add(state.name());
+                }
+            }
+            needed = new SnapshotNeeds(
+                    wanted(names, INVENTORY_EVENTS),
+                    wanted(names, HELD_ITEM_EVENTS),
+                    wanted(names, CONSUME_EVENTS),
+                    wanted(names, EXPERIENCE_EVENTS),
+                    wanted(names, EFFECT_EVENTS),
+                    wanted(names, VEHICLE_EVENTS),
+                    wanted(names, DIMENSION_EVENTS),
+                    wanted(names, ONLINE_NAME_EVENTS));
+        }
+        return needed;
+    }
+
+    private static SnapshotNeeds newlyEnabled(SnapshotNeeds before, SnapshotNeeds after) {
+        return new SnapshotNeeds(
+                !before.inventory() && after.inventory(),
+                !before.heldItem() && after.heldItem(),
+                !before.consume() && after.consume(),
+                !before.experience() && after.experience(),
+                !before.effects() && after.effects(),
+                !before.vehicle() && after.vehicle(),
+                !before.dimension() && after.dimension(),
+                !before.onlineNames() && after.onlineNames());
+    }
+
+    private static boolean wanted(Set<String> loaded, Set<String> events) {
+        for (String event : events) {
+            if (loaded.contains(event)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void trackVariables() {
+        int version = variables.version();
+        if (version != lastSeenVersion) {
+            lastSeenVersion = version;
+            lastChangeTick = ticks;
+            pendingSave = true;
+        } else if (pendingSave && ticks - lastChangeTick >= SAVE_DELAY_TICKS) {
+            pendingSave = false;
+            saver.run();
+        }
     }
 
     private void pollKeys() {
         for (String keyId : registry.watchedKeys()) {
+            if (!game.hasWorld()) {
+                return;
+            }
             boolean down = game.isKeyDown(keyId);
             Boolean previous = keyState.put(keyId, down);
             if (previous == null || previous == down) {
                 continue;
             }
             for (Trigger trigger : List.copyOf(registry.triggers())) {
+                if (!game.hasWorld()) {
+                    return;
+                }
                 if (down && trigger.event() instanceof Event.KeyPress press && press.keyId().equals(keyId)) {
                     start(trigger, Map.of());
                 } else if (!down && trigger.event() instanceof Event.KeyRelease release && release.keyId().equals(keyId)) {
@@ -94,17 +310,304 @@ public final class EventDispatcher {
         }
     }
 
+    private void diff(WorldSnapshot before, WorldSnapshot after) {
+        boolean outer = worldExpected;
+        worldExpected = after.hasWorld();
+        try {
+            if (!after.hasWorld()) {
+                if (before.hasWorld()) {
+                    fireState("leave", Map.of());
+                }
+                return;
+            }
+            if (!before.hasWorld()) {
+                onlineNamesSeen = false;
+                onWorldJoin.run();
+                fireState("join", Map.of());
+                return;
+            }
+            diffPosition(before, after);
+            diffPose(before, after);
+            diffHealth(before, after);
+            diffStats(before, after);
+            diffItems(before, after);
+            diffWorldState(before, after);
+            diffPresence(before, after);
+        } finally {
+            worldExpected = outer;
+        }
+    }
+
+    private void diffPosition(WorldSnapshot before, WorldSnapshot after) {
+        if (before.blockX() != after.blockX() || before.blockY() != after.blockY() || before.blockZ() != after.blockZ()) {
+            fireState("move", Map.of(
+                    "from x", (double) before.blockX(),
+                    "from y", (double) before.blockY(),
+                    "from z", (double) before.blockZ(),
+                    "to x", (double) after.blockX(),
+                    "to y", (double) after.blockY(),
+                    "to z", (double) after.blockZ()));
+        }
+        if (before.onGround() && !after.onGround() && after.velocityY() > 0) {
+            fireState("jump", Map.of());
+        }
+        if (!before.onGround() && after.onGround()) {
+            fireState("land", Map.of("fall distance", Math.max(before.fallDistance(), after.fallDistance())));
+        }
+    }
+
+    private void diffPose(WorldSnapshot before, WorldSnapshot after) {
+        if (before.sneaking() != after.sneaking()) {
+            fireState(after.sneaking() ? "sneak" : "unsneak", Map.of());
+        }
+        if (before.sprinting() != after.sprinting()) {
+            fireState(after.sprinting() ? "sprint" : "unsprint", Map.of());
+        }
+    }
+
+    private void diffHealth(WorldSnapshot before, WorldSnapshot after) {
+        if (after.health() <= 0 && before.health() > 0) {
+            fireState("death", Map.of());
+            return;
+        }
+        if (after.health() > 0 && before.health() <= 0) {
+            fireState("respawn", Map.of());
+            return;
+        }
+        if (after.health() < before.health()) {
+            fireState("damage", Map.of("damage", before.health() - after.health()));
+        } else if (after.health() > before.health() && before.health() > 0) {
+            fireState("heal", Map.of("healed", after.health() - before.health()));
+        }
+    }
+
+    private void diffStats(WorldSnapshot before, WorldSnapshot after) {
+        if (before.hunger() != after.hunger()) {
+            fireState("hunger", Map.of("hunger change", (double) (after.hunger() - before.hunger())));
+        }
+        if (before.xpLevel() != after.xpLevel()) {
+            fireState("level", Map.of("level change", (double) (after.xpLevel() - before.xpLevel())));
+        }
+        if (!justEnabled.experience() && before.xpLevel() == after.xpLevel() && before.totalExperience() != after.totalExperience()) {
+            fireState("xp", Map.of("xp change", (double) (after.totalExperience() - before.totalExperience())));
+        }
+    }
+
+    private void diffItems(WorldSnapshot before, WorldSnapshot after) {
+        if (before.selectedSlot() != after.selectedSlot()) {
+            fireState("held", Map.of(
+                    "previous item", itemAt(before, before.selectedSlot()),
+                    "item", itemAt(after, after.selectedSlot())));
+        }
+        List<ItemValue> was = before.inventory();
+        List<ItemValue> now = after.inventory();
+        if (!was.isEmpty() && !now.isEmpty()) {
+            int size = Math.max(was.size(), now.size());
+            for (int i = 0; i < size; i++) {
+                ItemValue old = i < was.size() ? was.get(i) : ItemValue.empty();
+                ItemValue fresh = i < now.size() ? now.get(i) : ItemValue.empty();
+                if (!old.id().equals(fresh.id()) || old.count() != fresh.count()) {
+                    fireState("inventory", Map.of("item", fresh));
+                    break;
+                }
+            }
+        }
+        if (before.usingItem() != after.usingItem()) {
+            fireState(after.usingItem() ? "use start" : "use stop", Map.of("item", itemAt(after, after.selectedSlot())));
+        }
+        if (before.consumingItem() && !after.consumingItem()
+                && before.useItemRemaining() <= 2
+                && after.useItemRemaining() == 0) {
+            fireState("consume", Map.of("item", before.useItem()));
+        }
+        ItemValue wasHeld = before.heldItem();
+        if (before.selectedSlot() == after.selectedSlot()
+                && wasHeld.maxDamage() > 0
+                && wasHeld.damage() >= wasHeld.maxDamage() - 1
+                && after.heldItem().isEmpty()) {
+            fireState("item break", Map.of("item", wasHeld));
+        }
+    }
+
+    private void diffPresence(WorldSnapshot before, WorldSnapshot after) {
+        Map<String, Integer> wasEffects = justEnabled.effects() ? after.effects() : before.effects();
+        Set<String> effectIds = new TreeSet<>(wasEffects.keySet());
+        effectIds.addAll(after.effects().keySet());
+        for (String id : effectIds) {
+            Integer was = wasEffects.get(id);
+            Integer now = after.effects().get(id);
+            if (was == null && now != null) {
+                fireState("effect gain", Map.of("effect", effectName(id), "effect level", (double) now));
+            } else if (was != null && now == null) {
+                fireState("effect lose", Map.of("effect", effectName(id)));
+            }
+        }
+        EntityValue wasVehicle = before.vehicle();
+        EntityValue nowVehicle = justEnabled.vehicle() ? wasVehicle : after.vehicle();
+        if (wasVehicle != null && (nowVehicle == null || !wasVehicle.id().equals(nowVehicle.id()))) {
+            fireState("dismount", Map.of("entity", wasVehicle));
+        }
+        if (nowVehicle != null && (wasVehicle == null || !wasVehicle.id().equals(nowVehicle.id()))) {
+            fireState("mount", Map.of("entity", nowVehicle));
+        }
+        if (!justEnabled.dimension() && !before.dimension().equals(after.dimension())) {
+            fireState("dimension", Map.of("from dimension", before.dimension(), "to dimension", after.dimension()));
+        }
+        diffOnlineNames(before, after);
+    }
+
+    private void diffOnlineNames(WorldSnapshot before, WorldSnapshot after) {
+        List<String> was = before.onlineNames();
+        List<String> now = after.onlineNames();
+        boolean seen = onlineNamesSeen;
+        onlineNamesSeen = seen || !was.isEmpty() || !now.isEmpty();
+        if (was.equals(now)) {
+            return;
+        }
+        if (was.isEmpty() && (!seen || justEnabled.onlineNames())) {
+            return;
+        }
+        Set<String> wasNames = new HashSet<>(was);
+        Set<String> nowNames = new HashSet<>(now);
+        Set<String> names = new TreeSet<>(wasNames);
+        names.addAll(nowNames);
+        for (String name : names) {
+            if (!wasNames.contains(name)) {
+                fireState("player join", Map.of("player", name));
+            } else if (!nowNames.contains(name)) {
+                fireState("player leave", Map.of("player", name));
+            }
+        }
+    }
+
+    private static String effectName(String id) {
+        int colon = id.indexOf(':');
+        return colon < 0 ? id : id.substring(colon + 1);
+    }
+
+    private void diffWorldState(WorldSnapshot before, WorldSnapshot after) {
+        if (before.screenOpen() != after.screenOpen()) {
+            fireState(after.screenOpen() ? "screen open" : "screen close", Map.of());
+        }
+        if (!before.gamemode().equals(after.gamemode())) {
+            fireState("gamemode", Map.of("gamemode", after.gamemode()));
+        }
+        if (before.raining() != after.raining() || before.thundering() != after.thundering()) {
+            fireState("weather", Map.of());
+        }
+    }
+
+    private static ItemValue itemAt(WorldSnapshot snapshot, int slot) {
+        List<ItemValue> items = snapshot.inventory();
+        return slot >= 0 && slot < items.size() ? items.get(slot) : ItemValue.empty();
+    }
+
+    private void fireState(String name, Map<String, Object> values) {
+        for (Trigger trigger : List.copyOf(registry.triggers())) {
+            if (worldEnded()) {
+                return;
+            }
+            if (trigger.event() instanceof Event.State state && state.name().equals(name)) {
+                start(trigger, values);
+            }
+        }
+    }
+
+    private void fireAll(Predicate<Trigger> match, Map<String, Object> values) {
+        boolean outer = worldExpected;
+        worldExpected = game.hasWorld();
+        try {
+            for (Trigger trigger : List.copyOf(registry.triggers())) {
+                if (worldEnded()) {
+                    return;
+                }
+                if (match.test(trigger)) {
+                    start(trigger, values);
+                }
+            }
+        } finally {
+            worldExpected = outer;
+        }
+    }
+
+    private boolean worldEnded() {
+        return worldExpected && !game.hasWorld();
+    }
+
     private void start(Trigger trigger, Map<String, Object> values) {
-        runSafely(new Execution(trigger, new Context(game, trigger.file(), values)));
+        runSafely(new Execution(trigger, new Context(game, trigger.file(), values, variables)));
+    }
+
+    private void resumeParked() {
+        if (parked.isEmpty()) {
+            return;
+        }
+        long epoch = parkedEpoch;
+        List<Parked> current = List.copyOf(parked);
+        parked.clear();
+        List<Parked> survivors = new ArrayList<>();
+        for (Parked entry : current) {
+            if (parkedEpoch != epoch || !game.hasWorld()) {
+                return;
+            }
+            if (entry.generation() != generationOf(entry.execution())) {
+                continue;
+            }
+            if (ticks <= entry.parkTick()) {
+                survivors.add(entry);
+                continue;
+            }
+            boolean satisfied;
+            try {
+                satisfied = entry.condition().test(entry.execution().context());
+            } catch (RuntimeException error) {
+                String message = error.getMessage();
+                game.showError(new ScriptError(entry.execution().context().file(), entry.line(),
+                        message == null ? error.getClass().getSimpleName() : message).toString());
+                continue;
+            }
+            if (satisfied) {
+                runSafely(entry.execution());
+            } else if (ticks >= entry.deadlineTick()) {
+                game.showError(new ScriptError(entry.execution().context().file(), entry.line(),
+                        "wait until timed out after " + WaitUntil.TIMEOUT_TICKS / TICKS_PER_SECOND + " seconds").toString());
+            } else {
+                survivors.add(entry);
+            }
+        }
+        if (parkedEpoch != epoch) {
+            return;
+        }
+        for (Parked entry : survivors) {
+            if (entry.generation() == generationOf(entry.execution())) {
+                parked.add(entry);
+            }
+        }
     }
 
     private void runSafely(Execution execution) {
+        long epoch = parkedEpoch;
+        long generation = generationOf(execution);
         try {
             if (interpreter.run(execution) == Interpreter.Outcome.WAITING) {
-                scheduler.schedule(execution, ticks + execution.waitTicks());
+                if (parkedEpoch != epoch || generationOf(execution) != generation) {
+                    return;
+                }
+                if (execution.waitCondition() != null) {
+                    parked.add(new Parked(execution, execution.waitCondition(), ticks,
+                            ticks + execution.waitTimeoutTicks(), execution.waitLine(), generation));
+                } else {
+                    long resume = ticks + execution.waitTicks();
+                    scheduler.schedule(execution, resume);
+                    scheduled.put(execution, new Waiting(resume, generation));
+                }
             }
         } catch (ScriptError error) {
             game.showError(error.toString());
         }
+    }
+
+    private long generationOf(Execution execution) {
+        return fileGeneration.getOrDefault(execution.trigger().file(), 0L);
     }
 }

@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.mineskript.game.FakeGameBridge;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PlayerRef;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Timespan;
@@ -69,5 +72,34 @@ class ConvertersTest {
         noWorld.hasWorld = false;
         Context noWorldContext = new Context(noWorld, "t.ms", Map.of());
         assertThrows(ScriptError.class, () -> Converters.toText(PlayerRef.LOCAL, noWorldContext));
+    }
+
+    @Test
+    void noneRendersAndConvertsOnlyToText() {
+        assertEquals("<none>", Converters.toText(None.NONE, context));
+        assertEquals("<none>", Converters.convert(None.NONE, SkType.TEXT, context));
+        assertEquals(None.NONE, Converters.convert(None.NONE, SkType.OBJECT, context));
+        ScriptError error = assertThrows(ScriptError.class, () -> Converters.convert(None.NONE, SkType.NUMBER, context));
+        assertEquals("variable is not set", error.getMessage());
+        assertEquals(SkType.OBJECT, Converters.typeOf(None.NONE));
+    }
+
+    @Test
+    void rendersItemsAndEntities() {
+        assertEquals("diamond pickaxe", Converters.toText(new ItemValue("minecraft:diamond_pickaxe", "diamond pickaxe", 1, 0, 1561), context));
+        assertEquals("64 cobblestone", Converters.toText(new ItemValue("minecraft:cobblestone", "cobblestone", 64, 0, 0), context));
+        assertEquals("air", Converters.toText(ItemValue.empty(), context));
+        assertEquals("Zombie", Converters.toText(new EntityValue("minecraft:zombie", "Zombie", 1.0, 2.0, 3.0, 4.5), context));
+        assertEquals(SkType.ITEM, Converters.typeOf(ItemValue.empty()));
+        assertEquals(SkType.ENTITY, Converters.typeOf(new EntityValue("minecraft:zombie", "Zombie", 0, 0, 0, 0)));
+    }
+
+    @Test
+    void itemsConvertToBlockTypesAndText() {
+        ItemValue stone = new ItemValue("minecraft:stone", "stone", 3, 0, 0);
+        assertTrue(Converters.canConvert(SkType.ITEM, SkType.BLOCKTYPE));
+        assertTrue(Converters.canConvert(SkType.ITEM, SkType.TEXT));
+        assertFalse(Converters.canConvert(SkType.ITEM, SkType.NUMBER));
+        assertEquals(new BlockType("minecraft:stone"), Converters.convert(stone, SkType.BLOCKTYPE, context));
     }
 }

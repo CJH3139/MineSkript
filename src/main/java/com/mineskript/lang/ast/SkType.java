@@ -8,6 +8,8 @@ public enum SkType {
     BLOCKTYPE,
     BLOCK,
     PLAYER,
+    ITEM,
+    ENTITY,
     OBJECT;
 
     public boolean accepts(SkType other) {

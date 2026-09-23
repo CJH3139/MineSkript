@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Timespan;
 import org.junit.jupiter.api.Test;
@@ -47,5 +50,31 @@ class ComparatorsTest {
     void refusesIncomparableValues() {
         ScriptError error = assertThrows(ScriptError.class, () -> Comparators.relate("5", 5.0));
         assertEquals("cannot compare text with number", error.getMessage());
+    }
+
+    @Test
+    void noneIsNeverEqualAndNeverOrdered() {
+        assertFalse(Comparators.test(Relation.EQUAL, None.NONE, 5.0));
+        assertFalse(Comparators.test(Relation.EQUAL, 5.0, None.NONE));
+        assertTrue(Comparators.test(Relation.NOT_EQUAL, None.NONE, 5.0));
+        assertFalse(Comparators.test(Relation.LESS, None.NONE, 5.0));
+        assertFalse(Comparators.test(Relation.GREATER, None.NONE, 5.0));
+        assertFalse(Comparators.test(Relation.GREATER_OR_EQUAL, None.NONE, None.NONE));
+        assertTrue(Comparators.test(Relation.EQUAL, 5.0, 5.0));
+        assertTrue(Comparators.test(Relation.LESS, 4.0, 5.0));
+    }
+
+    @Test
+    void itemsCompareWithBlockTypesAndEntitiesWithText() {
+        ItemValue stone = new ItemValue("minecraft:stone", "stone", 1, 0, 0);
+        assertTrue(Comparators.canCompare(SkType.ITEM, SkType.BLOCKTYPE));
+        assertTrue(Comparators.canCompare(SkType.ITEM, SkType.ITEM));
+        assertFalse(Comparators.canOrder(SkType.ITEM, SkType.ITEM));
+        assertEquals(0, Comparators.relate(stone, new BlockType("minecraft:stone")));
+        assertFalse(Comparators.relate(stone, new BlockType("minecraft:dirt")) == 0);
+        assertEquals(0, Comparators.relate(new BlockType("minecraft:stone"), stone));
+        EntityValue zombie = new EntityValue("minecraft:zombie", "Zombie", 0, 0, 0, 2.0);
+        assertTrue(Comparators.canCompare(SkType.ENTITY, SkType.ENTITY));
+        assertEquals(0, Comparators.relate(zombie, new EntityValue("minecraft:zombie", "Other", 9, 9, 9, 9)));
     }
 }

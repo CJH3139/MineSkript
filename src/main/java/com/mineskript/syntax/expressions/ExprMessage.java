@@ -12,8 +12,9 @@ import java.util.Optional;
 public final class ExprMessage implements Expression {
     public static void register(SyntaxRegistry registry) {
         registry.addExpression(SkType.TEXT, Tier.SIMPLE, (match, scope) -> {
-            if (!(scope.event() instanceof Event.Chat)) {
-                throw new SyntaxException("\"message\" is only available inside \"on chat\"");
+            Event event = scope.event();
+            if (!(event instanceof Event.Chat) && !(event instanceof Event.ChatSend) && !(event instanceof Event.CommandSend)) {
+                throw new SyntaxException("\"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\"");
             }
             return Optional.of(new ExprMessage());
         }, "[the] [chat] message");

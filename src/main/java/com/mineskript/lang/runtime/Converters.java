@@ -2,6 +2,9 @@ package com.mineskript.lang.runtime;
 
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PlayerRef;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Timespan;
@@ -15,6 +18,7 @@ public final class Converters {
     public static String toText(Object value, Context context) {
         return switch (value) {
             case null -> "<none>";
+            case None ignored -> "<none>";
             case String text -> text;
             case Double number -> formatNumber(number);
             case Boolean bool -> bool.toString();
@@ -22,6 +26,8 @@ public final class Converters {
             case BlockType type -> type.path();
             case BlockValue block -> block.type().path();
             case PlayerRef ignored -> context.world().playerName();
+            case ItemValue item -> item.count() > 1 ? item.count() + " " + item.name() : item.name();
+            case EntityValue entity -> entity.name();
             case List<?> list -> joinList(list, context);
             default -> value.toString();
         };
@@ -36,6 +42,8 @@ public final class Converters {
             case BlockType ignored -> SkType.BLOCKTYPE;
             case BlockValue ignored -> SkType.BLOCK;
             case PlayerRef ignored -> SkType.PLAYER;
+            case ItemValue ignored -> SkType.ITEM;
+            case EntityValue ignored -> SkType.ENTITY;
             case null, default -> SkType.OBJECT;
         };
     }
@@ -44,12 +52,24 @@ public final class Converters {
         if (to == SkType.OBJECT || to == from || to == SkType.TEXT) {
             return true;
         }
-        return from == SkType.BLOCK && to == SkType.BLOCKTYPE;
+        if (from == SkType.BLOCK && to == SkType.BLOCKTYPE) {
+            return true;
+        }
+        return from == SkType.ITEM && to == SkType.BLOCKTYPE;
     }
 
     public static Object convert(Object value, SkType to, Context context) {
         if (value instanceof List<?> list) {
             return list.stream().map(item -> convert(item, to, context)).toList();
+        }
+        if (value == None.NONE) {
+            if (to == SkType.OBJECT) {
+                return value;
+            }
+            if (to == SkType.TEXT) {
+                return "<none>";
+            }
+            throw new ScriptError("variable is not set");
         }
         if (to == SkType.OBJECT || typeOf(value) == to) {
             return value;
@@ -59,6 +79,9 @@ public final class Converters {
         }
         if (to == SkType.BLOCKTYPE && value instanceof BlockValue block) {
             return block.type();
+        }
+        if (to == SkType.BLOCKTYPE && value instanceof ItemValue item) {
+            return item.type();
         }
         throw new ScriptError("cannot convert " + typeName(typeOf(value)) + " to " + typeName(to));
     }

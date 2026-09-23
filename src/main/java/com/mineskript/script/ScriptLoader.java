@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class ScriptLoader {
@@ -34,16 +35,21 @@ public final class ScriptLoader {
     }
 
     public LoadReport load(Path dir) {
+        return load(dir, true, new ScriptSources(dir));
+    }
+
+    public LoadReport load(Path dir, boolean seedExample, ScriptSources sources) {
         List<ParsedScript> scripts = new ArrayList<>();
+        sources.forget();
         try {
             Files.createDirectories(dir);
             List<Path> files = listScripts(dir);
-            if (files.isEmpty()) {
+            if (files.isEmpty() && seedExample) {
                 Files.writeString(dir.resolve("example.ms"), EXAMPLE, StandardCharsets.UTF_8);
                 files = listScripts(dir);
             }
             for (Path file : files) {
-                scripts.add(parseFile(file));
+                scripts.add(parseFile(file, sources));
             }
         } catch (IOException error) {
             scripts.add(new ParsedScript(dir.toString(), List.of(), List.of(new ParseError(dir.toString(), 0, "cannot read scripts folder: " + error.getMessage()))));
@@ -51,12 +57,49 @@ public final class ScriptLoader {
         return new LoadReport(List.copyOf(scripts));
     }
 
-    private ParsedScript parseFile(Path file) {
+    public static boolean createFolder(Path dir) {
+        try {
+            if (Files.isDirectory(dir)) {
+                return false;
+            }
+            Files.createDirectories(dir);
+            Files.writeString(dir.resolve("example.ms"), EXAMPLE, StandardCharsets.UTF_8);
+            return true;
+        } catch (IOException error) {
+            return false;
+        }
+    }
+
+    public static boolean isScriptName(String file) {
+        return file.endsWith(".ms") && !file.contains("/") && !file.contains("\\");
+    }
+
+    public Optional<ParsedScript> loadOne(Path dir, String file) {
+        return loadOne(dir, file, new ScriptSources(dir));
+    }
+
+    public Optional<ParsedScript> loadOne(Path dir, String file, ScriptSources sources) {
+        if (!isScriptName(file)) {
+            return Optional.empty();
+        }
+        Path path = dir.resolve(file);
+        if (!Files.isRegularFile(path)) {
+            return Optional.empty();
+        }
+        return Optional.of(parseFile(path, sources));
+    }
+
+    private ParsedScript parseFile(Path file, ScriptSources sources) {
         String name = file.getFileName().toString();
         try {
-            return parser.parse(name, Files.readString(file, StandardCharsets.UTF_8));
+            String text = Files.readString(file, StandardCharsets.UTF_8);
+            ParsedScript script = parser.parse(name, text);
+            sources.capture(name, text, script.errors());
+            return script;
         } catch (IOException error) {
-            return new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, "cannot read file: " + error.getMessage())));
+            ParsedScript script = new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, "cannot read file: " + error.getMessage())));
+            sources.capture(name, "", script.errors());
+            return script;
         }
     }
 

@@ -3,6 +3,8 @@ package com.mineskript.lang.ast;
 public sealed interface Flow {
     Flow CONTINUE = new Continue();
     Flow STOP = new Stop();
+    Flow NEXT_ITERATION = new NextIteration();
+    Flow EXIT_LOOP = new ExitLoop();
 
     record Continue() implements Flow {
     }
@@ -14,5 +16,17 @@ public sealed interface Flow {
     }
 
     record Wait(int ticks) implements Flow {
+    }
+
+    record Park(Condition condition, int timeoutTicks) implements Flow {
+    }
+
+    record EnterLoop(Block block, LoopController controller) implements Flow {
+    }
+
+    record NextIteration() implements Flow {
+    }
+
+    record ExitLoop() implements Flow {
     }
 }

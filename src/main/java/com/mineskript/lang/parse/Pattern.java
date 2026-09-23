@@ -2,6 +2,7 @@ package com.mineskript.lang.parse;
 
 import com.mineskript.lang.ast.SkType;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,17 +22,23 @@ public final class Pattern {
             Map.entry("blocks", SkType.BLOCK),
             Map.entry("player", SkType.PLAYER),
             Map.entry("players", SkType.PLAYER),
+            Map.entry("item", SkType.ITEM),
+            Map.entry("items", SkType.ITEM),
+            Map.entry("entity", SkType.ENTITY),
+            Map.entry("entities", SkType.ENTITY),
             Map.entry("object", SkType.OBJECT),
             Map.entry("objects", SkType.OBJECT));
 
     private final String source;
     private final PatternElement root;
     private final int slotCount;
+    private final Map<PatternElement, int[]> suffixMinima = new IdentityHashMap<>();
 
     private Pattern(String source, PatternElement root, int slotCount) {
         this.source = source;
         this.root = root;
         this.slotCount = slotCount;
+        collectSuffixMinima(root, suffixMinima);
     }
 
     public static Pattern compile(String source) {
@@ -53,6 +60,34 @@ public final class Pattern {
 
     public int slotCount() {
         return slotCount;
+    }
+
+    int suffixMinimum(PatternElement.Sequence sequence, int index) {
+        return suffixMinima.get(sequence)[index];
+    }
+
+    private static void collectSuffixMinima(PatternElement element, Map<PatternElement, int[]> into) {
+        switch (element) {
+            case PatternElement.Sequence sequence -> {
+                List<PatternElement> elements = sequence.elements();
+                int[] suffix = new int[elements.size() + 1];
+                for (int i = elements.size() - 1; i >= 0; i--) {
+                    suffix[i] = suffix[i + 1] + PatternElement.minimum(elements.get(i));
+                    collectSuffixMinima(elements.get(i), into);
+                }
+                into.put(sequence, suffix);
+            }
+            case PatternElement.Optional optional -> collectSuffixMinima(optional.element(), into);
+            case PatternElement.Choice choice -> {
+                for (PatternElement.Branch branch : choice.branches()) {
+                    collectSuffixMinima(branch.element(), into);
+                }
+            }
+            case PatternElement.Literal ignored -> {
+            }
+            case PatternElement.Slot ignored -> {
+            }
+        }
     }
 
     @Override
