@@ -2,6 +2,7 @@ package com.mineskript.game;
 
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.script.OwnChatGuard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 
 public final class FakeGameBridge implements GameBridge {
     public static final int MAIN_SLOTS = 36;
@@ -20,10 +22,16 @@ public final class FakeGameBridge implements GameBridge {
 
     public final List<String> calls = new ArrayList<>();
     public final List<String> messages = new ArrayList<>();
+    public final List<String> sentChat = new ArrayList<>();
+    public final List<String> warnings = new ArrayList<>();
     public final List<String> errors = new ArrayList<>();
+    public Predicate<String> chatHook;
+    public final List<String> infos = new ArrayList<>();
+    public final List<String> shown = new ArrayList<>();
     public final Set<String> keysDown = new HashSet<>();
     public final Map<String, String> blocks = new HashMap<>();
     public boolean hasWorld = true;
+    private final OwnChatGuard ownChat = new OwnChatGuard();
     public double health = 20;
     public double maxHealth = 20;
     public int hunger = 20;
@@ -151,6 +159,16 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public void sendChat(String text) {
         calls.add("chat:" + text);
+        ownChat.around(() -> {
+            if (chatHook == null || chatHook.test(text)) {
+                sentChat.add(text);
+            }
+        });
+    }
+
+    @Override
+    public boolean sendingOwnChat() {
+        return ownChat.sending();
     }
 
     @Override
@@ -161,11 +179,25 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public void showMessage(String text) {
         messages.add(text);
+        shown.add("message:" + text);
+    }
+
+    @Override
+    public void showInfo(String text) {
+        infos.add(text);
+        shown.add("info:" + text);
+    }
+
+    @Override
+    public void showWarning(String text) {
+        warnings.add(text);
+        shown.add("warning:" + text);
     }
 
     @Override
     public void showError(String text) {
         errors.add(text);
+        shown.add("error:" + text);
     }
 
     @Override

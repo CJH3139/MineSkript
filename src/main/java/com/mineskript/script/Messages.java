@@ -32,7 +32,8 @@ public final class Messages {
                 new MessageLine(MessageLine.Kind.INFO, "/ms reload scripts, the same thing spelled out"),
                 new MessageLine(MessageLine.Kind.INFO, "/ms reload <file.ms>, reload one script"),
                 new MessageLine(MessageLine.Kind.INFO, "/ms reload variables, re-read variables.json"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload all, variables and every script"),
+                new MessageLine(MessageLine.Kind.INFO, "/ms reload all, the config, variables and every script"),
+                new MessageLine(MessageLine.Kind.INFO, "/ms reload config, re-read " + Config.NAME),
                 new MessageLine(MessageLine.Kind.INFO, "/ms list, what is loaded now"),
                 new MessageLine(MessageLine.Kind.INFO, "/ms errors, the errors from the last load"),
                 new MessageLine(MessageLine.Kind.INFO, "/ms info, version, folder, counts and ticks since the last full reload"));
@@ -51,7 +52,7 @@ public final class Messages {
     }
 
     public static List<MessageLine> startingEverything() {
-        return starting("variables and every script");
+        return starting("the config, variables and every script");
     }
 
     private static List<MessageLine> starting(String what) {
@@ -105,6 +106,33 @@ public final class Messages {
                     "did not re-read " + file.getFileName() + ", it could not be read" + took));
             case BUSY -> List.of(new MessageLine(MessageLine.Kind.WARNING, "a reload is already running, ignored"));
         };
+    }
+
+    public static List<MessageLine> startingConfig(Path file) {
+        return starting(file.getFileName().toString());
+    }
+
+    public static List<MessageLine> configReloaded(Path file, ConfigReload result, List<String> warnings, long millis) {
+        String took = " (" + millis + " ms)";
+        if (result == ConfigReload.BUSY) {
+            return List.of(new MessageLine(MessageLine.Kind.WARNING, "a reload is already running, ignored"));
+        }
+        List<MessageLine> lines = new ArrayList<>();
+        if (result == ConfigReload.RELOADED) {
+            lines.add(new MessageLine(MessageLine.Kind.SUCCESS, "re-read " + file.getFileName() + took));
+        } else {
+            lines.add(new MessageLine(MessageLine.Kind.ERROR, "did not re-read " + file.getFileName() + ", it could not be read" + took));
+        }
+        lines.addAll(configWarnings(warnings));
+        return List.copyOf(lines);
+    }
+
+    public static List<MessageLine> configWarnings(List<String> warnings) {
+        List<MessageLine> lines = new ArrayList<>();
+        for (String warning : warnings) {
+            lines.add(new MessageLine(MessageLine.Kind.WARNING, warning));
+        }
+        return List.copyOf(lines);
     }
 
     public static List<MessageLine> list(Path dir, List<ParsedScript> scripts, List<ParseError> errors) {

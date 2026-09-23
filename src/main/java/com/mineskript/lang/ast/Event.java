@@ -24,4 +24,7 @@ public sealed interface Event {
 
     record State(String name) implements Event {
     }
+
+    record EffectCommand() implements Event {
+    }
 }

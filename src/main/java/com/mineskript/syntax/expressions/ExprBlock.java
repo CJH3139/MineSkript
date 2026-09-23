@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public final class ExprBlock implements Expression {
     private static final String PATTERN = "[the] block [%-number% [(block|blocks)]] "
-            + "(above:above|above:over|above:up|below:below|below:under|below:beneath|below:down|north:north|south:south|east:east|west:west|at:at) [of] [the] [player]";
+            + "(above:above|above:over|above:up|below:below|below:under|below:beneath|below:down|north:north|south:south|east:east|west:west|at:at) [of] [the] [(player|me|myself)]";
     private static final Map<String, int[]> DIRECTIONS = Map.of(
             "above", new int[] {0, 1, 0},
             "below", new int[] {0, -1, 0},

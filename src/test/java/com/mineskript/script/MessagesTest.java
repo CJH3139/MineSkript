@@ -126,16 +126,18 @@ class MessagesTest {
     @Test
     void helpHasOneLinePerBranchOfTheTree() {
         List<String> lines = text(Messages.help());
-        assertEquals(10, lines.size());
+        assertEquals(11, lines.size());
         assertEquals("SUCCESS the command tree, /mineskript or /ms", lines.get(0));
         assertEquals("INFO /ms reload <file.ms>, reload one script", lines.get(4));
-        assertEquals("INFO /ms info, version, folder, counts and ticks since the last full reload", lines.get(9));
+        assertEquals("INFO /ms reload config, re-read config.txt", lines.get(7));
+        assertEquals("INFO /ms info, version, folder, counts and ticks since the last full reload", lines.get(10));
     }
 
     @Test
     void everyReloadAnnouncesWhatItIsAboutToDo(@TempDir Path dir) {
         assertEquals(List.of("INFO reloading every script"), text(Messages.startingScripts()));
-        assertEquals(List.of("INFO reloading variables and every script"), text(Messages.startingEverything()));
+        assertEquals(List.of("INFO reloading the config, variables and every script"), text(Messages.startingEverything()));
+        assertEquals(List.of("INFO reloading config.txt"), text(Messages.startingConfig(dir.resolve("config.txt"))));
         assertEquals(List.of("INFO reloading variables.json"), text(Messages.startingVariables(dir.resolve("variables.json"))));
         assertEquals(List.of("INFO reloading Chat.ms"), text(Messages.startingFile("Chat.ms")));
     }

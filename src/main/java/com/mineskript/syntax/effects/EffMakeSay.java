@@ -19,7 +19,7 @@ public final class EffMakeSay implements Statement {
 
     public static void register(SyntaxRegistry registry) {
         registry.addEffect((match, scope) -> match.slot(0).isList() ? Optional.empty() : Optional.of(new EffMakeSay(scope.line(), match.slot(0))),
-                "(make|force) [the] player (say|send [the] (message|messages)) %string%");
+                "(make|force) [the] (player|me|myself) (say|send [the] (message|messages)) %string%");
     }
 
     @Override

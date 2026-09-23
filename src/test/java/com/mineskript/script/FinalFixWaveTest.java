@@ -220,7 +220,8 @@ class FinalFixWaveTest {
 
         private void serve(Path dir) {
             service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry())), registry, dispatcher,
-                    new VariablePersistence(new VariableStore(), dir.resolve("variables.json"), variables, game));
+                    new VariablePersistence(new VariableStore(), dir.resolve("variables.json"), variables, game),
+                    new ConfigFile(dir.resolve(Config.NAME)));
         }
 
         private List<String> load(String source) {

@@ -16,6 +16,7 @@ public final class ScriptService {
     private final ScriptRegistry registry;
     private final EventDispatcher dispatcher;
     private final VariablePersistence persistence;
+    private final ConfigFile config;
     private final LongSupplier nanos;
     private final Map<String, List<ParseError>> errorsByFile = new LinkedHashMap<>();
     private final ScriptSources sources;
@@ -23,22 +24,25 @@ public final class ScriptService {
     private long lastMillis;
     private boolean reloading;
 
-    public ScriptService(Path dir, ScriptLoader loader, ScriptRegistry registry, EventDispatcher dispatcher, VariablePersistence persistence) {
-        this(dir, loader, registry, dispatcher, persistence, System::nanoTime);
+    public ScriptService(Path dir, ScriptLoader loader, ScriptRegistry registry, EventDispatcher dispatcher, VariablePersistence persistence, ConfigFile config) {
+        this(dir, loader, registry, dispatcher, persistence, config, System::nanoTime);
     }
 
-    public ScriptService(Path dir, ScriptLoader loader, ScriptRegistry registry, EventDispatcher dispatcher, VariablePersistence persistence, LongSupplier nanos) {
+    public ScriptService(Path dir, ScriptLoader loader, ScriptRegistry registry, EventDispatcher dispatcher, VariablePersistence persistence, ConfigFile config, LongSupplier nanos) {
         this.dir = dir;
         this.loader = loader;
         this.registry = registry;
         this.dispatcher = dispatcher;
         this.persistence = persistence;
+        this.config = config;
         this.nanos = nanos;
         this.sources = new ScriptSources(dir);
     }
 
     public LoadReport start() {
         ScriptLoader.createFolder(dir);
+        config.create();
+        config.load();
         persistence.load();
         return reload();
     }
@@ -64,6 +68,8 @@ public final class ScriptService {
         reloading = true;
         long started = nanos.getAsLong();
         try {
+            config.create();
+            config.load();
             persistence.load();
             return loadEverything();
         } finally {
@@ -86,6 +92,25 @@ public final class ScriptService {
             lastMillis = millis(started);
             reloading = false;
         }
+    }
+
+    public ConfigReload reloadConfig() {
+        if (reloading) {
+            return ConfigReload.BUSY;
+        }
+        reloading = true;
+        long started = nanos.getAsLong();
+        try {
+            config.create();
+            return config.load() ? ConfigReload.RELOADED : ConfigReload.UNREADABLE;
+        } finally {
+            lastMillis = millis(started);
+            reloading = false;
+        }
+    }
+
+    public ConfigFile config() {
+        return config;
     }
 
     public FileReload reloadFile(String file) {

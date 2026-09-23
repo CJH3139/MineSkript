@@ -44,6 +44,9 @@ public final class ExprEventValue implements Expression {
 
     private static void add(SyntaxRegistry registry, String name, SkType type, Set<String> events) {
         registry.addExpression(type, Tier.SIMPLE, (match, scope) -> {
+            if (scope.event() instanceof Event.EffectCommand) {
+                throw new SyntaxException("event-" + name + " needs an event, and an effect command typed in chat has none");
+            }
             if (!(scope.event() instanceof Event.State state) || !events.contains(state.name())) {
                 throw new SyntaxException("event-" + name + " is not available in this event");
             }

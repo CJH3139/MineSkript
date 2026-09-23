@@ -37,7 +37,7 @@ class ServiceCoverageTest {
         VariablePersistence persistence = new VariablePersistence(new VariableStore(), root.resolve("variables.json"), variables, game);
         dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), scheduler, variables, () -> {
         });
-        service = new ScriptService(root, new ScriptLoader(new Parser(DefaultSyntax.registry())), registry, dispatcher, persistence, () -> nanos += 1_000_000L);
+        service = new ScriptService(root, new ScriptLoader(new Parser(DefaultSyntax.registry())), registry, dispatcher, persistence, new ConfigFile(root.resolve(Config.NAME)), () -> nanos += 1_000_000L);
         service.start();
     }
 

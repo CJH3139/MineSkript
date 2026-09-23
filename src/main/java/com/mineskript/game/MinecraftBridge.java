@@ -6,6 +6,7 @@ import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.script.MessageLine;
 import com.mineskript.script.Messages;
+import com.mineskript.script.OwnChatGuard;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +52,7 @@ public final class MinecraftBridge implements GameBridge {
     private final List<String> nameScratch = new ArrayList<>();
     private final Map<String, Integer> effectScratch = new TreeMap<>();
     private final Set<String> heldKeys = new HashSet<>();
+    private final OwnChatGuard ownChat = new OwnChatGuard();
     private boolean attackHeld;
     private boolean useHeld;
     private ClientLevel trackedLevel;
@@ -132,7 +134,12 @@ public final class MinecraftBridge implements GameBridge {
 
     @Override
     public void sendChat(String text) {
-        minecraft().player.connection.sendChat(text);
+        ownChat.around(() -> minecraft().player.connection.sendChat(text));
+    }
+
+    @Override
+    public boolean sendingOwnChat() {
+        return ownChat.sending();
     }
 
     @Override
@@ -143,6 +150,16 @@ public final class MinecraftBridge implements GameBridge {
     @Override
     public void showMessage(String text) {
         show(Component.literal(text), text, false);
+    }
+
+    @Override
+    public void showInfo(String text) {
+        show(MineSkriptMessages.component(new MessageLine(MessageLine.Kind.SUCCESS, text)), Messages.PREFIX + " " + text, false);
+    }
+
+    @Override
+    public void showWarning(String text) {
+        show(MineSkriptMessages.component(new MessageLine(MessageLine.Kind.WARNING, text)), Messages.PREFIX + " " + text, true);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.mineskript;
 
+import com.mineskript.script.ConfigReload;
 import com.mineskript.script.FileReload;
 import com.mineskript.script.LoadReport;
 import com.mineskript.script.MessageLine;
@@ -46,6 +47,8 @@ public final class MineSkriptCommand {
                                 .executes(ctx -> reloadVariables(ctx.getSource(), service)))
                         .then(ClientCommands.literal("all")
                                 .executes(ctx -> reloadEverything(ctx.getSource(), service)))
+                        .then(ClientCommands.literal("config")
+                                .executes(ctx -> reloadConfig(ctx.getSource(), service)))
                         .then(ClientCommands.argument("file", StringArgumentType.word())
                                 .suggests((ctx, builder) -> suggest(service, builder))
                                 .executes(ctx -> reloadOne(ctx.getSource(), service, StringArgumentType.getString(ctx, "file")))))
@@ -79,7 +82,9 @@ public final class MineSkriptCommand {
 
     private static int reloadEverything(FabricClientCommandSource source, ScriptService service) {
         show(source, Messages.startingEverything());
-        return showFullReload(source, service, service.reloadAll());
+        int result = showFullReload(source, service, service.reloadAll());
+        show(source, Messages.configWarnings(service.config().takeWarnings()));
+        return result;
     }
 
     private static int showFullReload(FabricClientCommandSource source, ScriptService service, LoadReport report) {
@@ -94,6 +99,13 @@ public final class MineSkriptCommand {
         show(source, Messages.startingVariables(service.persistence().file()));
         VariablesReload done = service.reloadVariables();
         return show(source, Messages.variablesReloaded(service.persistence().file(), done, service.lastMillis()));
+    }
+
+    private static int reloadConfig(FabricClientCommandSource source, ScriptService service) {
+        show(source, Messages.startingConfig(service.config().file()));
+        ConfigReload done = service.reloadConfig();
+        List<String> warnings = done == ConfigReload.BUSY ? List.of() : service.config().takeWarnings();
+        return show(source, Messages.configReloaded(service.config().file(), done, warnings, service.lastMillis()));
     }
 
     private static int reloadOne(FabricClientCommandSource source, ScriptService service, String file) {

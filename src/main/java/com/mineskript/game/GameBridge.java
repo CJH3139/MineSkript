@@ -24,9 +24,15 @@ public interface GameBridge {
 
     void sendChat(String text);
 
+    boolean sendingOwnChat();
+
     void sendCommand(String command);
 
     void showMessage(String text);
+
+    void showInfo(String text);
+
+    void showWarning(String text);
 
     void showError(String text);
 

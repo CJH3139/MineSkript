@@ -106,6 +106,10 @@ public final class EventDispatcher {
         return scheduled.size();
     }
 
+    int parkedSize() {
+        return parked.size();
+    }
+
     public void tick() {
         SnapshotNeeds needs = needs();
         WorldSnapshot current = game.snapshot(needs);
@@ -177,6 +181,19 @@ public final class EventDispatcher {
             fireMessage(Event.CommandSend.class, command);
         } finally {
             commandSending = false;
+        }
+    }
+
+    public boolean runOneOff(Trigger trigger) {
+        if (!game.hasWorld()) {
+            return false;
+        }
+        boolean outer = worldExpected;
+        worldExpected = true;
+        try {
+            return start(trigger, Map.of());
+        } finally {
+            worldExpected = outer;
         }
     }
 
@@ -534,8 +551,8 @@ public final class EventDispatcher {
         return worldExpected && !game.hasWorld();
     }
 
-    private void start(Trigger trigger, Map<String, Object> values) {
-        runSafely(new Execution(trigger, new Context(game, trigger.file(), values, variables)));
+    private boolean start(Trigger trigger, Map<String, Object> values) {
+        return runSafely(new Execution(trigger, new Context(game, trigger.file(), values, variables)));
     }
 
     private void resumeParked() {
@@ -585,13 +602,13 @@ public final class EventDispatcher {
         }
     }
 
-    private void runSafely(Execution execution) {
+    private boolean runSafely(Execution execution) {
         long epoch = parkedEpoch;
         long generation = generationOf(execution);
         try {
             if (interpreter.run(execution) == Interpreter.Outcome.WAITING) {
                 if (parkedEpoch != epoch || generationOf(execution) != generation) {
-                    return;
+                    return true;
                 }
                 if (execution.waitCondition() != null) {
                     parked.add(new Parked(execution, execution.waitCondition(), ticks,
@@ -604,7 +621,9 @@ public final class EventDispatcher {
             }
         } catch (ScriptError error) {
             game.showError(error.toString());
+            return false;
         }
+        return true;
     }
 
     private long generationOf(Execution execution) {

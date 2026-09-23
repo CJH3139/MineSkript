@@ -60,6 +60,20 @@ public final class Parser {
         return new ParsedScript(file, List.copyOf(triggers), List.copyOf(errors));
     }
 
+    public ParsedEffect parseEffect(String file, int line, Event event, String text) {
+        expressions.clearCache();
+        String trimmed = text.strip();
+        if (trimmed.isEmpty()) {
+            return new ParsedEffect(null, new ParseError(file, line, "there is nothing here to run"));
+        }
+        Node node = new Node(trimmed, line, false, List.of());
+        try {
+            return new ParsedEffect(parseEffect(node, new ParseScope(file, line, event)), null);
+        } catch (Failure failure) {
+            return new ParsedEffect(null, new ParseError(file, failure.line, failure.getMessage()));
+        }
+    }
+
     private Trigger parseTrigger(String file, Node node) {
         if (!node.section()) {
             throw new Failure(node.line(), "expected an event section");

@@ -21,7 +21,7 @@ public final class EffCommand implements Statement {
         registry.addEffect((match, scope) -> match.slot(0).isList() ? Optional.empty() : Optional.of(new EffCommand(scope.line(), match.slot(0))),
                 "[execute] [the] command %string%",
                 "send [the] command %string%",
-                "(make|let) [the] player execute [[the] command] %string%");
+                "(make|let) [the] (player|me|myself) execute [[the] command] %string%");
     }
 
     @Override

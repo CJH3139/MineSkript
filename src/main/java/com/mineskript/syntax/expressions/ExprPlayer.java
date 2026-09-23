@@ -10,7 +10,10 @@ import java.util.Optional;
 
 public final class ExprPlayer implements Expression {
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.PLAYER, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprPlayer()), "[the] player");
+        registry.addExpression(SkType.PLAYER, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprPlayer()),
+                "[the] player",
+                "me",
+                "myself");
     }
 
     @Override

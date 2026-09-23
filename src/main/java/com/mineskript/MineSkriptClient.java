@@ -6,6 +6,9 @@ import com.mineskript.lang.parse.Parser;
 import com.mineskript.lang.runtime.Interpreter;
 import com.mineskript.lang.runtime.Scheduler;
 import com.mineskript.lang.runtime.Variables;
+import com.mineskript.script.Config;
+import com.mineskript.script.ConfigFile;
+import com.mineskript.script.EffectCommands;
 import com.mineskript.script.EventDispatcher;
 import com.mineskript.script.LoadReport;
 import com.mineskript.script.ScriptLoader;
@@ -43,8 +46,13 @@ public final class MineSkriptClient implements ClientModInitializer {
         Variables variables = new Variables();
         Path dir = FabricLoader.getInstance().getGameDir().resolve("mineskript");
         VariablePersistence persistence = new VariablePersistence(new VariableStore(), dir.resolve("variables.json"), variables, bridge);
-        EventDispatcher dispatcher = new EventDispatcher(registry, bridge, new Interpreter(STEP_BUDGET), new Scheduler(), variables, persistence::save, persistence::flushWarning);
-        service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry())), registry, dispatcher, persistence);
+        ConfigFile config = new ConfigFile(dir.resolve(Config.NAME));
+        EventDispatcher dispatcher = new EventDispatcher(registry, bridge, new Interpreter(STEP_BUDGET), new Scheduler(), variables, persistence::save, () -> {
+            persistence.flushWarning();
+            config.flushTo(bridge);
+        });
+        service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry())), registry, dispatcher, persistence, config);
+        EffectCommands effects = new EffectCommands(new Parser(DefaultSyntax.registry()), dispatcher, config, bridge);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> dispatcher.tick());
         ClientReceiveMessageEvents.CHAT.register((message, signed, profile, params, timestamp) -> dispatcher.onChat(message.getString()));
@@ -54,6 +62,7 @@ public final class MineSkriptClient implements ClientModInitializer {
             }
         });
         ClientSendMessageEvents.CHAT.register(dispatcher::onChatSend);
+        ClientSendMessageEvents.ALLOW_CHAT.register(effects::allowChat);
         ClientSendMessageEvents.COMMAND.register(dispatcher::onCommandSend);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(dispatcher::onDisconnect));
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> logReport(service.start()));
