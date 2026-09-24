@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Name("Yaw")
 @Description({
-        "The direction you are facing horizontally, in degrees, as a decimal number. 0 faces south (+z), 90 west, 180 north and -90 east. Needs a world: outside a world the line stops with a \"no world\" error.",
+        "The direction you are facing horizontally, in degrees, as a decimal number. 0 faces south (+z), 90 west, 180 north and -90 east. Written yaw, yaw of player or player's yaw, like Skript. Needs a world: outside a world the line stops with a \"no world\" error.",
         "The game does not wrap this value, so after turning around several times it can be far outside -180 to 180. It can be set, added to and removed from, so add 90 to yaw turns you a quarter to the right."
 })
 @Examples({
@@ -26,16 +26,21 @@ import java.util.Set;
         "\tsend \"yaw %yaw%, pitch %pitch%\"",
         "",
         "on key press of \"t\":",
-        "\tadd 180 to yaw"
+        "\tadd 180 to yaw",
+        "",
+        "on key press of \"r\":",
+        "\tset player's yaw to 0"
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.8"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.8", "1.0.0-alpha.11"})
 public final class ExprYaw extends GameValueExpression implements Changeable {
     private ExprYaw() {
         super(SkType.NUMBER, GameBridge::yaw);
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.NUMBER, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprYaw()), "[the] yaw");
+        registry.addExpression(SkType.NUMBER, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprYaw()),
+                "[the] yaw [of %players%]",
+                "%players%'s yaw");
     }
 
     @Override

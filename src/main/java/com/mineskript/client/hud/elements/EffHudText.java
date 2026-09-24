@@ -17,7 +17,8 @@ import java.util.Optional;
 
 @Name("Show Title")
 @Description({"Shows text on your own screen: show title puts large text in the middle, show subtitle sets the smaller line under it, and show action bar shows text just above the hotbar. A title fades in over half a second, stays for about 3.5 seconds and fades out over 1 second. Only you see it.",
-        "A subtitle is only drawn while a title is on screen, so show it together with a title. Needs a world."})
+        "A subtitle is only drawn while a title is on screen, so show it together with a title. Needs a world.",
+        "Skript's spellings, send title (with a subtitle and times) and send action bar, do the same and are described under Send Title and Action Bar."})
 @Examples({"every 5 seconds:",
         "\tif health of player is less than 6:",
         "\t\tshow subtitle \"%health of player% hp left\"",

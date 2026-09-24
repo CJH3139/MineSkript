@@ -8,10 +8,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
+import com.mineskript.lang.ast.Enchantment;
+import com.mineskript.lang.ast.EnchantmentType;
+import com.mineskript.lang.ast.EntityType;
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.GameMode;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Location;
+import com.mineskript.lang.ast.PotionEffectType;
 import com.mineskript.lang.ast.Timespan;
+import com.mineskript.lang.ast.WeatherType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -131,9 +137,30 @@ public final class VariableStore {
                 fields.addProperty("dimension", location.dimension());
                 object.add("value", fields);
             }
+            case GameMode mode -> named(object, "gamemode", mode.id());
+            case WeatherType weather -> named(object, "weathertype", weather.toString());
+            case PotionEffectType effect -> named(object, "potioneffecttype", effect.id());
+            case Enchantment enchantment -> named(object, "enchantment", enchantment.id());
+            case EnchantmentType type -> {
+                object.addProperty("type", "enchantmenttype");
+                JsonObject fields = new JsonObject();
+                fields.addProperty("id", type.enchantment().id());
+                fields.addProperty("level", type.level());
+                object.add("value", fields);
+            }
+            case EntityType type -> named(object, "entitytype", type.id());
             default -> throw new IllegalArgumentException("cannot save a " + value.getClass().getSimpleName());
         }
         return object;
+    }
+
+    private static void named(JsonObject object, String type, String value) {
+        object.addProperty("type", type);
+        object.addProperty("value", value);
+    }
+
+    private static IllegalArgumentException unknown(String type) {
+        return new IllegalArgumentException("unknown variable type " + type);
     }
 
     private Object decode(JsonObject object) {
@@ -168,7 +195,17 @@ public final class VariableStore {
                 yield new Location(fields.get("x").getAsDouble(), fields.get("y").getAsDouble(),
                         fields.get("z").getAsDouble(), fields.get("dimension").getAsString());
             }
-            default -> throw new IllegalArgumentException("unknown variable type " + type);
+            case "gamemode" -> GameMode.parse(value.getAsString()).orElseThrow(() -> unknown(type));
+            case "weathertype" -> WeatherType.parse(value.getAsString()).orElseThrow(() -> unknown(type));
+            case "potioneffecttype" -> new PotionEffectType(value.getAsString());
+            case "enchantment" -> new Enchantment(value.getAsString());
+            case "enchantmenttype" -> {
+                JsonObject fields = value.getAsJsonObject();
+                yield new EnchantmentType(new Enchantment(fields.get("id").getAsString()),
+                        fields.get("level").getAsInt());
+            }
+            case "entitytype" -> new EntityType(value.getAsString());
+            default -> throw unknown(type);
         };
     }
 }

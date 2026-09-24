@@ -11,37 +11,78 @@ import com.mineskript.lang.parse.ParseScope;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.lang.parse.Tier;
 import com.mineskript.lang.runtime.Context;
-import com.mineskript.lang.runtime.Converters;
 import java.util.Optional;
 
-@Name("Text Range")
-@Description("Part of a text between two character positions, counting from 1, with both ends included: abcdef from character 2 to 4 is bcd. Positions are rounded and clipped to the text, and a range that falls outside it gives empty text.")
+@Name("Substring")
+@Description({
+        "Part of a text, like Skript's substring: the first or last characters, or the characters between two positions.",
+        "part of X between 2 and 4 (also subtext of, substring of, from ... to, and with index or character before the numbers) is the text from the second to the fourth character, counting from 1, with both ends included, so the part of \"abcdef\" from 2 to 4 is bcd. X from character 2 to 4 is the older spelling and still works.",
+        "first 5 characters of X and the 5 first characters of X give the start of the text, last 3 characters of X its end, and first character of X or last character of X a single character.",
+        "Positions and counts are rounded and clipped to the text: a count larger than the text gives the whole text, and 0 or less, or a range outside the text, gives empty text. Given a list of texts, it gives the part of each."
+})
 @Examples({
+        "on chat:",
+        "\tset {_start} to first 5 characters of message",
+        "\tsend \"starts with: %{_start}%\"",
+        "",
+        "on key press of \"t\":",
+        "\tset {_id} to id of held item",
+        "\tsend \"ends in %last 3 characters of {_id}%\"",
+        "",
         "on key press of \"t\":",
         "\tset {_t} to \"minecraft\"",
-        "\tsend \"%{_t} from character 5 to 9%\""
+        "\tsend \"%subtext of {_t} from characters 5 to 9%\"",
+        "\tsend \"%{_t} from character 1 to 4%\"",
+        "\tsend \"%the first character of {_t}%\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprSubstring implements Expression {
-    private final Expression text;
-    private final Expression second;
-    private final Expression third;
+    private enum Kind {
+        RANGE,
+        FIRST,
+        LAST
+    }
 
-    private ExprSubstring(Expression text, Expression second, Expression third) {
+    private final Kind kind;
+    private final Expression text;
+    private final Expression first;
+    private final Expression second;
+
+    private ExprSubstring(Kind kind, Expression text, Expression first, Expression second) {
+        this.kind = kind;
         this.text = text;
+        this.first = first;
         this.second = second;
-        this.third = third;
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.TEXT, Tier.COMBINED, ExprSubstring::create, "%string% from character %number% to %number%");
+        registry.addExpression(SkType.TEXT, Tier.COMBINED, ExprSubstring::create,
+                "[the] (part|subtext|sub text|substring|sub string) of %strings% (between|from) "
+                        + "(index|indices|character|characters|) %number% (and|to) (index|character|) %number%",
+                "[the] (first:first|last) [%-number%] (character|characters) of %strings%",
+                "[the] %number% (first:first|last) characters of %strings%",
+                "%string% from character %number% to %number%");
     }
 
     private static Optional<Expression> create(Match match, ParseScope scope) {
-        if (match.slot(0).isList() || match.slot(1).isList() || match.slot(2).isList()) {
+        return switch (match.patternIndex()) {
+            case 0, 3 -> range(match.slot(0), match.slot(1), match.slot(2));
+            default -> ends(match.has("first") ? Kind.FIRST : Kind.LAST, match.slot(1), match.slot(0));
+        };
+    }
+
+    private static Optional<Expression> range(Expression text, Expression from, Expression to) {
+        if (from.isList() || to.isList()) {
             return Optional.empty();
         }
-        return Optional.of(new ExprSubstring(match.slot(0), match.slot(1), match.slot(2)));
+        return Optional.of(new ExprSubstring(Kind.RANGE, text, from, to));
+    }
+
+    private static Optional<Expression> ends(Kind kind, Expression text, Expression count) {
+        if (count != null && count.isList()) {
+            return Optional.empty();
+        }
+        return Optional.of(new ExprSubstring(kind, text, count, null));
     }
 
     @Override
@@ -50,8 +91,30 @@ public final class ExprSubstring implements Expression {
     }
 
     @Override
+    public boolean isList() {
+        return text.isList();
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        String value = Converters.toText(text.evaluate(context), context);
-        return TextHelper.range(value, TextHelper.index(second, context), TextHelper.index(third, context));
+        return switch (kind) {
+            case RANGE -> {
+                int from = TextHelper.index(first, context);
+                int to = TextHelper.index(second, context);
+                yield TextHelper.map(text, context, value -> TextHelper.range(value, from, to));
+            }
+            case FIRST -> {
+                int count = count(context);
+                yield TextHelper.map(text, context, value -> TextHelper.range(value, 1, count));
+            }
+            case LAST -> {
+                int count = count(context);
+                yield TextHelper.map(text, context, value -> TextHelper.last(value, count));
+            }
+        };
+    }
+
+    private int count(Context context) {
+        return first == null ? 1 : TextHelper.index(first, context);
     }
 }

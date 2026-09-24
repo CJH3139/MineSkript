@@ -14,7 +14,7 @@ import java.util.Optional;
 @Name("Gamemode Is")
 @Description({
         "Checks your current game mode against a text value, ignoring case. The game reports survival, creative, adventure or spectator.",
-        "A value that is not text, or a name that is not a game mode, is simply never equal."
+        "A value that is not text, or a name that is not a game mode, is simply never equal. The gamemode is also a game mode value, so gamemode is creative and player's gamemode is not survival work without quotes, like in Skript (see Gamemode)."
 })
 @Examples({
         "on key press of \"g\":",

@@ -43,6 +43,10 @@ public final class ExprEventValue implements Expression {
         }, value.syntax());
     }
 
+    public static Expression reading(String name, SkType type) {
+        return new ExprEventValue(name, type);
+    }
+
     @Override
     public SkType type() {
         return type;

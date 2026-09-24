@@ -16,6 +16,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeMap;
@@ -24,6 +25,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -624,6 +626,15 @@ public final class MinecraftBridge implements GameBridge {
     }
 
     @Override
+    public void sendTitle(Optional<String> title, Optional<String> subtitle, int fadeInTicks, int stayTicks,
+            int fadeOutTicks) {
+        Hud hud = minecraft().gui.hud;
+        hud.setTimes(fadeInTicks, stayTicks, fadeOutTicks);
+        subtitle.ifPresent(text -> hud.setSubtitle(Component.literal(text)));
+        title.ifPresent(text -> hud.setTitle(Component.literal(text)));
+    }
+
+    @Override
     public void playSound(String id) {
         SoundEvent event = BuiltInRegistries.SOUND_EVENT.getValue(Identifier.tryParse(id));
         if (event == null) {
@@ -645,6 +656,22 @@ public final class MinecraftBridge implements GameBridge {
     public String biome() {
         Minecraft minecraft = minecraft();
         return minecraft.level.getBiome(minecraft.player.blockPosition()).getRegisteredName();
+    }
+
+    @Override
+    public String biomeAt(double x, double y, double z) {
+        return minecraft().level.getBiome(BlockPos.containing(x, y, z)).getRegisteredName();
+    }
+
+    @Override
+    public int lightAt(double x, double y, double z, boolean sky) {
+        return minecraft().level.getBrightness(sky ? LightLayer.SKY : LightLayer.BLOCK, BlockPos.containing(x, y, z));
+    }
+
+    @Override
+    public boolean itemExists(String id) {
+        Identifier key = Identifier.tryParse(id);
+        return key != null && BuiltInRegistries.ITEM.containsKey(key);
     }
 
     @Override

@@ -10,8 +10,8 @@ import com.mineskript.lang.runtime.Relation;
 
 @Name("Is (Equal)")
 @Description({
-        "Compares two values for equality. Text is compared exactly, so case matters; blocks, items and block types match when they are the same kind of block or item; an entity matches text naming its type, such as \"zombie\" or \"minecraft:zombie\". When the right side is a list joined with or, one match is enough; joined with and, every entry must match. An unset value is never equal to anything, and an empty list never matches. The negated form is not is true when the values differ: against an or list it means none of them match (\"is not stone or dirt\" means neither), and since an unset value is never equal, {x} is not 5 is true while {x} is unset.",
-        "The left side must be a single value, not a list. Values that can never be compared, such as text against a number, are refused when the script loads; a variable holding the wrong kind of value fails at run time with cannot compare. Use Is Ignoring Case to ignore capitals."
+        "Compares two values for equality. Text ignores capitals, like Skript with its default case sensitive: false setting, so \"Hello\" is \"hello\" is true; blocks, items and item types match when they are the same kind of block or item; an entity matches an entity type or text naming its type, such as zombie, \"zombie\" or \"minecraft:zombie\". Game modes, potion effect types, enchantments and weather types match their names written out, like Skript (gamemode is creative, event-effect is night vision), and text naming them too. When the right side is a list joined with or, one match is enough; joined with and, every entry must match. An unset value is never equal to anything, and an empty list never matches. The negated form is not is true when the values differ: against an or list it means none of them match (\"is not stone or dirt\" means neither), and since an unset value is never equal, {x} is not 5 is true while {x} is unset.",
+        "The left side must be a single value, not a list. Values that can never be compared, such as text against a number, are refused when the script loads; a variable holding the wrong kind of value fails at run time with cannot compare. Is ignoring case is still accepted but no longer needed."
 })
 @Examples({
         "on key press of \"r\":",
@@ -27,7 +27,7 @@ import com.mineskript.lang.runtime.Relation;
         "	if block below player is not stone or dirt:",
         "		send \"not on stone or dirt\""
 })
-@Since("1.0.0-alpha")
+@Since({"1.0.0-alpha", "1.0.0-alpha.11"})
 public final class CondCompareEqual {
     private CondCompareEqual() {
     }

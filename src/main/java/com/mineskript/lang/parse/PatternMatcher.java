@@ -8,11 +8,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public final class PatternMatcher {
     private interface Continuation {
         boolean run(int position);
     }
+
+    private static final ThreadLocal<Boolean> EXHAUSTIVE = ThreadLocal.withInitial(() -> false);
 
     private final Pattern pattern;
     private final List<Token> tokens;
@@ -29,7 +32,24 @@ public final class PatternMatcher {
         this.slots = new Expression[pattern.slotCount()];
     }
 
+    static boolean exhaustive() {
+        return EXHAUSTIVE.get();
+    }
+
+    static <T> T exhaustively(Supplier<T> action) {
+        boolean outer = EXHAUSTIVE.get();
+        EXHAUSTIVE.set(true);
+        try {
+            return action.get();
+        } finally {
+            EXHAUSTIVE.set(outer);
+        }
+    }
+
     public static Optional<Match> match(Pattern pattern, int patternIndex, List<Token> tokens, SlotResolver resolver, ParseScope scope) {
+        if (!EXHAUSTIVE.get() && !pattern.mayMatch(tokens)) {
+            return Optional.empty();
+        }
         PatternMatcher matcher = new PatternMatcher(pattern, tokens, resolver, scope);
         boolean matched = matcher.match(pattern.root(), 0, 0, position -> position == tokens.size());
         if (!matched) {

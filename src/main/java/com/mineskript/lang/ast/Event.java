@@ -1,6 +1,7 @@
 package com.mineskript.lang.ast;
 
 import java.util.List;
+import java.util.Map;
 
 public sealed interface Event {
     EventContext context();
@@ -14,7 +15,7 @@ public sealed interface Event {
             case CommandSend event -> new CommandSend(context);
             case KeyPress event -> new KeyPress(event.keyId(), event.modifiers(), context);
             case KeyRelease event -> new KeyRelease(event.keyId(), context);
-            case State event -> new State(event.name(), context);
+            case State event -> new State(event.name(), context, event.filter());
             case Durability event -> new Durability(event.threshold(), context);
             case EffectCommand event -> new EffectCommand(context);
         };
@@ -66,9 +67,21 @@ public sealed interface Event {
         }
     }
 
-    record State(String name, EventContext context) implements Event {
+    record State(String name, EventContext context, EventFilter filter) implements Event {
+        public State(String name, EventContext context) {
+            this(name, context, EventFilter.ANY);
+        }
+
         public State(String name) {
             this(name, EventContext.NONE);
+        }
+
+        public State(String name, EventFilter filter) {
+            this(name, EventContext.NONE, filter);
+        }
+
+        public boolean accepts(Map<String, Object> values) {
+            return filter.accepts(values);
         }
     }
 

@@ -54,6 +54,22 @@ class PatternMatcherTest {
     }
 
     @Test
+    void aMissingRequiredWordFailsBeforeAnySlotIsTried() {
+        int[] resolved = {0};
+        SlotResolver counting = (tokens, types, scope) -> {
+            resolved[0]++;
+            return RESOLVER.resolve(tokens, types, scope);
+        };
+        Pattern pattern = Pattern.compile("%player%'s (yaw|pitch) [of %number%]");
+        assertTrue(PatternMatcher.match(pattern, 0, Tokenizer.tokenize("player health of 5"), counting, SCOPE)
+                .isEmpty());
+        assertEquals(0, resolved[0]);
+        assertTrue(PatternMatcher.match(pattern, 0, Tokenizer.tokenize("player's yaw"), counting, SCOPE).isPresent());
+        assertTrue(match("(on|at) chat [now]", "at chat").isPresent());
+        assertTrue(match("(on chat|chat on) now", "chat on now").isPresent());
+    }
+
+    @Test
     void optionalWordsMayBeAbsentOrPresent() {
         assertTrue(match("on [script] load", "on load").isPresent());
         assertTrue(match("on [script] load", "on script load").isPresent());
@@ -113,5 +129,18 @@ class PatternMatcherTest {
         Expression constant = new ConstantExpression(SkType.NUMBER, 4.0);
         assertEquals(SkType.NUMBER, constant.type());
         assertEquals(4.0, constant.evaluate(null));
+    }
+
+    @Test
+    void optionalGroupsTakeAlternativesAndTags() {
+        String pattern = "replace [all|every|first:[the] first] %string% [case:with case sensitivity]";
+        Match plain = match(pattern, "replace \"a\"").orElseThrow();
+        assertEquals(Set.of(), plain.tags());
+        Match every = match(pattern, "replace every \"a\"").orElseThrow();
+        assertEquals(Set.of(), every.tags());
+        Match first = match(pattern, "replace the first \"a\" with case sensitivity").orElseThrow();
+        assertEquals(Set.of("first", "case"), first.tags());
+        assertTrue(match(pattern, "replace first \"a\"").orElseThrow().has("first"));
+        assertTrue(match(pattern, "replace some \"a\"").isEmpty());
     }
 }

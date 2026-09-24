@@ -93,14 +93,16 @@ public final class EventValues {
                 "The item involved in the event. For held item change it is the item in the newly selected slot, for inventory change the new content of the changed slot (air if emptied), for start and stop using item the main hand item, and for consume, item break and durability below the item that was eaten, broke or wore down.");
         add(registry, "previous item", SkType.ITEM,
                 "The item in the hotbar slot you switched away from.");
-        add(registry, "gamemode", SkType.TEXT,
-                "The new game mode: survival, creative, adventure or spectator.");
-        add(registry, "effect", SkType.TEXT,
-                "The effect name without the minecraft: prefix, for example speed or night_vision.");
+        add(registry, "gamemode", SkType.GAMEMODE,
+                "The new game mode: survival, creative, adventure or spectator. Compare it with a game mode, as in event-gamemode is creative; text such as \"creative\" works too.");
+        add(registry, "effect", SkType.POTIONEFFECTTYPE,
+                "The potion effect type, such as speed or night vision. Compare it with an effect, as in event-effect is night vision; text such as \"night_vision\" works too. Printed in text it shows the name with spaces, such as night vision.");
         add(registry, "effect level", SkType.NUMBER,
                 "The level of the new effect, where 1 means level I.");
+        add(registry, "weather", SkType.WEATHERTYPE,
+                "The new weather: clear, rain or thunder. Compare it with a weather type, as in event-weather is rain.");
         add(registry, "entity", SkType.ENTITY,
-                "The entity involved: the vehicle for mount and dismount, or the entity that spawned, despawned or died. Compare it with a type name, as in event-entity is \"zombie\".");
+                "The entity involved: the vehicle for mount and dismount, or the entity that spawned, despawned or died. Compare it with an entity type, as in event-entity is zombie, or with text naming its type, as in event-entity is \"zombie\".");
         add(registry, "from dimension", SkType.TEXT,
                 "The id of the dimension you left, such as minecraft:overworld.");
         add(registry, "to dimension", SkType.TEXT,

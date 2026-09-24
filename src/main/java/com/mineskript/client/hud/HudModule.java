@@ -1,10 +1,12 @@
 package com.mineskript.client.hud;
 
+import com.mineskript.client.hud.elements.EffActionBar;
 import com.mineskript.client.hud.elements.EffClipboard;
 import com.mineskript.client.hud.elements.EffCloseScreen;
 import com.mineskript.client.hud.elements.EffHudText;
 import com.mineskript.client.hud.elements.EffPlaySound;
 import com.mineskript.client.hud.elements.EffScreenshot;
+import com.mineskript.client.hud.elements.EffSendTitle;
 import com.mineskript.client.hud.elements.ExprClipboard;
 import com.mineskript.client.hud.elements.ExprFps;
 import com.mineskript.client.hud.elements.ExprScreenTitle;
@@ -29,6 +31,8 @@ public final class HudModule implements SyntaxModule {
         ExprClipboard.register(registry);
 
         EffHudText.register(registry);
+        EffSendTitle.register(registry);
+        EffActionBar.register(registry);
         EffPlaySound.register(registry);
         EffCloseScreen.register(registry);
         EffClipboard.register(registry);

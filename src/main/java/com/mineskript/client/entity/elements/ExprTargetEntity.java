@@ -11,21 +11,28 @@ import com.mineskript.lang.parse.Tier;
 import java.util.Optional;
 
 @Name("Target Entity")
-@Description("The entity your crosshair is on, such as a mob, player, item frame or boat. Returns none (prints as <none>) when you are not looking at an entity within reach. The value is a snapshot of that moment. Needs a world: outside a world the line stops with a \"no world\" error.")
+@Description("The entity your crosshair is on, such as a mob, player, item frame or boat. Written target entity, or like Skript target of player or player's target. Returns none (prints as <none>) when you are not looking at an entity within reach. The value is a snapshot of that moment. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"e\":",
         "\tif target entity is set:",
         "\t\tsend \"looking at %name of target entity% %distance of target entity% blocks away\"",
         "\telse:",
-        "\t\tsend \"nothing targeted\""
+        "\t\tsend \"nothing targeted\"",
+        "",
+        "on key press of \"e\":",
+        "\tif player's target is zombie:",
+        "\t\tsend \"a zombie\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprTargetEntity extends GameValueExpression {
     private ExprTargetEntity() {
         super(SkType.ENTITY, game -> nullToNone(game.targetEntity()));
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.ENTITY, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprTargetEntity()), "[the] target entity");
+        registry.addExpression(SkType.ENTITY, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprTargetEntity()),
+                "[the] target entity [of %players%]",
+                "[the] target of %players%",
+                "%players%'s target [entity]");
     }
 }

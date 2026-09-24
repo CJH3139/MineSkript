@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Name("Pitch")
 @Description({
-        "The angle you are looking up or down, in degrees, as a decimal number: -90 is straight up, 0 is level and 90 is straight down. Needs a world: outside a world the line stops with a \"no world\" error.",
+        "The angle you are looking up or down, in degrees, as a decimal number: -90 is straight up, 0 is level and 90 is straight down. Written pitch, pitch of player or player's pitch, like Skript. Needs a world: outside a world the line stops with a \"no world\" error.",
         "It can be set, added to and removed from. Adding or removing stops at straight up or straight down instead of going past it."
 })
 @Examples({
@@ -27,9 +27,12 @@ import java.util.Set;
         "\t\tshow action bar \"looking at your feet\"",
         "",
         "on key press of \"u\":",
-        "\tremove 15 from pitch"
+        "\tremove 15 from pitch",
+        "",
+        "on key press of \"k\":",
+        "\tset pitch of player to 0"
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.8"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.8", "1.0.0-alpha.11"})
 public final class ExprPitch extends GameValueExpression implements Changeable {
     private static final double STRAIGHT_UP = -90;
     private static final double STRAIGHT_DOWN = 90;
@@ -39,7 +42,9 @@ public final class ExprPitch extends GameValueExpression implements Changeable {
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.NUMBER, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprPitch()), "[the] pitch");
+        registry.addExpression(SkType.NUMBER, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprPitch()),
+                "[the] pitch [of %players%]",
+                "%players%'s pitch");
     }
 
     @Override

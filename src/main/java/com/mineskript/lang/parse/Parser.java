@@ -335,14 +335,15 @@ public final class Parser {
                 depth--;
             } else if (depth == 0 && condition < 0 && token.is("if")) {
                 condition = i;
-            } else if (depth == 0 && condition >= 0 && token.is("else")) {
+            } else if (depth == 0 && condition >= 0 && (token.is("else") || token.is("otherwise"))) {
                 otherwise = i;
             }
         }
-        if (condition <= 0 || otherwise <= condition + 1 || otherwise >= tokens.size() - 1) {
+        int conditionEnd = otherwise > 0 && tokens.get(otherwise - 1).is(",") ? otherwise - 1 : otherwise;
+        if (condition <= 0 || conditionEnd <= condition + 1 || otherwise >= tokens.size() - 1) {
             return Optional.empty();
         }
-        Optional<Condition> test = combine(tokens.subList(condition + 1, otherwise), scope);
+        Optional<Condition> test = combine(tokens.subList(condition + 1, conditionEnd), scope);
         if (test.isEmpty()) {
             return Optional.empty();
         }
@@ -491,8 +492,9 @@ public final class Parser {
             throw new Failure(node.line(), Language.get("parse.expected-event-section"));
         }
         ParseScope scope = new ParseScope(file, node.line(), null);
-        Event event = guarded(node, () -> registry.matchFirst(registry.events(), tokens(node, node.text()), expressions, scope)
-                .orElseThrow(() -> new Failure(node.line(), Language.format("parse.unknown-event", node.text()))));
+        Event event = explained(() -> guarded(node, () -> registry.matchFirst(registry.events(),
+                tokens(node, node.text()), expressions, scope)
+                .orElseThrow(() -> new Failure(node.line(), Language.format("parse.unknown-event", node.text())))));
         Block body = parseBlock(node.children(), new ParseScope(file, node.line(), event));
         return new Trigger(file, node.line(), event, body);
     }
@@ -606,6 +608,10 @@ public final class Parser {
     }
 
     private LoopStatement.Kind parseLoopHeader(Node node, String text, ParseScope scope) {
+        return explained(() -> parseLoopHeaderOnce(node, text, scope));
+    }
+
+    private LoopStatement.Kind parseLoopHeaderOnce(Node node, String text, ParseScope scope) {
         List<Token> tokens = tokens(node, text);
         if (tokens.size() == 1 && !tokens.get(0).quoted()) {
             switch (tokens.get(0).text()) {
@@ -643,6 +649,10 @@ public final class Parser {
     }
 
     private Condition parseCondition(Node node, String text, ParseScope scope) {
+        return explained(() -> parseConditionOnce(node, text, scope));
+    }
+
+    private Condition parseConditionOnce(Node node, String text, ParseScope scope) {
         List<Token> tokens = tokens(node, text);
         conditionCache.clear();
         return guarded(node, () -> combine(tokens, scope))
@@ -763,6 +773,28 @@ public final class Parser {
     }
 
     private Statement parseEffect(Node node, ParseScope scope) {
+        return explained(() -> parseEffectOnce(node, scope));
+    }
+
+    private <T> T explained(Supplier<T> parse) {
+        try {
+            return parse.get();
+        } catch (Failure failure) {
+            if (PatternMatcher.exhaustive()) {
+                throw failure;
+            }
+            expressions.clearCache();
+            conditionCache.clear();
+            try {
+                return PatternMatcher.exhaustively(parse);
+            } finally {
+                expressions.clearCache();
+                conditionCache.clear();
+            }
+        }
+    }
+
+    private Statement parseEffectOnce(Node node, ParseScope scope) {
         conditionCache.clear();
         String text = node.text();
         if (startsWith(text, "wait until ") || startsWith(text, "halt until ")) {

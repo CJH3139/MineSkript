@@ -19,6 +19,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 public final class VariableExpression implements Expression, Changeable {
     private static final String LIST_SUFFIX = "::*";
@@ -138,6 +139,21 @@ public final class VariableExpression implements Expression, Changeable {
             case ADD -> context.setVariable(scope, name, number(context, name, mode) + operand(mode, value));
             case REMOVE -> context.setVariable(scope, name, number(context, name, mode) - operand(mode, value));
             case DELETE, RESET, REMOVE_ALL -> context.deleteVariable(scope, name);
+        }
+    }
+
+    public void changeInPlace(Context context, UnaryOperator<Object> change) {
+        String name = name(context);
+        if (!list) {
+            Object value = context.getVariable(scope, name);
+            if (value != None.NONE) {
+                context.setVariable(scope, name, change.apply(value));
+            }
+            return;
+        }
+        IndexedValues entries = context.getList(scope, name);
+        for (int i = 0; i < entries.size(); i++) {
+            context.setVariable(scope, entry(name, entries.index(i)), change.apply(entries.get(i)));
         }
     }
 

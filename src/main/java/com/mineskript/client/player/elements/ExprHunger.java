@@ -12,21 +12,24 @@ import com.mineskript.lang.runtime.Context;
 import java.util.Optional;
 
 @Name("Hunger")
-@Description("Your food level as a whole number from 0 to 20, where 20 is a full hunger bar. Also written food level of player or player's hunger. Needs a world: outside a world the line stops with a \"no world\" error.")
+@Description("Your food level as a whole number from 0 to 20, where 20 is a full hunger bar. Written like Skript's food level: food level, hunger, food bar or hunger meter, alone or as food level of player or player's hunger. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "every 5 seconds:",
         "\tif hunger of player is at most 6:",
-        "\t\tsend \"eat something\""
+        "\t\tsend \"eat something\"",
+        "",
+        "on hunger change:",
+        "\tshow action bar \"food %food level%, %player's hunger bar% on the bar\""
 })
-@Since("1.0.0-alpha")
+@Since({"1.0.0-alpha", "1.0.0-alpha.11"})
 public final class ExprHunger implements Expression {
     private ExprHunger() {
     }
 
     public static void register(SyntaxRegistry registry) {
         registry.addExpression(SkType.NUMBER, Tier.PROPERTY, (match, scope) -> Optional.of(new ExprHunger()),
-                "[the] (hunger|food level) of %player%",
-                "%player%'s (hunger|food level)");
+                "[the] (food|hunger) [(level|meter|metre|bar)] [of %players%]",
+                "%players%'s (food|hunger) [(level|meter|metre|bar)]");
     }
 
     @Override

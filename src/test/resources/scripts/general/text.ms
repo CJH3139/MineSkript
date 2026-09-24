@@ -12,5 +12,5 @@ test "values in text":
 	assert length of "100%%" is 4 with "a doubled percent sign counted as two characters"
 
 test "case":
-	assert uppercase "abc" is "ABC" with "uppercase did not work"
-	assert lowercase "ABC" is "abc" with "lowercase did not work"
+	assert ((uppercase "abc") with "ABC" replaced with "" with case sensitivity) is "" with "uppercase did not work"
+	assert ((lowercase "ABC") with "abc" replaced with "" with case sensitivity) is "" with "lowercase did not work"

@@ -56,18 +56,52 @@ on key press of "r":
 
 every 5 seconds:
     if health of player is less than 6:
-        show title "low health"
+        send title "low health" with subtitle "eat something" for 3 seconds
 ```
 
 ## What you can write
 Events for movement, health, hunger, xp, the inventory, held items, effects, mounts, weather, screens, dimensions,
 players joining and leaving, your own outgoing chat, and more. Conditions on what you are holding, standing in,
-looking at and carrying. Effects that press keys, aim the camera, pick hotbar slots, show titles, play sounds and run
-commands. Variables in three scopes, arithmetic, `and`, `or` and `not`, chained comparisons like `1 < {x} < 5`,
+looking at and carrying. Effects that press keys, aim the camera, pick hotbar slots, send titles and action bars (with Skript's
+`send title "..." with subtitle "..." for 5 seconds with fade in 1 second`), play sounds and run commands. Variables in three scopes, arithmetic, `and`, `or` and `not`, chained comparisons like `1 < {x} < 5`,
 `true` and `false`, loops, text and maths functions, `"42" parsed as number`, `wait until <condition>`, and
 `try:` with `on error:` to catch a failing line (the message is in `{_error}`). Blocks broken and placed, health
 changes, tools running low with `on durability below 10`, and the title of any screen that opens are all events.
 `stop all scripts` and `stop script "name"` cancel what is running.
+
+Text works as in Skript. Comparing text ignores capitals, like Skript's default `case sensitive: false`, so
+`message is "gg"`, `"Alex" is in {friends::*}`, `contains`, `starts with` and `ends with` all match `GG` too.
+`join {names::*} with ", "`, `split message at " "`, `replace all "noob" with "friend" in message` (which changes the
+message or variable in place), `part of {t} between 2 and 5`, `first 3 characters of {t}`, `{t} in upper case`,
+`capitalized {t}` and `{t} in proper case` are all here; `split` and `replace` take `with case sensitivity` when
+capitals should matter.
+
+Events offer their values the way Skript's do: `event-block`, `event-item` and `event-location` for the values that
+are types, and their own expressions for the rest, such as `damage` in `on damage`, `fall distance` in `on land`
+(how far you fell), and `past health` or `former held item` for what the value was just before the event.
+
+Events take filters the way Skript's do, written out so they are checked before the trigger runs: `on break of stone`,
+`on mine of diamond ore or deepslate diamond ore`, `on place of torch`, `on death of zombie`, `on spawn of creeper`,
+`on gamemode change to creative`, `on weather change to rain`, `on eat of golden apple`,
+`on item break of diamond pickaxe` and `on effect gain of speed`. Skript's event names work as well: `on mine`,
+`on sneak toggle` and `on sprint toggle` (which fire both ways), `on tool change`, `on join` and `on quit` (you
+joining or leaving a world; `on player join` is still someone else appearing in the tab list), `on player level change`,
+`on level progress change`, `on food bar change` and more.
+
+Game modes, potion effects, enchantments, entity types and weather are types, as in Skript, so they are written without
+quotes: `if player's gamemode is creative`, `if player has potion speed`, `tier of speed of player`,
+`if player is poisoned`, `if held item is enchanted with sharpness 3 or better`, `level of sharpness of held item`,
+`if player's target is zombie`, `if event-weather is rain`. Text still matches them, so `gamemode is "creative"` keeps
+working. Items are item types (Skript's name for what MineSkript used to call block types) and take amounts:
+`player has 3 diamonds`, `player's inventory contains 64 of stone`, `amount of diamond in player's inventory` and
+`slot 0 of player's inventory`.
+
+The player's values have Skript's names and property forms too: `player's level`, `level progress of player`,
+`player's remaining air` (a time, such as `15 seconds`), `food level of player`, `player's saturation`,
+`max health of player`, `player's yaw`, `player's hotbar slot`, `tool of player`, `player's targeted block`,
+`target of player`, `player's vehicle`, `world of player`, `durability of held item`, and `biome of`,
+`light level of` and `block above` any location. The short forms (`xp level`, `hunger of player`, `selected slot`,
+`max damage of held item` and the rest) still work.
 
 Scripts can also react to the action bar, titles and boss bars, the tab list and scoreboard, sounds and particles the
 server sends, entities spawning, despawning and dying, chunks loading, every client tick or rendered frame, key combos
@@ -75,6 +109,8 @@ like `on key press of "ctrl+shift+x"`, the scroll wheel, toasts and advancements
 disconnected (`event-reason` says why). `cancel event` inside `on chat send` stops the message from ever leaving.
 
 A line ending in `\` carries on onto the next one, and everything between two `###` lines is a comment.
+
+`x if condition else y` also takes Skript's `otherwise` and a comma: `"on" if {x} is set, otherwise "off"`.
 
 Functions take typed parameters, which arrive as local variables, and can return a value. Called on its own line, a
 function may `wait`; used as a value, it must not. `local function` keeps it private to its file, and a function that
@@ -117,12 +153,12 @@ lists survive a restart like any other `{global}` variable. Inside text, `""` is
 `send "she said ""hi"""`.
 
 Set, add and remove also work on some values of the game: `add 90 to yaw`, `remove 10 from pitch`,
-`add 1 to selected slot` (which wraps round the hotbar), `set clipboard to "..."`, and `set message to "..."` inside
+`add 1 to selected slot` (which wraps round the hotbar), `set player's hotbar slot to 3`, `set clipboard to "..."`, and `set message to "..."` inside
 `on chat send` or `on command send`, which changes what is actually sent.
 
 Items carry their data, the modern replacement for NBT: `custom name of held item` (none if it was never renamed),
-`lore of held item`, `enchantments of held item` (a list like `sharpness 5`), `level of enchantment "sharpness" on
-held item`, `custom model data of held item`, and any data component as text with
+`lore of held item`, `enchantments of held item` (a list of enchantment types like `sharpness 5`),
+`level of sharpness of held item` (or `level of enchantment "sharpness" on held item`), `custom model data of held item`, and any data component as text with
 `component "minecraft:custom_data" of held item`.
 
 Some things only you see. `on item tooltip` runs while the game draws the tooltip of the item you hover over, and

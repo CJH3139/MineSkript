@@ -57,7 +57,7 @@ public final class EffSpawnClientEntity implements Statement {
     public static void register(SyntaxRegistry registry) {
         registry.addEffect(EffSpawnClientEntity::create,
                 "spawn [a] [client] hologram [(with text|saying)] %string% at %location%",
-                "spawn [(a|an)] [client] item display (of|with) %blocktype% at %location%",
+                "spawn [(a|an)] [client] item display (of|with) %itemtype% at %location%",
                 "spawn [a] [client] block display (of|with) %blocktype% at %location%");
     }
 

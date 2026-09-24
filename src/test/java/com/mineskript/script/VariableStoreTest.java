@@ -7,9 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mineskript.lang.ast.BlockType;
+import com.mineskript.lang.ast.Enchantment;
+import com.mineskript.lang.ast.EnchantmentType;
+import com.mineskript.lang.ast.EntityType;
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.GameMode;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.PotionEffectType;
 import com.mineskript.lang.ast.Timespan;
+import com.mineskript.lang.ast.WeatherType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +48,23 @@ class VariableStoreTest {
         assertTrue(text.contains("\"type\": \"number\""));
         assertTrue(text.contains("\"type\": \"timespan\""));
         assertTrue(text.contains("\n"));
+    }
+
+    @Test
+    void roundTripsTheSkriptTypes(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("variables.json");
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("mode", GameMode.SPECTATOR);
+        values.put("weather", WeatherType.THUNDER);
+        values.put("effect", new PotionEffectType("minecraft:night_vision"));
+        values.put("enchantment", new Enchantment("minecraft:mending"));
+        values.put("enchantment type", new EnchantmentType(new Enchantment("minecraft:sharpness"), 5));
+        values.put("any level", new EnchantmentType(new Enchantment("mymod:frost"), EnchantmentType.ANY_LEVEL));
+        values.put("entity type", new EntityType("minecraft:zombie"));
+        store.save(file, values);
+        VariableStore.Loaded loaded = store.load(file);
+        assertNull(loaded.warning());
+        assertEquals(values, loaded.values());
     }
 
     @Test

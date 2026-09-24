@@ -2,10 +2,12 @@ package com.mineskript.lang.parse;
 
 import com.mineskript.lang.ast.SkType;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public final class Pattern {
     public static final String CONDITION = "condition";
@@ -20,6 +22,8 @@ public final class Pattern {
             Map.entry("timespan", SkType.TIMESPAN),
             Map.entry("blocktype", SkType.BLOCKTYPE),
             Map.entry("blocktypes", SkType.BLOCKTYPE),
+            Map.entry("itemtype", SkType.BLOCKTYPE),
+            Map.entry("itemtypes", SkType.BLOCKTYPE),
             Map.entry("block", SkType.BLOCK),
             Map.entry("blocks", SkType.BLOCK),
             Map.entry("player", SkType.PLAYER),
@@ -30,6 +34,22 @@ public final class Pattern {
             Map.entry("entities", SkType.ENTITY),
             Map.entry("location", SkType.LOCATION),
             Map.entry("locations", SkType.LOCATION),
+            Map.entry("gamemode", SkType.GAMEMODE),
+            Map.entry("gamemodes", SkType.GAMEMODE),
+            Map.entry("potioneffecttype", SkType.POTIONEFFECTTYPE),
+            Map.entry("potioneffecttypes", SkType.POTIONEFFECTTYPE),
+            Map.entry("enchantment", SkType.ENCHANTMENT),
+            Map.entry("enchantments", SkType.ENCHANTMENT),
+            Map.entry("enchantmenttype", SkType.ENCHANTMENTTYPE),
+            Map.entry("enchantmenttypes", SkType.ENCHANTMENTTYPE),
+            Map.entry("entitytype", SkType.ENTITYTYPE),
+            Map.entry("entitytypes", SkType.ENTITYTYPE),
+            Map.entry("entitydata", SkType.ENTITYTYPE),
+            Map.entry("entitydatas", SkType.ENTITYTYPE),
+            Map.entry("weathertype", SkType.WEATHERTYPE),
+            Map.entry("weathertypes", SkType.WEATHERTYPE),
+            Map.entry("inventory", SkType.INVENTORY),
+            Map.entry("inventories", SkType.INVENTORY),
             Map.entry("object", SkType.OBJECT),
             Map.entry("objects", SkType.OBJECT));
 
@@ -37,12 +57,14 @@ public final class Pattern {
     private final PatternElement root;
     private final int slotCount;
     private final Map<PatternElement, int[]> suffixMinima = new IdentityHashMap<>();
+    private final Set<String> requiredWords;
 
     private Pattern(String source, PatternElement root, int slotCount) {
         this.source = source;
         this.root = root;
         this.slotCount = slotCount;
         collectSuffixMinima(root, suffixMinima);
+        this.requiredWords = Set.copyOf(requiredWords(root));
     }
 
     public static Pattern compile(String source) {
@@ -55,7 +77,7 @@ public final class Pattern {
     }
 
     public static SkType typeNamed(String name) {
-        return TYPE_NAMES.get(name.toLowerCase(Locale.ROOT));
+        return TYPE_NAMES.get(name.toLowerCase(Locale.ROOT).replace(" ", ""));
     }
 
     public String source() {
@@ -68,6 +90,42 @@ public final class Pattern {
 
     public int slotCount() {
         return slotCount;
+    }
+
+    boolean mayMatch(List<Token> tokens) {
+        for (String word : requiredWords) {
+            if (tokens.stream().noneMatch(token -> token.is(word))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Set<String> requiredWords(PatternElement element) {
+        return switch (element) {
+            case PatternElement.Literal literal -> Set.of(literal.word());
+            case PatternElement.Sequence sequence -> {
+                Set<String> words = new HashSet<>();
+                for (PatternElement child : sequence.elements()) {
+                    words.addAll(requiredWords(child));
+                }
+                yield words;
+            }
+            case PatternElement.Choice choice -> {
+                Set<String> words = null;
+                for (PatternElement.Branch branch : choice.branches()) {
+                    Set<String> branchWords = new HashSet<>(requiredWords(branch.element()));
+                    if (words == null) {
+                        words = branchWords;
+                    } else {
+                        words.retainAll(branchWords);
+                    }
+                }
+                yield words == null ? Set.of() : words;
+            }
+            case PatternElement.Optional ignored -> Set.of();
+            case PatternElement.Slot ignored -> Set.of();
+        };
     }
 
     int suffixMinimum(PatternElement.Sequence sequence, int index) {
@@ -126,9 +184,9 @@ public final class Pattern {
                 } else if (c == '[') {
                     flushWord(elements, word);
                     position++;
-                    PatternElement inner = sequence();
+                    PatternElement inner = choice();
                     expect(']');
-                    elements.add(new PatternElement.Optional(inner));
+                    elements.add(new PatternElement.Optional(unwrapped(inner)));
                 } else if (c == '(') {
                     flushWord(elements, word);
                     position++;
@@ -163,6 +221,14 @@ public final class Pattern {
                 }
                 return new PatternElement.Choice(List.copyOf(branches));
             }
+        }
+
+        private static PatternElement unwrapped(PatternElement element) {
+            if (element instanceof PatternElement.Choice choice && choice.branches().size() == 1
+                    && choice.branches().get(0).tag().isEmpty()) {
+                return choice.branches().get(0).element();
+            }
+            return element;
         }
 
         private int tagEnd() {

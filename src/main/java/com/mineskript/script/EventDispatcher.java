@@ -10,11 +10,14 @@ import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
+import com.mineskript.lang.ast.GameMode;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Location;
+import com.mineskript.lang.ast.PotionEffectType;
 import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.WaitUntil;
+import com.mineskript.lang.ast.WeatherType;
 import com.mineskript.lang.parse.ParsedScript;
 import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.Execution;
@@ -588,9 +591,11 @@ public final class EventDispatcher {
     private void diffPose(WorldSnapshot before, WorldSnapshot after) {
         if (before.sneaking() != after.sneaking()) {
             fireState(after.sneaking() ? "sneak" : "unsneak", Map.of());
+            fireState("sneak toggle", Map.of());
         }
         if (before.sprinting() != after.sprinting()) {
             fireState(after.sprinting() ? "sprint" : "unsprint", Map.of());
+            fireState("sprint toggle", Map.of());
         }
     }
 
@@ -612,9 +617,9 @@ public final class EventDispatcher {
             return;
         }
         if (now < was) {
-            fireState("damage", Map.of("damage", was - now));
+            fireState("damage", Map.of("damage", was - now, "old health", was));
         } else if (now > was && was > 0) {
-            fireState("heal", Map.of("healed", now - was));
+            fireState("heal", Map.of("healed", now - was, "old health", was));
         }
     }
 
@@ -685,9 +690,9 @@ public final class EventDispatcher {
             Integer was = wasEffects.get(id);
             Integer now = after.effects().get(id);
             if (was == null && now != null) {
-                fireState("effect gain", Map.of("effect", effectName(id), "effect level", (double) now));
+                fireState("effect gain", Map.of("effect", PotionEffectType.fromId(id), "effect level", (double) now));
             } else if (was != null && now == null) {
-                fireState("effect lose", Map.of("effect", effectName(id)));
+                fireState("effect lose", Map.of("effect", PotionEffectType.fromId(id)));
             }
         }
         EntityValue wasVehicle = before.vehicle();
@@ -728,9 +733,8 @@ public final class EventDispatcher {
         }
     }
 
-    private static String effectName(String id) {
-        int colon = id.indexOf(':');
-        return colon < 0 ? id : id.substring(colon + 1);
+    private static Object gamemodeValue(String name) {
+        return GameMode.parse(name).<Object>map(mode -> mode).orElse(name);
     }
 
     private void diffWorldState(WorldSnapshot before, WorldSnapshot after) {
@@ -742,10 +746,10 @@ public final class EventDispatcher {
             }
         }
         if (!before.gamemode().equals(after.gamemode())) {
-            fireState("gamemode", Map.of("gamemode", after.gamemode()));
+            fireState("gamemode", Map.of("gamemode", gamemodeValue(after.gamemode())));
         }
         if (before.raining() != after.raining() || before.thundering() != after.thundering()) {
-            fireState("weather", Map.of());
+            fireState("weather", Map.of("weather", WeatherType.of(after.raining(), after.thundering())));
         }
     }
 
@@ -811,6 +815,9 @@ public final class EventDispatcher {
     }
 
     private boolean start(Trigger trigger, Map<String, Object> values) {
+        if (trigger.event() instanceof Event.State state && !state.accepts(values)) {
+            return false;
+        }
         return runSafely(new Execution(trigger, context(trigger, values)));
     }
 

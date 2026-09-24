@@ -8,7 +8,7 @@ import com.mineskript.lang.parse.Priority;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
 @Name("Is Ignoring Case")
-@Description("Compares two pieces of text for equality without caring about upper and lower case, so \"Hello\" is \"hello\" ignoring case is true. Plain Is compares text exactly.")
+@Description("Compares two pieces of text for equality without caring about upper and lower case, so \"Hello\" is \"hello\" ignoring case is true. Since 1.0.0-alpha.11 plain Is ignores capitals too, like Skript, so ignoring case is no longer needed; it keeps working for older scripts.")
 @Examples({
         "on chat send:",
         "	if message is \"gg\" ignoring case:",
@@ -18,7 +18,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "	if server brand is not \"vanilla\" ignoring case:",
         "		send \"server runs %server brand%\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class CondIgnoringCase {
     private CondIgnoringCase() {
     }

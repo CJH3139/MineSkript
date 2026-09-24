@@ -208,9 +208,11 @@ class TextAndMathTest {
                     if "Hello" is not "world" ignoring case:
                         send "different"
                     if "Hello" is "hello":
+                        send "plain is ignores capitals too"
+                    if "Hello" is "world":
                         send "never"
                 """);
-        assertEquals(List.of("same", "different"), runner.game.messages);
+        assertEquals(List.of("same", "different", "plain is ignores capitals too"), runner.game.messages);
     }
 
     @Test

@@ -11,6 +11,13 @@ public enum SkType {
     ITEM,
     ENTITY,
     LOCATION,
+    GAMEMODE,
+    POTIONEFFECTTYPE,
+    ENCHANTMENT,
+    ENCHANTMENTTYPE,
+    ENTITYTYPE,
+    WEATHERTYPE,
+    INVENTORY,
     OBJECT;
 
     public boolean accepts(SkType other) {

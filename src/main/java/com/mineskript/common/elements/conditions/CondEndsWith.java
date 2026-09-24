@@ -8,7 +8,7 @@ import com.mineskript.lang.parse.Priority;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
 @Name("Ends With")
-@Description("Checks whether text ends with another piece of text. Case-sensitive.")
+@Description("Checks whether text ends with another piece of text. Capitals are ignored, like everywhere text is compared, so \"Hello\" ends with \"LO\".")
 @Examples({
         "on chat:",
         "	if message ends with \"?\":",
@@ -18,7 +18,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "	if message doesn't end with \".\":",
         "		send \"tip: end sentences with a full stop\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class CondEndsWith {
     private CondEndsWith() {
     }

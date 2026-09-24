@@ -8,10 +8,6 @@ final class Enchantments {
     private Enchantments() {
     }
 
-    static String displayName(String id) {
-        return id.startsWith(VANILLA) ? id.substring(VANILLA.length()).replace('_', ' ') : id;
-    }
-
     static String id(String name) {
         String trimmed = name.trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", "_");
         return trimmed.contains(":") ? trimmed : VANILLA + trimmed;

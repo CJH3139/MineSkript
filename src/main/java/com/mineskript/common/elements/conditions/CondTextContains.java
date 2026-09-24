@@ -8,14 +8,14 @@ import com.mineskript.lang.parse.Priority;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
 @Name("Text Contains")
-@Description("Checks whether one piece of text appears inside another. The check is case-sensitive; lowercase both sides first to ignore case. Both sides must be single values, not lists.")
+@Description("Checks whether one piece of text appears inside another. Capitals are ignored, like Skript with its default case sensitive: false setting, so \"Hello World\" contains \"world\". Both sides must be single values, not lists.")
 @Examples({
         "on chat:",
         "	if message contains \"your turn\":",
         "		play sound \"minecraft:block.note_block.pling\"",
         "",
         "on chat send:",
-        "	if lowercase message contains \"password\":",
+        "	if message contains \"password\":",
         "		cancel event",
         "		send \"blocked a message containing a password\"",
         "",
@@ -23,7 +23,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "	if message doesn't contain \" \":",
         "		send \"one word message\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class CondTextContains {
     private CondTextContains() {
     }

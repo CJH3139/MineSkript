@@ -153,6 +153,10 @@ class ModulesTest {
             assertEquals("ExprBlock", expression(registry, "block at player", SkType.BLOCK));
             assertEquals("ExprBlockAt", expression(registry, "block at 2 above player", SkType.BLOCK));
             assertEquals("EffLookAt", effect(registry, "look at {_l}"));
+            assertEquals("EffSendTitle", effect(registry, "send title \"a\" with subtitle \"b\""));
+            assertEquals("EffActionBar", effect(registry, "send action bar \"a\""));
+            assertEquals("EffSend", effect(registry, "send \"a\""));
+            assertEquals("EffReplace", effect(registry, "replace \"a\" with \"b\" in {_x}"));
             assertEquals("ExprParsedAsNumber", expression(registry, "block at {_l} parsed as number",
                     SkType.NUMBER));
         }

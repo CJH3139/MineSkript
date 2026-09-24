@@ -15,7 +15,7 @@ import java.util.Optional;
 @Name("Has Effect")
 @Description({
         "Checks whether you currently have a status effect at any level. The name is matched against the effect id, with spaces turned into underscores and minecraft: added when no namespace is given, so \"speed\", \"fire resistance\" and \"minecraft:fire_resistance\" all work. It always reads your own player.",
-        "An unknown effect name is not an error; it is simply never active. Use level of effect to read the level."
+        "An unknown effect name is not an error; it is simply never active. Use level of effect to read the level. Skript's form, player has potion speed, takes the effect written out instead of as text (see Has Potion)."
 })
 @Examples({
         "on key press of \"h\":",

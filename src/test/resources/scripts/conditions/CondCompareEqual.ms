@@ -4,7 +4,8 @@ test "equal":
 	assert 1 is 1 with "1 is not 1"
 	assert 1 = 1 with "1 = 1 failed"
 	assert "a" is "a" with "text was not equal to itself"
-	assert "a" is not "A" with "text comparison ignored capitals"
+	assert "a" is "A" with "text comparison did not ignore capitals"
+	assert "a" is not "b" with "different text was equal"
 	assert 2 != 3 with "2 != 3 failed"
 
 test "or and and lists":

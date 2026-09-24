@@ -7,7 +7,9 @@ test "is in a written list":
 test "is in a list variable":
 	set {_friends::*} to "Alex" and "Bea"
 	assert "Alex" is in {_friends::*} with "Alex was not in the list variable"
-	assert "alex" is not in {_friends::*} with "is in ignored capitals"
+	assert "alex" is in {_friends::*} with "is in did not ignore capitals"
+	assert "cy" is not in {_friends::*} with "is in found an entry that is not there"
+	assert {_friends::*} contains "BEA" with "list contains did not ignore capitals"
 	assert {_friends::*} contains "Bea" with "contains did not find Bea"
 	assert {_friends::*} doesn't contain "Cy" with "contains found Cy"
 

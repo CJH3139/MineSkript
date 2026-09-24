@@ -41,8 +41,8 @@ public final class CondIsHolding implements Condition {
 
     public static void register(SyntaxRegistry registry) {
         registry.addCondition((match, scope) -> create(match, match.patternIndex() == 1),
-                "%player% (is|are) holding %blocktype%",
-                "%player% (isn't|is not|aren't|are not) holding %blocktype%");
+                "%player% (is|are) holding %itemtype%",
+                "%player% (isn't|is not|aren't|are not) holding %itemtype%");
     }
 
     private static Optional<Condition> create(Match match, boolean negate) {

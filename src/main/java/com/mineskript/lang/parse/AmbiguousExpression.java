@@ -25,6 +25,10 @@ public final class AmbiguousExpression implements Expression {
                 .orElse(primary);
     }
 
+    public static Expression primary(Expression expression) {
+        return expression instanceof AmbiguousExpression ambiguous ? ambiguous.primary : expression;
+    }
+
     public static Optional<Expression> alternative(Expression expression) {
         return expression instanceof AmbiguousExpression ambiguous ? Optional.of(ambiguous.alternative) : Optional.empty();
     }

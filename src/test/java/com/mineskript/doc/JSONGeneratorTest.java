@@ -34,7 +34,8 @@ class JSONGeneratorTest {
     @Test
     void eventsListTheirDeclaredValues() {
         JsonObject damage = event("Damage");
-        assertEquals(List.of("event-damage"), strings(damage.getAsJsonArray("eventValues"), "name"));
+        assertEquals(List.of("event-damage", "event-old health"),
+                strings(damage.getAsJsonArray("eventValues"), "name"));
         JsonObject value = damage.getAsJsonArray("eventValues").get(0).getAsJsonObject();
         assertEquals("number", value.get("type").getAsString());
         assertTrue(value.get("description").getAsString().startsWith("Health lost in this hit"));
@@ -43,7 +44,7 @@ class JSONGeneratorTest {
                 strings(event("Durability Below").getAsJsonArray("eventValues"), "name"));
         assertEquals(List.of("event-block", "event-block x", "event-block y", "event-block z", "event-location"),
                 strings(event("Block Break").getAsJsonArray("eventValues"), "name"));
-        assertEquals(List.of("block type", "number", "number", "number", "location"),
+        assertEquals(List.of("item type", "number", "number", "number", "location"),
                 strings(event("Block Break").getAsJsonArray("eventValues"), "type"));
         assertEquals(List.of(), strings(event("Jump").getAsJsonArray("eventValues"), "name"));
     }

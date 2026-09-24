@@ -41,7 +41,8 @@ class ConditionsTest {
         assertTrue(test("block below player != dirt"));
         assertFalse(test("block below player is not equal to stone"));
         assertTrue(test("message is \"hello\""));
-        assertFalse(test("message is \"Hello\""));
+        assertTrue(test("message is \"Hello\""));
+        assertFalse(test("message is \"hullo\""));
     }
 
     @Test

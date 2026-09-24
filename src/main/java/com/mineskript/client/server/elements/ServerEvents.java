@@ -1,6 +1,7 @@
 package com.mineskript.client.server.elements;
 
 import static com.mineskript.client.ClientEvents.state;
+import static com.mineskript.client.ClientEvents.states;
 
 import com.mineskript.lang.parse.SyntaxRegistry;
 
@@ -9,21 +10,30 @@ public final class ServerEvents {
     }
 
     public static void register(SyntaxRegistry registry) {
-        state(registry, "World Join", "on (world join|join server|server join)", "join")
-                .description("Fires on the first tick you are in a world after having none: joining a server or opening a singleplayer world. Nothing else is compared on that tick, so events such as move or health change start from the following tick.")
+        states(registry, "World Join", "join", "on (world join|join server|server join)",
+                "on (join|joining|login|logging in)")
+                .description("Fires on the first tick you are in a world after having none: joining a server or opening a singleplayer world. Nothing else is compared on that tick, so events such as move or health change start from the following tick.",
+                        "Skript's on join is a player joining the server; for a client that is you joining, so on join and on login are this event. On player join is someone else appearing in the tab list (see Player Join).")
                 .examples("on join server:",
                         "\twait 2 seconds",
                         "\tsend \"joined, %players online% players here\"",
                         "",
                         "on world join:",
-                        "\tset {-session deaths} to 0")
-                .since("1.0.0-alpha.2");
-        state(registry, "World Leave", "on (world leave|leave server|server leave|quit server)", "leave")
+                        "\tset {-session deaths} to 0",
+                        "",
+                        "on join:",
+                        "\tsend \"welcome back\"")
+                .since("1.0.0-alpha.2", "1.0.0-alpha.11");
+        states(registry, "World Leave", "leave", "on (world leave|leave server|server leave|quit server)",
+                "on (quit|quitting|logout|log out|logging out|leave|leaving)")
                 .description("Fires on the first tick after the world is gone, when you leave a server or close a singleplayer world. The world is already unloaded, so anything that reads the player or the world fails, and lines after a wait never run.",
-                        "Also see on disconnect, which gives the reason when a server closes the connection.")
+                        "Skript's on quit is a player leaving the server; for a client that is you leaving, so on quit, on leave and on logout are this event. Also see on disconnect, which gives the reason when a server closes the connection.")
                 .examples("on quit server:",
-                        "\tset {last left} to \"left a world\"")
-                .since("1.0.0-alpha.2");
+                        "\tset {last left} to \"left a world\"",
+                        "",
+                        "on quit:",
+                        "\tadd 1 to {sessions}")
+                .since("1.0.0-alpha.2", "1.0.0-alpha.11");
         state(registry, "Player Join", "on (player join|player join server|player joins server)", "player join")
                 .values("player")
                 .description("Fires when a name appears in the tab list of online players, checked once per tick. event-player is that name. The first list received after you join is taken as the starting point, so the players already online do not each fire it.",
@@ -92,20 +102,20 @@ public final class ServerEvents {
                         "\tif event-particle is \"minecraft:totem_of_undying\":",
                         "\t\tsend \"someone popped a totem\"")
                 .since("1.0.0-alpha.6");
-        state(registry, "Chunk Load", "on chunk load", "chunk load")
+        states(registry, "Chunk Load", "chunk load", "on chunk (load|loading)")
                 .values("chunk x", "chunk z")
                 .description("Fires when a chunk is loaded on your client. event-chunk x and event-chunk z are chunk coordinates (block coordinates divided by 16, rounded down). It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.",
                         "Joining a world loads hundreds of chunks at once, which can fill the per-tick signal limit and drop other signal events in those ticks.")
                 .examples("on chunk load:",
                         "\tadd 1 to {-chunks loaded}")
-                .since("1.0.0-alpha.6");
-        state(registry, "Chunk Unload", "on chunk unload", "chunk unload")
+                .since("1.0.0-alpha.6", "1.0.0-alpha.11");
+        states(registry, "Chunk Unload", "chunk unload", "on chunk (unload|unloading)")
                 .values("chunk x", "chunk z")
                 .description("Fires when a chunk is unloaded from your client. event-chunk x and event-chunk z are its chunk coordinates. It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.",
                         "Chunks unloaded while leaving a world arrive when there is no world and are not delivered.")
                 .examples("on chunk unload:",
                         "\tsend \"unloaded %event-chunk x%, %event-chunk z%\"")
-                .since("1.0.0-alpha.6");
+                .since("1.0.0-alpha.6", "1.0.0-alpha.11");
         state(registry, "Client Tick", "on client tick", "client tick")
                 .description("Fires once every client tick (20 times per second) while you are in a world, after timers, key presses and the other tick checks. It is the same as every tick but runs later in the tick.",
                         "Runs 20 times a second; keep the body short.")

@@ -8,7 +8,7 @@ import com.mineskript.lang.parse.Priority;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
 @Name("List Contains")
-@Description("The same check as Is In written the other way round: true when a list has an entry equal to the value. Used with a list on the left, such as online player names or a list variable like {friends::*}; when the left side is a single text value the Text Contains condition is used instead.")
+@Description("The same check as Is In written the other way round: true when a list has an entry equal to the value. Text entries ignore capitals, as in Is. Used with a list on the left, such as online player names or a list variable like {friends::*}; when the left side is a single text value the Text Contains condition is used instead.")
 @Examples({
         "on player join:",
         "	if online player names contains \"Alex\":",
@@ -22,7 +22,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "	if {friends::*} contains \"Alex\":",
         "		send \"Alex is a friend\""
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.8"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.8", "1.0.0-alpha.11"})
 public final class CondListContains {
     private CondListContains() {
     }

@@ -40,10 +40,10 @@ final class TextCheck implements Condition {
         String a = Converters.toText(left.evaluate(context), context);
         String b = Converters.toText(right.evaluate(context), context);
         boolean result = switch (kind) {
-            case CONTAINS -> a.contains(b);
-            case STARTS -> a.startsWith(b);
-            case ENDS -> a.endsWith(b);
-            case SAME -> a.toLowerCase(Locale.ROOT).equals(b.toLowerCase(Locale.ROOT));
+            case CONTAINS -> a.toLowerCase(Locale.ROOT).contains(b.toLowerCase(Locale.ROOT));
+            case STARTS -> a.regionMatches(true, 0, b, 0, b.length());
+            case ENDS -> a.length() >= b.length() && a.regionMatches(true, a.length() - b.length(), b, 0, b.length());
+            case SAME -> a.equalsIgnoreCase(b);
         };
         return negate != result;
     }

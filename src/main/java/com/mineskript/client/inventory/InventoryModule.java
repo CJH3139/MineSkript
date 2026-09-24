@@ -2,6 +2,7 @@ package com.mineskript.client.inventory;
 
 import com.mineskript.client.inventory.elements.CondHasItem;
 import com.mineskript.client.inventory.elements.CondInventoryFull;
+import com.mineskript.client.inventory.elements.CondIsEnchanted;
 import com.mineskript.client.inventory.elements.CondIsHolding;
 import com.mineskript.client.inventory.elements.CondSlotEmpty;
 import com.mineskript.client.inventory.elements.EffAddTooltip;
@@ -11,9 +12,11 @@ import com.mineskript.client.inventory.elements.EffOpenInventory;
 import com.mineskript.client.inventory.elements.EffSelectSlot;
 import com.mineskript.client.inventory.elements.EffSwapHands;
 import com.mineskript.client.inventory.elements.ExprCustomModelData;
+import com.mineskript.client.inventory.elements.ExprDurability;
 import com.mineskript.client.inventory.elements.ExprEnchantmentLevel;
 import com.mineskript.client.inventory.elements.ExprFreeSlots;
 import com.mineskript.client.inventory.elements.ExprHeldItem;
+import com.mineskript.client.inventory.elements.ExprInventory;
 import com.mineskript.client.inventory.elements.ExprInventoryCount;
 import com.mineskript.client.inventory.elements.ExprItemComponent;
 import com.mineskript.client.inventory.elements.ExprItemCount;
@@ -52,8 +55,10 @@ public final class InventoryModule implements SyntaxModule {
         ExprItemCount.register(registry);
         ExprItemDamage.register(registry);
         ExprItemMaxDamage.register(registry);
+        ExprDurability.register(registry);
         ExprItemInSlot.register(registry);
         ExprInventoryCount.register(registry);
+        ExprInventory.register(registry);
         ExprItemCustomName.register(registry);
         ExprItemLore.register(registry);
         ExprItemEnchantments.register(registry);
@@ -65,6 +70,7 @@ public final class InventoryModule implements SyntaxModule {
         CondIsHolding.register(registry);
         CondInventoryFull.register(registry);
         CondSlotEmpty.register(registry);
+        CondIsEnchanted.register(registry);
 
         EffSelectSlot.register(registry);
         EffSwapHands.register(registry);

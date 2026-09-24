@@ -14,16 +14,19 @@ import com.mineskript.lang.parse.Tier;
 import java.util.Optional;
 
 @Name("Target Block")
-@Description("The block your crosshair is on, as a block value that prints as its plain name such as oak_log. Returns air when you are not looking at a block (looking at the sky, at an entity, or at something out of reach). Needs a world: outside a world the line stops with a \"no world\" error.")
+@Description("The block your crosshair is on, as a block value that prints as its plain name such as oak_log. Written target block, targeted block, target block of player or player's targeted block, like Skript. Returns air when you are not looking at a block (looking at the sky, at an entity, or at something out of reach). Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"i\":",
         "\tsend \"looking at %target block%\"",
         "",
         "every 1 second:",
         "\tif target block is diamond_ore:",
-        "\t\tshow action bar \"diamonds!\""
+        "\t\tshow action bar \"diamonds!\"",
+        "",
+        "on key press of \"i\":",
+        "\tsend \"%player's targeted block% at %location of player's targeted block%\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprTargetBlock extends GameValueExpression {
     private ExprTargetBlock() {
         super(SkType.BLOCK, ExprTargetBlock::read);
@@ -39,6 +42,8 @@ public final class ExprTargetBlock extends GameValueExpression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.BLOCK, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprTargetBlock()), "[the] target block");
+        registry.addExpression(SkType.BLOCK, Tier.SIMPLE, (match, scope) -> Optional.of(new ExprTargetBlock()),
+                "[the] (target|targeted) block [of %players%]",
+                "%players%'s (target|targeted) block");
     }
 }

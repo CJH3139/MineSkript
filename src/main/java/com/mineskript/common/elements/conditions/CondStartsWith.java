@@ -8,7 +8,7 @@ import com.mineskript.lang.parse.Priority;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
 @Name("Starts With")
-@Description("Checks whether text begins with another piece of text. Case-sensitive. Every text starts with the empty text \"\".")
+@Description("Checks whether text begins with another piece of text. Capitals are ignored, like everywhere text is compared, so \"Hello\" starts with \"he\". Every text starts with the empty text \"\".")
 @Examples({
         "on chat send:",
         "	if message starts with \"!\":",
@@ -19,7 +19,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "	if message doesn't start with \"<\":",
         "		send \"server message: %message%\""
 })
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class CondStartsWith {
     private CondStartsWith() {
     }

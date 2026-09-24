@@ -12,6 +12,7 @@ import com.mineskript.lang.function.FunctionInfo;
 import com.mineskript.lang.function.FunctionParameter;
 import com.mineskript.lang.parse.EventInfo;
 import com.mineskript.lang.parse.SyntaxRegistry;
+import com.mineskript.lang.runtime.Converters;
 import com.mineskript.syntax.DefaultSyntax;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -226,7 +227,7 @@ public final class JSONGenerator {
     }
 
     private static String typeName(SkType type) {
-        return type.name().toLowerCase(Locale.ROOT).replace("blocktype", "block type");
+        return Converters.typeName(type);
     }
 
     private static int count(JsonObject root) {

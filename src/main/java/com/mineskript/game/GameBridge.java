@@ -4,6 +4,7 @@ import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 public interface GameBridge {
@@ -159,6 +160,9 @@ public interface GameBridge {
 
     void showActionBar(String text);
 
+    void sendTitle(Optional<String> title, Optional<String> subtitle, int fadeInTicks, int stayTicks,
+            int fadeOutTicks);
+
     void playSound(String id);
 
     void closeScreen();
@@ -170,6 +174,12 @@ public interface GameBridge {
     }
 
     String biome();
+
+    String biomeAt(double x, double y, double z);
+
+    int lightAt(double x, double y, double z, boolean sky);
+
+    boolean itemExists(String id);
 
     int lightLevel();
 

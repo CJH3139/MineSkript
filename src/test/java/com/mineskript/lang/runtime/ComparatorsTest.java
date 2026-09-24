@@ -38,7 +38,8 @@ class ComparatorsTest {
         assertTrue(Comparators.relate(3.0, 5.0) < 0);
         assertTrue(Comparators.relate(9.0, 5.0) > 0);
         assertEquals(0, Comparators.relate("a", "a"));
-        assertFalse(Comparators.relate("a", "A") == 0);
+        assertEquals(0, Comparators.relate("a", "A"));
+        assertFalse(Comparators.relate("a", "b") == 0);
         assertEquals(0, Comparators.relate(new BlockValue("minecraft:stone"), new BlockType("minecraft:stone")));
         assertFalse(Comparators.relate(new BlockValue("minecraft:stone"), new BlockType("minecraft:dirt")) == 0);
         assertEquals(0, Comparators.relate(new BlockType("minecraft:stone"), new BlockValue("minecraft:stone")));

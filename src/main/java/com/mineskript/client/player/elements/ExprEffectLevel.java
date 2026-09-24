@@ -14,7 +14,7 @@ import com.mineskript.lang.runtime.Converters;
 import java.util.Optional;
 
 @Name("Effect Level")
-@Description("The level of an active status effect on you, as a whole number: 1 for Speed I, 2 for Speed II, and 0 when you do not have the effect. The name can be a plain effect name like speed or jump boost (spaces become underscores) or a full id like minecraft:speed. Also written effect level of. Needs a world: outside a world the line stops with a \"no world\" error.")
+@Description("The level of an active status effect on you, as a whole number: 1 for Speed I, 2 for Speed II, and 0 when you do not have the effect. The name can be a plain effect name like speed or jump boost (spaces become underscores) or a full id like minecraft:speed. Also written effect level of. Skript's form, tier of speed of player, takes the effect written out instead of as text (see Potion Effect Tier). Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on effect gain:",
         "\tset {_lvl} to level of effect \"speed\"",

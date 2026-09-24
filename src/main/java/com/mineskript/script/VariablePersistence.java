@@ -3,6 +3,7 @@ package com.mineskript.script;
 import com.mineskript.game.GameBridge;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PlayerRef;
 import com.mineskript.lang.runtime.Variables;
@@ -86,6 +87,9 @@ public final class VariablePersistence {
         }
         if (value instanceof PlayerRef) {
             return game.hasWorld() ? game.playerName() : "player";
+        }
+        if (value instanceof InventoryRef) {
+            return None.NONE;
         }
         if (value instanceof List<?> list) {
             List<Object> items = new ArrayList<>();

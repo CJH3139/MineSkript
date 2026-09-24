@@ -119,8 +119,21 @@ public final class ExpressionParser implements SlotResolver {
                 }
             }
         }
+        for (SkType type : types) {
+            Optional<Expression> named = Literals.named(tokens, type);
+            if (named.isPresent()) {
+                return named;
+            }
+        }
         if (accepted(SkType.BLOCKTYPE, types)) {
-            return Literals.blockType(tokens).flatMap(type -> typed(new ConstantExpression(SkType.BLOCKTYPE, type), types));
+            Optional<Expression> blockType = Literals.blockType(tokens)
+                    .flatMap(type -> typed(new ConstantExpression(SkType.BLOCKTYPE, type), types));
+            if (blockType.isPresent()) {
+                return blockType;
+            }
+        }
+        if (types.contains(SkType.OBJECT)) {
+            return Literals.leveledEnchantment(tokens);
         }
         return Optional.empty();
     }

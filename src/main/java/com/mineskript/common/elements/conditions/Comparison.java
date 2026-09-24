@@ -6,6 +6,7 @@ import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.AmbiguousExpression;
 import com.mineskript.lang.parse.ListExpression;
+import com.mineskript.lang.parse.Literals;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.runtime.Comparators;
 import com.mineskript.lang.runtime.Context;
@@ -39,18 +40,27 @@ final class Comparison implements Condition {
         }
         SkType rightType = right instanceof ListExpression list ? list.type() : right.type();
         if (!Comparators.canCompare(left.type(), rightType)) {
-            Optional<Expression> other = AmbiguousExpression.alternative(right);
-            if (other.isEmpty() || !Comparators.canCompare(left.type(), other.get().type())) {
+            Optional<Expression> other = comparableAlternative(left.type(), right);
+            if (other.isEmpty()) {
                 return Optional.empty();
             }
             right = other.get();
-            rightType = right.type();
+            rightType = right instanceof ListExpression list ? list.type() : right.type();
         }
         if (relation.ordered() && !Comparators.canOrder(left.type(), rightType)) {
             return Optional.empty();
         }
         boolean disjunctive = right instanceof ListExpression list && list.disjunctive();
         return Optional.of(new Comparison(left, right, null, relation, negate, disjunctive));
+    }
+
+    private static Optional<Expression> comparableAlternative(SkType leftType, Expression right) {
+        Optional<Expression> other = AmbiguousExpression.alternative(right);
+        if (other.isPresent() && Comparators.canCompare(leftType, other.get().type())) {
+            return other;
+        }
+        SkType target = leftType == SkType.ENTITY ? SkType.ENTITYTYPE : leftType;
+        return Literals.reinterpret(right, target);
     }
 
     static Optional<Condition> createBetween(Match match, boolean negate) {

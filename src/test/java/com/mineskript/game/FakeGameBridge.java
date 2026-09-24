@@ -133,6 +133,12 @@ public final class FakeGameBridge implements GameBridge {
     }
 
     public final Set<String> knownIds = new HashSet<>(Set.of("minecraft:diamond", "minecraft:stone", "minecraft:gold_block"));
+    public final Set<String> itemIds = new HashSet<>(Set.of("minecraft:diamond", "minecraft:stone",
+            "minecraft:cobblestone", "minecraft:torch", "minecraft:bricks", "minecraft:brick", "minecraft:glass",
+            "minecraft:potato", "minecraft:sweet_berries", "minecraft:oak_log", "minecraft:ender_pearl"));
+    public final Map<String, String> biomes = new HashMap<>();
+    public final Map<String, Integer> blockLight = new HashMap<>();
+    public final Map<String, Integer> skyLightAt = new HashMap<>();
     public final Map<Integer, ClientEntity> clientEntities = new LinkedHashMap<>();
     public final List<Beam> beams = new ArrayList<>();
     private int nextHandle = 1;
@@ -522,6 +528,34 @@ public final class FakeGameBridge implements GameBridge {
     }
 
     @Override
+    public String biomeAt(double x, double y, double z) {
+        return biomes.getOrDefault(blockKey(x, y, z), biome);
+    }
+
+    @Override
+    public int lightAt(double x, double y, double z, boolean sky) {
+        return sky ? skyLightAt.getOrDefault(blockKey(x, y, z), skyLight)
+                : blockLight.getOrDefault(blockKey(x, y, z), lightLevel);
+    }
+
+    @Override
+    public boolean itemExists(String id) {
+        if (itemIds.contains(id)) {
+            return true;
+        }
+        for (int i = 0; i <= OFFHAND_SLOT; i++) {
+            if (slot(i).id().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String blockKey(double x, double y, double z) {
+        return (int) Math.floor(x) + "," + (int) Math.floor(y) + "," + (int) Math.floor(z);
+    }
+
+    @Override
     public int lightLevel() {
         return lightLevel;
     }
@@ -751,6 +785,13 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public void showActionBar(String text) {
         calls.add("actionBar:" + text);
+    }
+
+    @Override
+    public void sendTitle(Optional<String> title, Optional<String> subtitle, int fadeInTicks, int stayTicks,
+            int fadeOutTicks) {
+        calls.add("sendTitle:" + title.orElse("-") + "|" + subtitle.orElse("-") + "|" + fadeInTicks + "|"
+                + stayTicks + "|" + fadeOutTicks);
     }
 
     @Override
