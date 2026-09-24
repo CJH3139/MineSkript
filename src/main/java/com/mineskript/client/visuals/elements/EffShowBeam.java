@@ -23,11 +23,11 @@ import java.util.OptionalInt;
         "The colour is optional and written as text: one of the 16 dye colours (white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, black) or any colour as \"#rrggbb\". Without one the beam is white. An unknown colour stops the line with an error.",
         "A beam goes straight up through any blocks above it, like a beacon beam, and is drawn up to 512 blocks away (measured flat, ignoring height), even over chunks that are not loaded. At most 64 beams can be shown at once. They disappear when you leave the world or change dimension, and when the script that made them is reloaded, so a location in another dimension than yours stops the line with an error."})
 @Examples({"on key press of \"b\":",
-        "\tshow a \"red\" beam at location(100, 64, -200)",
-        "\tshow beam at player",
+        "	show a \"red\" beam at location(100, 64, -200)",
+        "	show beam at player",
         "",
         "on key press of \"n\":",
-        "\tshow a \"#00ffaa\" beam at location(0, 70, 0)"})
+        "	show a \"#00ffaa\" beam at location(0, 70, 0)"})
 @Since("1.0.0-alpha.9, 1.0.0-alpha.10 (locations)")
 public final class EffShowBeam implements Statement {
     public static final int LIMIT = 64;

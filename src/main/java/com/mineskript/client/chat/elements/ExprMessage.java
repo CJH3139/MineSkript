@@ -25,20 +25,20 @@ import java.util.Set;
 })
 @Examples({
         "on chat:",
-        "\tif message contains \"your turn\":",
-        "\t\tplay sound \"minecraft:block.note_block.pling\"",
+        "	if message contains \"your turn\":",
+        "		play sound \"minecraft:block.note_block.pling\"",
         "",
         "on chat send:",
-        "\tif message starts with \"!\":",
-        "\t\tcancel event",
-        "\t\tsend \"that was a local note\"",
+        "	if message starts with \"!\":",
+        "		cancel event",
+        "		send \"that was a local note\"",
         "",
         "on chat send:",
-        "\tset message to \"%message% :)\"",
+        "	set message to \"%message% :)\"",
         "",
         "on command send:",
-        "\tif message is \"h\":",
-        "\t\tset message to \"home\""
+        "	if message is \"h\":",
+        "		set message to \"home\""
 })
 @Since({"1.0.0-alpha", "1.0.0-alpha.8"})
 public final class ExprMessage implements Expression, Changeable {

@@ -13,12 +13,12 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "From a list variable such as {names::*}, remove x deletes the first entry equal to x, as in Skript, and remove all x deletes every entry equal to x. The other entries keep their indices. The yaw, the pitch and the selected slot can be removed from as well.",
         "It cannot remove items from your inventory."})
 @Examples({"on block place:",
-        "\tif {-blocks left} is set:",
-        "\t\tremove 1 from {-blocks left}",
-        "\t\tshow action bar \"%{-blocks left}% blocks left\"",
+        "	if {-blocks left} is set:",
+        "		remove 1 from {-blocks left}",
+        "		show action bar \"%{-blocks left}% blocks left\"",
         "",
         "on player leave:",
-        "\tremove all event-player from {-seen::*}"})
+        "	remove all event-player from {-seen::*}"})
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.8"})
 public final class EffRemove {
     private EffRemove() {

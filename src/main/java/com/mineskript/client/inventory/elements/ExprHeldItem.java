@@ -16,16 +16,16 @@ import java.util.Optional;
 @Description("The item stack in your main hand (the selected hotbar slot). Also written item in hand, and like Skript tool, weapon, tool of player or player's held item. In on held item change, past held item (or former tool) is the item in the slot you switched away from (see Former State). An empty hand gives air (a count of 0), not none, so check it with is air. Printed in text an item shows its display name, with the count in front when there is more than one, like 32 Cobblestone. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"x\":",
-        "\tsend \"holding %held item%\"",
+        "	send \"holding %held item%\"",
         "",
         "on key press of \"x\":",
-        "\tif held item is air:",
-        "\t\tsend \"empty hand\"",
-        "\telse:",
-        "\t\tsend \"%count of held item% of %id of held item%\"",
+        "	if held item is air:",
+        "		send \"empty hand\"",
+        "	else:",
+        "		send \"%count of held item% of %id of held item%\"",
         "",
         "on key press of \"t\":",
-        "\tsend \"your tool: %player's tool%\""
+        "	send \"your tool: %player's tool%\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprHeldItem extends GameValueExpression implements PastState {

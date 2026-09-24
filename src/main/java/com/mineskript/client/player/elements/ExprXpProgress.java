@@ -15,11 +15,11 @@ import java.util.Optional;
 @Description("How far you are towards the next level, as a decimal from 0 (empty bar) to 1 (full bar). Also written experience progress, and like Skript level progress, level progress of player or player's level progress. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"x\":",
-        "\tsend \"level %xp level%, %xp progress * 100% percent to the next\"",
+        "	send \"level %xp level%, %xp progress * 100% percent to the next\"",
         "",
         "every 1 second:",
-        "\tif player's level progress is greater than 0.9:",
-        "\t\tshow action bar \"almost the next level\""
+        "	if player's level progress is greater than 0.9:",
+        "		show action bar \"almost the next level\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprXpProgress extends GameValueExpression {

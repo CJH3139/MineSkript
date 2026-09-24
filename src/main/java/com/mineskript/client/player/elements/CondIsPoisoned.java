@@ -13,12 +13,12 @@ import java.util.Optional;
 @Description("Checks whether you have the poison effect, like Skript's is poisoned. It always reads your own player.")
 @Examples({
         "every 1 second:",
-        "\tif player is poisoned:",
-        "\t\tshow action bar \"poisoned, drink milk\"",
+        "	if player is poisoned:",
+        "		show action bar \"poisoned, drink milk\"",
         "",
         "on effect lose:",
-        "\tif player is not poisoned:",
-        "\t\tsend \"the poison wore off\""
+        "	if player is not poisoned:",
+        "		send \"the poison wore off\""
 })
 @Since("1.0.0-alpha.11")
 public final class CondIsPoisoned implements Condition {

@@ -20,15 +20,15 @@ import java.util.Optional;
 @Description({"Pauses the trigger for a length of time, then carries on from the next line. The game keeps running normally while a trigger waits. Times can be given in ticks, milliseconds, seconds, minutes or hours, such as wait 20 ticks, wait 1.5 seconds or wait a tick. Halt is another word for wait.",
         "A tick is 50 milliseconds; any time is rounded to whole ticks and waits at least 1 tick. A function used as a value cannot wait, and neither can an item tooltip trigger (the tooltip is drawn straight away)."})
 @Examples({"on key press of \"r\":",
-        "\thold use",
-        "\twait 2 seconds",
-        "\trelease use",
+        "	hold use",
+        "	wait 2 seconds",
+        "	release use",
         "",
         "every 1 minute:",
-        "\tset {_before} to health of player",
-        "\twait 5 seconds",
-        "\tif health of player is less than {_before}:",
-        "\t\tsend \"still taking damage\""})
+        "	set {_before} to health of player",
+        "	wait 5 seconds",
+        "	if health of player is less than {_before}:",
+        "		send \"still taking damage\""})
 @Since("1.0.0-alpha")
 public final class EffWait implements Statement {
     private final int line;

@@ -25,16 +25,16 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"e\":",
-        "\tif held item is enchanted:",
-        "\t\tsend \"%enchantments of held item%\"",
+        "	if held item is enchanted:",
+        "		send \"%enchantments of held item%\"",
         "",
         "on key press of \"e\":",
-        "\tif tool of player is enchanted with efficiency 4 or better:",
-        "\t\tsend \"fast pickaxe\"",
+        "	if tool of player is enchanted with efficiency 4 or better:",
+        "		send \"fast pickaxe\"",
         "",
         "on key press of \"e\":",
-        "\tif held item is not enchanted with mending:",
-        "\t\tsend \"this will not repair itself\""
+        "	if held item is not enchanted with mending:",
+        "		send \"this will not repair itself\""
 })
 @Since("1.0.0-alpha.11")
 public final class CondIsEnchanted implements Condition {

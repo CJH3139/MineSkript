@@ -18,12 +18,12 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"p\":",
-        "\tloop online player names:",
-        "\t\tsend \"online: %loop-value%\"",
+        "	loop online player names:",
+        "		send \"online: %loop-value%\"",
         "",
         "on tab list change:",
-        "\tif online player names contains \"Notch\":",
-        "\t\tshow title \"Notch is here\""
+        "	if online player names contains \"Notch\":",
+        "		show title \"Notch is here\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprOnlinePlayerNames implements Expression {

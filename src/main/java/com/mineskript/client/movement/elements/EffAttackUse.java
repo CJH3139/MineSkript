@@ -17,13 +17,13 @@ import java.util.Optional;
 @Description({"Presses, holds or releases your attack (left click) or use (right click) control. Press and click make a single click, exactly like tapping the button once. Hold keeps the control down until a matching release, so hold attack mines a block or hold use keeps eating or drawing a bow. It works through your key bindings, so it does whatever the button would do in game.",
         "A held control stays held after the trigger ends, until a release, stop all scripts, or leaving the world releases it. Click does nothing if the control has no key bound. Needs a world."})
 @Examples({"on key press of \"r\":",
-        "\thold attack",
-        "\twait 20 ticks",
-        "\trelease attack",
+        "	hold attack",
+        "	wait 20 ticks",
+        "	release attack",
         "",
         "every 1 second:",
-        "\tif key \"left alt\" is held:",
-        "\t\tclick the attack button"})
+        "	if key \"left alt\" is held:",
+        "		click the attack button"})
 @Since("1.0.0-alpha")
 public final class EffAttackUse implements Statement {
     private enum Action {

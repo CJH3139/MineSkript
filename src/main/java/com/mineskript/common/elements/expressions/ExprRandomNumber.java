@@ -17,9 +17,9 @@ import java.util.Optional;
 @Description("A random decimal number between two numbers. The order of the bounds does not matter. The lower bound can be returned but the upper bound never is (unless both are equal, in which case that value is returned).")
 @Examples({
         "on key press of \"r\":",
-        "\tset {_chance} to random number between 0 and 1",
-        "\tif {_chance} is less than 0.25:",
-        "\t\tsend \"lucky!\""
+        "	set {_chance} to random number between 0 and 1",
+        "	if {_chance} is less than 0.25:",
+        "		send \"lucky!\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprRandomNumber implements Expression {

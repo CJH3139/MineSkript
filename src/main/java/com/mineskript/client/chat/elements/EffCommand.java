@@ -16,11 +16,11 @@ import java.util.Optional;
 @Description({"Sends a command to the server as if you typed it. A leading slash is optional and is removed, so \"/spawn\" and \"spawn\" are the same. Also written send command, command, or make player execute.",
         "The command goes to the server, so it only does what the server allows you to do. Only a single text value is accepted, not a list. Needs a world."})
 @Examples({"on key press of \"h\":",
-        "\texecute command \"/home\"",
+        "	execute command \"/home\"",
         "",
         "on world join:",
-        "\twait 2 seconds",
-        "\tmake player execute command \"/warp shop\""})
+        "	wait 2 seconds",
+        "	make player execute command \"/warp shop\""})
 @Since("1.0.0-alpha")
 public final class EffCommand implements Statement {
     private final int line;

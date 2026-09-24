@@ -14,9 +14,9 @@ import java.util.Optional;
 @Description({"Closes whatever screen is open: an inventory, a chest, a crafting table, the chat box or the pause menu, just as pressing Escape would. Does nothing when no screen is open.",
         "Needs a world."})
 @Examples({"on screen open:",
-        "\tif event-screen title contains \"Vote\":",
-        "\t\twait 1 tick",
-        "\t\tclose screen"})
+        "	if event-screen title contains \"Vote\":",
+        "		wait 1 tick",
+        "		close screen"})
 @Since("1.0.0-alpha.2")
 public final class EffCloseScreen implements Statement {
     private final int line;

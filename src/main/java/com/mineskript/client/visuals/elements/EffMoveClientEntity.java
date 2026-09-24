@@ -19,8 +19,8 @@ import java.util.Optional;
 @Description({"Moves a client entity (a hologram, item display or block display you spawned) to a location straight away. The entity is given by its number from last spawned client entity. Does nothing if it no longer exists, for example after you changed worlds.",
         "Client entities only exist in the dimension you are in, so a location in another dimension stops the line with an error."})
 @Examples({"every 5 ticks:",
-        "\tif {-marker} is set:",
-        "\t\tmove client entity {-marker} to 2.5 above player"})
+        "	if {-marker} is set:",
+        "		move client entity {-marker} to 2.5 above player"})
 @Since("1.0.0-alpha.9, 1.0.0-alpha.10 (locations)")
 public final class EffMoveClientEntity implements Statement {
     private final int line;

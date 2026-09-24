@@ -13,37 +13,40 @@ import java.util.Optional;
 
 @Name("Light Level")
 @Description({
-        "The block light level at your feet, a whole number from 0 to 15. This is only light from blocks such as torches and lava; sunlight is not included (see sky light). Needs a world: outside a world the line stops with a \"no world\" error.",
-        "Like Skript, light level of a location, or block light level of a location, gives the light there instead, such as light level of target block. A location in another dimension gives none. Unlike Skript, where a plain light level mixes in sunlight, MineSkript's light level is always the block light, the same as block light level."
+        "The light level at your feet, a whole number from 0 to 15. Like Skript, a plain light level is the brightest of the block light and the sky light, with the sky light dimmed at night and in rain, which is the number mob spawning goes by. Needs a world: outside a world the line stops with a \"no world\" error.",
+        "Block light level is only the light from blocks such as torches and lava, and sky light level (or sunlight level) is only the light from the sky; see Sky Light.",
+        "Light level of a location, or block light level of a location, gives the light there instead, such as light level of target block. A location in another dimension gives none."
 })
 @Examples({
         "every 2 seconds:",
-        "\tif light level is less than 8:",
-        "\t\tshow action bar \"dark here, mobs can spawn\"",
+        "	if light level is 0:",
+        "		send action bar \"dark here, mobs can spawn\"",
         "",
         "on key press of \"l\":",
-        "\tsend \"block light at the target: %block light level of target block%\""
+        "	send \"light %light level of target block%, from blocks %block light level of target block%\""
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.11", "1.0.0-alpha.12"})
 public final class ExprLightLevel implements Expression {
     private final Expression location;
+    private final boolean blockOnly;
 
-    private ExprLightLevel(Expression location) {
+    private ExprLightLevel(Expression location, boolean blockOnly) {
         this.location = location;
+        this.blockOnly = blockOnly;
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addExpression(SkType.NUMBER, Tier.SIMPLE, (match, scope) -> create(match.slot(0)),
-                "[the] [block] (light level|lightlevel) [of %location%]",
-                "[the] blocklight level [of %location%]",
-                "%location%'s [block] light level");
+        registry.addExpression(SkType.NUMBER, Tier.SIMPLE, (match, scope) -> create(match.slot(0), match.has("block")),
+                "[the] [block:block] (light level|lightlevel) [of %location%]",
+                "[the] block:blocklight level [of %location%]",
+                "%location%'s [block:block] light level");
     }
 
-    private static Optional<Expression> create(Expression location) {
+    private static Optional<Expression> create(Expression location, boolean blockOnly) {
         if (location != null && location.isList()) {
             return Optional.empty();
         }
-        return Optional.of(new ExprLightLevel(location));
+        return Optional.of(new ExprLightLevel(location, blockOnly));
     }
 
     @Override
@@ -54,8 +57,8 @@ public final class ExprLightLevel implements Expression {
     @Override
     public Object evaluate(Context context) {
         if (location == null) {
-            return (double) context.world().lightLevel();
+            return (double) (blockOnly ? context.world().lightLevel() : context.world().combinedLight());
         }
-        return LightAt.read(location, context, false);
+        return blockOnly ? LightAt.read(location, context, false) : LightAt.readCombined(location, context);
     }
 }

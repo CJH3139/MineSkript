@@ -18,8 +18,8 @@ import java.util.Optional;
 })
 @Examples({
         "every 1 second:",
-        "\tif the player's remaining air is less than 3 seconds:",
-        "\t\tshow title \"get to the surface!\""
+        "	if the player's remaining air is less than 3 seconds:",
+        "		show title \"get to the surface!\""
 })
 @Since("1.0.0-alpha.11")
 public final class ExprRemainingAir extends GameValueExpression {

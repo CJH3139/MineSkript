@@ -21,14 +21,14 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"c\":",
-        "\tsend \"you have %number of diamond in inventory% diamonds\"",
+        "	send \"you have %number of diamond in inventory% diamonds\"",
         "",
         "on inventory change:",
-        "\tif number of cobblestone in the inventory is at least 64:",
-        "\t\tsend \"a full stack of cobblestone\"",
+        "	if number of cobblestone in the inventory is at least 64:",
+        "		send \"a full stack of cobblestone\"",
         "",
         "on key press of \"c\":",
-        "\tsend \"%amount of iron ingot in player's inventory% iron\""
+        "	send \"%amount of iron ingot in player's inventory% iron\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprInventoryCount implements Expression {

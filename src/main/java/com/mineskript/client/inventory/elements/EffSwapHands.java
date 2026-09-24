@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description({"Swaps the items in your main hand and offhand by pressing your swap-offhand key binding, as if you pressed F.",
         "Does nothing if the swap control has no key bound. Needs a world."})
 @Examples({"on key press of \"v\":",
-        "\tif player is holding totem_of_undying:",
-        "\t\tswap hands"})
+        "	if player is holding totem_of_undying:",
+        "		swap hands"})
 @Since("1.0.0-alpha.2")
 public final class EffSwapHands implements Statement {
     private final int line;

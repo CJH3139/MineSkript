@@ -539,6 +539,11 @@ public final class FakeGameBridge implements GameBridge {
     }
 
     @Override
+    public int combinedLightAt(double x, double y, double z) {
+        return Math.max(lightAt(x, y, z, false), lightAt(x, y, z, true));
+    }
+
+    @Override
     public boolean itemExists(String id) {
         if (itemIds.contains(id)) {
             return true;
@@ -563,6 +568,11 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public int skyLight() {
         return skyLight;
+    }
+
+    @Override
+    public int combinedLight() {
+        return Math.max(lightLevel, skyLight);
     }
 
     @Override

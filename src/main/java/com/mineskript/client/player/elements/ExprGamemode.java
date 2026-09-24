@@ -19,15 +19,15 @@ import java.util.Optional;
 })
 @Examples({
         "on gamemode change:",
-        "\tsend \"now in %gamemode%\"",
+        "	send \"now in %gamemode%\"",
         "",
         "on key press of \"g\":",
-        "\tif player's gamemode is creative:",
-        "\t\tsend \"creative mode\"",
+        "	if player's gamemode is creative:",
+        "		send \"creative mode\"",
         "",
         "on key press of \"g\":",
-        "\tif game mode of player is survival or adventure:",
-        "\t\tsend \"you can be hurt\""
+        "	if game mode of player is survival or adventure:",
+        "		send \"you can be hurt\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprGamemode extends GameValueExpression {

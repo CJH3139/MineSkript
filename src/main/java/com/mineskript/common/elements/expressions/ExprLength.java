@@ -19,8 +19,8 @@ import java.util.Optional;
 @Description("The number of characters in a text, as a whole number. Written length of X or X's length.")
 @Examples({
         "on chat send:",
-        "\tif length of message is greater than 100:",
-        "\t\tsend \"long message\""
+        "	if length of message is greater than 100:",
+        "		send \"long message\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprLength implements Expression {

@@ -13,15 +13,15 @@ import com.mineskript.lang.parse.SyntaxRegistry;
         "Adding to a list variable such as {names::*} stores each value under the lowest free number index, 1, 2, 3 and so on. The yaw, the pitch and the selected slot can be added to as well; the selected slot wraps round within 0 to 8.",
         "It does not add items to your inventory. Adding text to a single variable, or adding to a variable that holds text, is a run time error."})
 @Examples({"on entity death:",
-        "\tif event-entity is \"zombie\":",
-        "\t\tadd 1 to {zombies killed}",
-        "\t\tshow action bar \"zombies: %{zombies killed}%\"",
+        "	if event-entity is \"zombie\":",
+        "		add 1 to {zombies killed}",
+        "		show action bar \"zombies: %{zombies killed}%\"",
         "",
         "on chat:",
-        "\tadd message to {-recent chat::*}",
+        "	add message to {-recent chat::*}",
         "",
         "on key press of \"q\":",
-        "\tadd 90 to yaw"})
+        "	add 90 to yaw"})
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.8"})
 public final class EffAdd {
     private EffAdd() {

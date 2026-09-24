@@ -19,11 +19,11 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"n\":",
-        "\tsend \"hello %player%\"",
+        "	send \"hello %player%\"",
         "",
         "on key press of \"n\":",
-        "\tif me is sneaking:",
-        "\t\tsend \"%myself% is sneaking\""
+        "	if me is sneaking:",
+        "		send \"%myself% is sneaking\""
 })
 @Since("1.0.0-alpha")
 public final class ExprPlayer implements Expression {

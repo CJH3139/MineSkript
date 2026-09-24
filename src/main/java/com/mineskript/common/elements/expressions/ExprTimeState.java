@@ -25,10 +25,10 @@ import java.util.Optional;
 })
 @Examples({
         "on damage:",
-        "\tsend \"health went from %past health% to %health%\"",
+        "	send \"health went from %past health% to %health%\"",
         "",
         "on held item change:",
-        "\tsend \"put away %former held item%\""
+        "	send \"put away %former held item%\""
 })
 @Since("1.0.0-alpha.11")
 public final class ExprTimeState implements Expression {

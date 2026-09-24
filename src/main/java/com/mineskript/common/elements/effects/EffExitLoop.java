@@ -15,12 +15,12 @@ import java.util.Optional;
 @Description({"Leaves the innermost loop straight away and carries on with the line after it. Also written stop loop, exit this loop and similar.",
         "Only allowed inside a loop or while section: anywhere else it is an error when the script loads."})
 @Examples({"on key press of \"r\":",
-        "\tloop 20 times:",
-        "\t\tif block below player is air:",
-        "\t\t\texit loop",
-        "\t\tclick attack",
-        "\t\twait 5 ticks",
-        "\tsend \"stopped\""})
+        "	loop 20 times:",
+        "		if block below player is air:",
+        "			exit loop",
+        "		click attack",
+        "		wait 5 ticks",
+        "	send \"stopped\""})
 @Since("1.0.0-alpha.2")
 public final class EffExitLoop implements Statement {
     private final int line;

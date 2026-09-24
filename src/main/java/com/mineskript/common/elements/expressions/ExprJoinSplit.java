@@ -24,21 +24,21 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"l\":",
-        "\tloop \"a,b,c\" split at \",\":",
-        "\t\tsend loop-value",
+        "	loop \"a,b,c\" split at \",\":",
+        "		send loop-value",
         "",
         "on chat:",
-        "\tloop split message by \" \":",
-        "\t\tif loop-value is \"hello\":",
-        "\t\t\tsend \"someone said hello\"",
+        "	loop split message by \" \":",
+        "		if loop-value is \"hello\":",
+        "			send \"someone said hello\"",
         "",
         "on key press of \"j\":",
-        "\tset {_names::*} to \"Alex\", \"Steve\" and \"Notch\"",
-        "\tsend join {_names::*} with \" | \"",
+        "	set {_names::*} to \"Alex\", \"Steve\" and \"Notch\"",
+        "	send join {_names::*} with \" | \"",
         "",
         "on key press of \"k\":",
-        "\tset {_parts::*} to split \"aXbxc\" at \"x\" with case sensitivity",
-        "\tsend \"%size of {_parts::*}% pieces\""
+        "	set {_parts::*} to split \"aXbxc\" at \"x\" with case sensitivity",
+        "	send \"%size of {_parts::*}% pieces\""
 })
 @Since({"1.0.0-alpha.4", "1.0.0-alpha.11"})
 public final class ExprJoinSplit implements Expression {

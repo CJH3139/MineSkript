@@ -15,7 +15,7 @@ import java.util.Optional;
 @Description("The world difficulty as lower case text: peaceful, easy, normal or hard. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on world join:",
-        "\tsend \"difficulty: %difficulty%\""
+        "	send \"difficulty: %difficulty%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprDifficulty extends GameValueExpression {

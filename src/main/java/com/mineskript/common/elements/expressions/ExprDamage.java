@@ -19,8 +19,8 @@ import java.util.Optional;
 })
 @Examples({
         "on damage:",
-        "\tif damage is greater than 4:",
-        "\t\tsend title \"ouch\" with subtitle \"lost %damage% health\""
+        "	if damage is greater than 4:",
+        "		send title \"ouch\" with subtitle \"lost %damage% health\""
 })
 @Since("1.0.0-alpha.11")
 public final class ExprDamage implements Expression {

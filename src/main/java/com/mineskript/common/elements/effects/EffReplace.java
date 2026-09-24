@@ -35,17 +35,17 @@ import java.util.function.UnaryOperator;
 })
 @Examples({
         "on chat send:",
-        "\treplace all \"idiot\" and \"noob\" with \"****\" in the message",
+        "	replace all \"idiot\" and \"noob\" with \"****\" in the message",
         "",
         "on key press of \"r\":",
-        "\tset {_msg} to \"<item> is ready\"",
-        "\treplace \"<item>\" in {_msg} with \"%held item%\"",
-        "\tsend {_msg}",
+        "	set {_msg} to \"<item> is ready\"",
+        "	replace \"<item>\" in {_msg} with \"%held item%\"",
+        "	send {_msg}",
         "",
         "on key press of \"r\":",
-        "\tset {_t} to \"a-b-c\"",
-        "\treplace the first \"-\" with \"+\" in {_t}",
-        "\treplace \"B\" with \"x\" in {_t} with case sensitivity"
+        "	set {_t} to \"a-b-c\"",
+        "	replace the first \"-\" with \"+\" in {_t}",
+        "	replace \"B\" with \"x\" in {_t} with case sensitivity"
 })
 @Since("1.0.0-alpha.11")
 public final class EffReplace implements Statement {

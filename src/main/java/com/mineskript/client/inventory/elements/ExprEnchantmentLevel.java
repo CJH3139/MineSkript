@@ -22,16 +22,16 @@ import java.util.Optional;
         "The older form takes the enchantment as text: level of enchantment \"sharpness\" on held item.",
         "Items read back from saved variables have no enchantments. If the value is not an item the line stops with a \"there is no item\" error."})
 @Examples({"on key press of \"e\":",
-        "\tif level of enchantment \"efficiency\" on held item is less than 5:",
-        "\t\tsend \"not a max efficiency tool\"",
+        "	if level of enchantment \"efficiency\" on held item is less than 5:",
+        "		send \"not a max efficiency tool\"",
         "",
         "on item tooltip:",
-        "\tset {_mending} to enchantment level of \"mending\" on event-item",
-        "\tif {_mending} is 1:",
-        "\t\tadd \"&amending\" to the tooltip",
+        "	set {_mending} to enchantment level of \"mending\" on event-item",
+        "	if {_mending} is 1:",
+        "		add \"&amending\" to the tooltip",
         "",
         "on key press of \"e\":",
-        "\tsend \"sharpness %held item's sharpness level%, looting %level of looting of held item%\""})
+        "	send \"sharpness %held item's sharpness level%, looting %level of looting of held item%\""})
 @Since({"1.0.0-alpha.9", "1.0.0-alpha.11"})
 public final class ExprEnchantmentLevel implements Expression {
     private static final String LEVEL = "[(enchantment|enchant)] (level|levels)";

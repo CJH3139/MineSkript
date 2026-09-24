@@ -18,8 +18,8 @@ import java.util.Optional;
 @Description("The x, y or z coordinate of the block your crosshair is on, as a whole number. Accepts x-coordinate, x-coord, x coordinate or x coord (and the same for y and z). If you are not looking at a block the line stops with a \"there is no target block\" error, so check first. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"i\":",
-        "\tif target block is not air:",
-        "\t\tsend \"%target block% at %x-coordinate of target block%, %y-coordinate of target block%, %z-coordinate of target block%\""
+        "	if target block is not air:",
+        "		send \"%target block% at %x-coordinate of target block%, %y-coordinate of target block%, %z-coordinate of target block%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprTargetCoordinate implements Expression {

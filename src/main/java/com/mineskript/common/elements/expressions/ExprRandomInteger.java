@@ -17,10 +17,10 @@ import java.util.Optional;
 @Description("A random whole number between two numbers, with both ends included. The bounds are rounded to whole numbers first and may be given in either order.")
 @Examples({
         "on key press of \"r\":",
-        "\tsend \"you rolled %random integer between 1 and 6%\"",
+        "	send \"you rolled %random integer between 1 and 6%\"",
         "",
         "on key press of \"r\":",
-        "\tselect slot random integer between 0 and 8"
+        "	select slot random integer between 0 and 8"
 })
 @Since("1.0.0-alpha.2")
 public final class ExprRandomInteger implements Expression {

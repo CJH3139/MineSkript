@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description("How many of the 36 main inventory slots (hotbar plus the 27 storage slots) are empty, as a whole number. Armor and offhand slots are not counted. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on inventory change:",
-        "\tif free slots is less than 3:",
-        "\t\tshow action bar \"inventory almost full\""
+        "	if free slots is less than 3:",
+        "		show action bar \"inventory almost full\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprFreeSlots extends GameValueExpression {

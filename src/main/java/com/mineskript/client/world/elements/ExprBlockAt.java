@@ -23,11 +23,11 @@ import java.util.Optional;
         "Your game only knows the dimension you are in, so a location in another dimension has no block: the result is none."})
 @Examples({
         "on key press of \"b\":",
-        "\tsend \"spawn block: %block at location(0, 64, 0)%\"",
+        "	send \"spawn block: %block at location(0, 64, 0)%\"",
         "",
         "on key press of \"b\":",
-        "\tif block at 1 below player is diamond_ore:",
-        "\t\tsend \"diamonds underfoot\""
+        "	if block at 1 below player is diamond_ore:",
+        "		send \"diamonds underfoot\""
 })
 @Since("1.0.0-alpha.2, 1.0.0-alpha.10 (locations)")
 public final class ExprBlockAt implements Expression {

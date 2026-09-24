@@ -22,10 +22,10 @@ import java.util.Optional;
 })
 @Examples({
         "on move:",
-        "\tsend action bar \"x %round player's x-coordinate%  z %round player's z-coordinate%\"",
+        "	send action bar \"x %round player's x-coordinate%  z %round player's z-coordinate%\"",
         "",
         "on key press of \"h\":",
-        "\tsend the actionbar with text \"hello\" to player"
+        "	send the actionbar with text \"hello\" to player"
 })
 @Since("1.0.0-alpha.11")
 public final class EffActionBar implements Statement {

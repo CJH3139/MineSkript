@@ -18,10 +18,10 @@ import java.util.Optional;
 @Name("Remove Beam")
 @Description("Removes the beam shown at the block of a location (decimal coordinates are rounded down to the block), or every beam at once. Removing a beam that is not there, or at a location in another dimension, does nothing. Beams are also removed by themselves when you leave the world or change dimension, and when the script that made them is reloaded.")
 @Examples({"on key press of \"b\":",
-        "\tremove beam at location(100, 64, -200)",
+        "	remove beam at location(100, 64, -200)",
         "",
         "on key press of \"v\":",
-        "\tremove all beams"})
+        "	remove all beams"})
 @Since("1.0.0-alpha.9, 1.0.0-alpha.10 (locations)")
 public final class EffRemoveBeam implements Statement {
     private final int line;

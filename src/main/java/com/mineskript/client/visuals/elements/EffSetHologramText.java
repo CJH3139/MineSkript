@@ -19,12 +19,12 @@ import java.util.Optional;
 @Description({"Changes the text of a hologram you spawned, given by its number from last spawned client entity. The text can use & colour codes, such as &a for green.",
         "Does nothing if the hologram no longer exists or the number belongs to an item or block display. This effect is tried before the general set effect, so set text of hologram always means this."})
 @Examples({"on key press of \"h\":",
-        "\tspawn a hologram \"&7health\" at location(0.5, 66, 0.5)",
-        "\tset {-health hologram} to last spawned client entity",
+        "	spawn a hologram \"&7health\" at location(0.5, 66, 0.5)",
+        "	set {-health hologram} to last spawned client entity",
         "",
         "on health change:",
-        "\tif {-health hologram} is set:",
-        "\t\tset text of hologram {-health hologram} to \"&c%health of player% hp\""})
+        "	if {-health hologram} is set:",
+        "		set text of hologram {-health hologram} to \"&c%health of player% hp\""})
 @Since("1.0.0-alpha.9")
 public final class EffSetHologramText implements Statement {
     private final int line;

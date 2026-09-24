@@ -16,9 +16,9 @@ import java.util.Optional;
 @Description("The namespaced entity type id as text, such as minecraft:zombie, minecraft:player or minecraft:item. Unlike the name it ignores name tags, so use it to check what kind of entity something is. If the value is not an entity the line stops with a \"there is no entity\" error.")
 @Examples({
         "every 1 second:",
-        "\tif nearest entity is set:",
-        "\t\tif id of nearest entity is \"minecraft:creeper\":",
-        "\t\t\tshow title \"creeper nearby\""
+        "	if nearest entity is set:",
+        "		if id of nearest entity is \"minecraft:creeper\":",
+        "			show title \"creeper nearby\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprEntityId extends EntityPropertyExpression {

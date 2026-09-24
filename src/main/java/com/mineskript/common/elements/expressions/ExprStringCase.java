@@ -23,16 +23,16 @@ import java.util.Optional;
 })
 @Examples({
         "on chat send:",
-        "\tset {_loud} to uppercase message",
-        "\tsend \"%{_loud}%\"",
+        "	set {_loud} to uppercase message",
+        "	send \"%{_loud}%\"",
         "",
         "on chat:",
-        "\tset {_m} to message in lower case",
-        "\tif {_m} contains \"help\":",
-        "\t\tsend \"someone needs help\"",
+        "	set {_m} to message in lower case",
+        "	if {_m} contains \"help\":",
+        "		send \"someone needs help\"",
         "",
         "on key press of \"n\":",
-        "\tsend \"steve the builder\" in proper case"
+        "	send \"steve the builder\" in proper case"
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprStringCase implements Expression {

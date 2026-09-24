@@ -17,9 +17,9 @@ import java.util.Optional;
 @Description("The smaller of two numbers. Also written min of.")
 @Examples({
         "on key press of \"m\":",
-        "\tset {_have} to number of cobblestone in inventory",
-        "\tset {_stack} to min of {_have} and 64",
-        "\tsend \"%{_stack}% cobblestone ready to place\""
+        "	set {_have} to number of cobblestone in inventory",
+        "	set {_stack} to min of {_have} and 64",
+        "	send \"%{_stack}% cobblestone ready to place\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprMinimum implements Expression {

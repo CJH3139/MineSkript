@@ -15,8 +15,8 @@ import java.util.Optional;
 @Description("The brand the server reports, such as vanilla or Paper (the text the F3 screen shows). Returns empty text when you are not connected or the server has not sent one. Works without a world.")
 @Examples({
         "on world join:",
-        "\twait 2 seconds",
-        "\tsend \"server software: %server brand%\""
+        "	wait 2 seconds",
+        "	send \"server software: %server brand%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprServerBrand implements Expression {

@@ -13,9 +13,9 @@ import java.util.Optional;
 @Name("Disconnect")
 @Description("Leaves the server or singleplayer world you are in and returns to the menus. The trigger stops here, so nothing after it runs. Also written leave the server, quit the game and similar.")
 @Examples({"every 1 second:",
-        "\tif health of player is less than 4:",
-        "\t\tif {-safety} is true:",
-        "\t\t\tdisconnect"})
+        "	if health of player is less than 4:",
+        "		if {-safety} is true:",
+        "			disconnect"})
 @Since("1.0.0-alpha.2")
 public final class EffDisconnect implements Statement {
     private final int line;

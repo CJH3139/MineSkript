@@ -148,7 +148,7 @@ This example, with `ExprAnswer` (an expression that returns 42), is kept as a wo
 
 * `@Name`: a short Title Case name.
 * `@Description`: what the element does, for people who have never programmed. One string per paragraph.
-* `@Examples`: complete scripts, one string per line, indented with `\t`, `""` between separate scripts.
+* `@Examples`: complete scripts, one string per line, indented with real tab characters (not `\t`), `""` between separate scripts.
 * `@Since`: your addon's version that first had the element.
 * `@Keywords`, `@Events` (optional), and `@NoDoc` to leave a helper element out.
 * Events are documented with the chained calls on `addEvent(...)`: `.description(...)`, `.examples(...)`,

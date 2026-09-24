@@ -24,9 +24,9 @@ import java.util.Optional;
         "Colour codes work with & or the section sign: &0 to &9 and &a to &f are the 16 colours (&c red, &a green, &6 gold, &7 grey), &l bold, &o italic, &n underline, &m strikethrough, &k obfuscated and &r resets. At most 64 lines are added to one tooltip.",
         "It can only be used in an on item tooltip trigger; anywhere else the script does not load."})
 @Examples({"on item tooltip:",
-        "\tadd \"&7stack of %count of event-item%\" to the tooltip",
-        "\tif level of enchantment \"sharpness\" on event-item is more than 4:",
-        "\t\tadd \"&c&lsharp!\" to the top of the tooltip"})
+        "	add \"&7stack of %count of event-item%\" to the tooltip",
+        "	if level of enchantment \"sharpness\" on event-item is more than 4:",
+        "		add \"&c&lsharp!\" to the top of the tooltip"})
 @Since("1.0.0-alpha.9")
 public final class EffAddTooltip implements Statement {
     private final int line;

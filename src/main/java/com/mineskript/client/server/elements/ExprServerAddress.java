@@ -15,11 +15,11 @@ import java.util.Optional;
 @Description("The address of the server you are connected to, exactly as it appears in your server list (for example play.example.net). Returns singleplayer when no multiplayer server is set, which includes singleplayer worlds and the title screen. Also written server ip. Works without a world.")
 @Examples({
         "on world join:",
-        "\tsend \"joined %server address%\"",
+        "	send \"joined %server address%\"",
         "",
         "on world join:",
-        "\tif server address is \"singleplayer\":",
-        "\t\tsend \"local world\""
+        "	if server address is \"singleplayer\":",
+        "		send \"local world\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprServerAddress implements Expression {

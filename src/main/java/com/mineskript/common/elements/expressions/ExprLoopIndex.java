@@ -20,8 +20,8 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"h\":",
-        "\tloop {homes::*}:",
-        "\t\tsend \"%loop-index%: %loop-value%\""
+        "	loop {homes::*}:",
+        "		send \"%loop-index%: %loop-value%\""
 })
 @Since("1.0.0-alpha.8")
 public final class ExprLoopIndex implements Expression {

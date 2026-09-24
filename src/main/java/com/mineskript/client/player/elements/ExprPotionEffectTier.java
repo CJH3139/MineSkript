@@ -20,11 +20,11 @@ import java.util.Optional;
 })
 @Examples({
         "every 1 second:",
-        "\tif the amplifier of haste of player is at least 2:",
-        "\t\tshow action bar \"mining fast\"",
+        "	if the amplifier of haste of player is at least 2:",
+        "		show action bar \"mining fast\"",
         "",
         "on effect gain:",
-        "\tsend \"speed tier %tier of speed of player%\""
+        "	send \"speed tier %tier of speed of player%\""
 })
 @Since("1.0.0-alpha.11")
 public final class ExprPotionEffectTier implements Expression {

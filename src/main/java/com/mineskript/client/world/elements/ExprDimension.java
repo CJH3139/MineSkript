@@ -19,15 +19,15 @@ import java.util.Optional;
 })
 @Examples({
         "on dimension change:",
-        "\tsend \"now in %dimension%\"",
+        "	send \"now in %dimension%\"",
         "",
         "on key press of \"d\":",
-        "\tif dimension is \"minecraft:the_nether\":",
-        "\t\tsend \"in the nether\"",
+        "	if dimension is \"minecraft:the_nether\":",
+        "		send \"in the nether\"",
         "",
         "on key press of \"h\":",
-        "\tif world of {home} is not world of player:",
-        "\t\tsend \"your home is in %world of {home}%\""
+        "	if world of {home} is not world of player:",
+        "		send \"your home is in %world of {home}%\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprDimension implements Expression {

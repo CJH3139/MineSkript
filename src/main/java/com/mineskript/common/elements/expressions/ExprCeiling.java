@@ -17,9 +17,9 @@ import java.util.Optional;
 @Description("Rounds a number up to the whole number at or above it, so ceiling 2.1 is 3 and ceiling -2.7 is -2. Also written ceil.")
 @Examples({
         "on key press of \"h\":",
-        "\tset {_half} to health of player / 2",
-        "\tset {_hearts} to ceil {_half}",
-        "\tsend \"%{_hearts}% hearts\""
+        "	set {_half} to health of player / 2",
+        "	set {_hearts} to ceil {_half}",
+        "	send \"%{_hearts}% hearts\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprCeiling implements Expression {

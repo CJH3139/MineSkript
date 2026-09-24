@@ -19,12 +19,12 @@ import java.util.Optional;
 @Description({"The distance between two locations in blocks, measured in a straight line, as a decimal number. Anything with a location works, such as the player, an entity or a block.",
         "Two locations in different dimensions have no distance between them: the result is none, like in Skript, so a comparison such as is less than 20 is false."})
 @Examples({"every 1 second:",
-        "\tif {home} is set:",
-        "\t\tif distance between player and {home} is less than 20:",
-        "\t\t\tshow action bar \"almost home\"",
+        "	if {home} is set:",
+        "		if distance between player and {home} is less than 20:",
+        "			show action bar \"almost home\"",
         "",
         "on key press of \"d\":",
-        "\tsend \"%distance between location(0, 64, 0) and location(3, 68, 0)% blocks\""})
+        "	send \"%distance between location(0, 64, 0) and location(3, 68, 0)% blocks\""})
 @Since("1.0.0-alpha.10")
 public final class ExprDistance implements Expression {
     private final Expression first;

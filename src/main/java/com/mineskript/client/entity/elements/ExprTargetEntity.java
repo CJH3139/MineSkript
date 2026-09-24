@@ -14,14 +14,14 @@ import java.util.Optional;
 @Description("The entity your crosshair is on, such as a mob, player, item frame or boat. Written target entity, or like Skript target of player or player's target. Returns none (prints as <none>) when you are not looking at an entity within reach. The value is a snapshot of that moment. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"e\":",
-        "\tif target entity is set:",
-        "\t\tsend \"looking at %name of target entity% %distance of target entity% blocks away\"",
-        "\telse:",
-        "\t\tsend \"nothing targeted\"",
+        "	if target entity is set:",
+        "		send \"looking at %name of target entity% %distance of target entity% blocks away\"",
+        "	else:",
+        "		send \"nothing targeted\"",
         "",
         "on key press of \"e\":",
-        "\tif player's target is zombie:",
-        "\t\tsend \"a zombie\""
+        "	if player's target is zombie:",
+        "		send \"a zombie\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprTargetEntity extends GameValueExpression {

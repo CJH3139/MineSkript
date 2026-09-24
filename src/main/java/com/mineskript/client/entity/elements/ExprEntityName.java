@@ -16,8 +16,8 @@ import java.util.Optional;
 @Description("The display name of an entity as text, such as Zombie, a player's username, or a custom name tag. If the value is not an entity (for example target entity when looking at nothing) the line stops with a \"there is no entity\" error. Written name of X or X's name.")
 @Examples({
         "on key press of \"e\":",
-        "\tif target entity is set:",
-        "\t\tsend \"that is %name of target entity%\""
+        "	if target entity is set:",
+        "		send \"that is %name of target entity%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprEntityName extends EntityPropertyExpression {

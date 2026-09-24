@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description("The time of day in ticks, a whole number from 0 to 23999: 0 is sunrise, 6000 noon, 12000 sunset and 18000 midnight. Also written day time. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "every 10 seconds:",
-        "\tif time of day is between 13000 and 23000:",
-        "\t\tshow action bar \"night, mobs are out\""
+        "	if time of day is between 13000 and 23000:",
+        "		show action bar \"night, mobs are out\""
 })
 @Since("1.0.0-alpha.6")
 public final class ExprTimeOfDay extends GameValueExpression {

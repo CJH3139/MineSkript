@@ -23,14 +23,14 @@ import java.util.Set;
 })
 @Examples({
         "every 1 second:",
-        "\tif pitch is greater than 80:",
-        "\t\tshow action bar \"looking at your feet\"",
+        "	if pitch is greater than 80:",
+        "		show action bar \"looking at your feet\"",
         "",
         "on key press of \"u\":",
-        "\tremove 15 from pitch",
+        "	remove 15 from pitch",
         "",
         "on key press of \"k\":",
-        "\tset pitch of player to 0"
+        "	set pitch of player to 0"
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.8", "1.0.0-alpha.11"})
 public final class ExprPitch extends GameValueExpression implements Changeable {

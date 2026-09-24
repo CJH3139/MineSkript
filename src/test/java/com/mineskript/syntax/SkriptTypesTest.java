@@ -307,8 +307,8 @@ class SkriptTypesTest {
         game.setBlockAt(10, 65, 10, "minecraft:gold_block");
         game.biomes.put(FakeGameBridge.blockKey(10, 64, 10), "minecraft:desert");
         game.blockLight.put(FakeGameBridge.blockKey(10, 64, 10), 7);
-        game.skyLightAt.put(FakeGameBridge.blockKey(10, 64, 10), 4);
-        assertEquals(List.of("gold_block", "minecraft:desert", "7", "7", "4", "4", "minecraft:the_end", "a", "b"),
+        game.skyLightAt.put(FakeGameBridge.blockKey(10, 64, 10), 9);
+        assertEquals(List.of("gold_block", "minecraft:desert", "9", "7", "9", "9", "minecraft:the_end", "a", "b"),
                 messages("""
                 set {_spot} to location(10.5, 64, 10.5)
                 send "%block above {_spot}%"

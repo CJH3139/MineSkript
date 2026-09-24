@@ -15,11 +15,11 @@ import java.util.Optional;
 @Description("Your food level as a whole number from 0 to 20, where 20 is a full hunger bar. Written like Skript's food level: food level, hunger, food bar or hunger meter, alone or as food level of player or player's hunger. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "every 5 seconds:",
-        "\tif hunger of player is at most 6:",
-        "\t\tsend \"eat something\"",
+        "	if hunger of player is at most 6:",
+        "		send \"eat something\"",
         "",
         "on hunger change:",
-        "\tshow action bar \"food %food level%, %player's hunger bar% on the bar\""
+        "	show action bar \"food %food level%, %player's hunger bar% on the bar\""
 })
 @Since({"1.0.0-alpha", "1.0.0-alpha.11"})
 public final class ExprHunger implements Expression {

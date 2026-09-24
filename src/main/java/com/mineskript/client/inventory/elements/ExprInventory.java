@@ -19,11 +19,11 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"i\":",
-        "\tif player's inventory has 3 diamonds:",
-        "\t\tsend \"enough diamonds\"",
+        "	if player's inventory has 3 diamonds:",
+        "		send \"enough diamonds\"",
         "",
         "on key press of \"i\":",
-        "\tsend \"%amount of cobblestone in inventory of player% cobblestone\""
+        "	send \"%amount of cobblestone in inventory of player% cobblestone\""
 })
 @Since("1.0.0-alpha.11")
 public final class ExprInventory implements Expression {

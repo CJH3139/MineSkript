@@ -13,8 +13,8 @@ class ClientEnvironmentTest {
     @Test
     void environmentReadings() {
         runner.game.biome = "minecraft:desert";
-        runner.game.lightLevel = 11;
-        runner.game.skyLight = 4;
+        runner.game.lightLevel = 4;
+        runner.game.skyLight = 11;
         runner.game.serverAddress = "play.example.com";
         runner.game.serverBrand = "paper";
         runner.game.ping = 57;
@@ -23,12 +23,12 @@ class ClientEnvironmentTest {
         runner.run("""
                 on load:
                     send "%biome%"
-                    send "%light level% %sky light%"
+                    send "%light level% %block light level% %sky light%"
                     send "%server address% %server brand%"
                     send "%ping% %fps%"
                     send "%saturation%"
                 """);
-        assertEquals(List.of("minecraft:desert", "11 4", "play.example.com paper", "57 144", "4.5"), runner.game.messages);
+        assertEquals(List.of("minecraft:desert", "11 4 11", "play.example.com paper", "57 144", "4.5"), runner.game.messages);
     }
 
     @Test

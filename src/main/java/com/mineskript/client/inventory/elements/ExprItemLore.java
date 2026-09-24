@@ -14,12 +14,12 @@ import java.util.Optional;
 @Description({"The lore of an item: the extra lines of text under its name that a server or a command gave it, as a list of plain text lines without colours, top to bottom. An item without lore gives an empty list.",
         "It does not include lines the game adds by itself (enchantments, attributes) or lines scripts add with add to tooltip. Items read back from saved variables have no lore. If the value is not an item the line stops with a \"there is no item\" error."})
 @Examples({"on key press of \"l\":",
-        "\tloop lore of held item:",
-        "\t\tsend \"lore: %loop-value%\"",
+        "	loop lore of held item:",
+        "		send \"lore: %loop-value%\"",
         "",
         "on inventory change:",
-        "\tif lore of event-item contains \"Soulbound\":",
-        "\t\tsend \"soulbound item picked up\""})
+        "	if lore of event-item contains \"Soulbound\":",
+        "		send \"soulbound item picked up\""})
 @Since("1.0.0-alpha.9")
 public final class ExprItemLore extends ItemPropertyExpression {
     private ExprItemLore(Expression item) {

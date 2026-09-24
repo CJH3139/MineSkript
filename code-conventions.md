@@ -126,7 +126,7 @@ public final class CondIsSet implements Condition {
 * `@Name`: short, Title Case.
 * `@Description`: what it does and what a script writer must know (units, what happens with no value, when it
   fails). One string per paragraph.
-* `@Examples`: complete scripts, one string per line, indented with `\t`, with `""` between separate scripts. They
+* `@Examples`: complete scripts, one string per line, indented with real tab characters (not `\t`), with `""` between separate scripts. They
   are parsed on every build, so they must work.
 * `@Since`: the version it ships in.
 * Events use the same fields in chained form: `registry.addEvent("Block Break", ...).description(...)

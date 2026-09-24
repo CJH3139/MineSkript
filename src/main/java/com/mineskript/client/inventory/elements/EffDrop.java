@@ -13,8 +13,8 @@ import java.util.Optional;
 @Name("Drop Item")
 @Description("Drops what you are holding in your main hand, like pressing Q. Drop item throws one item; drop the stack or drop the whole stack throws the entire stack.")
 @Examples({"on inventory change:",
-        "\tif held item is rotten flesh:",
-        "\t\tdrop the whole stack"})
+        "	if held item is rotten flesh:",
+        "		drop the whole stack"})
 @Since("1.0.0-alpha.2")
 public final class EffDrop implements Statement {
     private final int line;

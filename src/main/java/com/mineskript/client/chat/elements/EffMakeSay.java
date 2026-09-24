@@ -16,8 +16,8 @@ import java.util.Optional;
 @Description({"Sends a chat message to the server as you, visible to everyone else. Written make player say, make me say, or force the player send message.",
         "Unlike Send, other players see this. Use Execute Command for commands. Needs a world."})
 @Examples({"on world join:",
-        "\twait 3 seconds",
-        "\tmake player say \"hello everyone\""})
+        "	wait 3 seconds",
+        "	make player say \"hello everyone\""})
 @Since("1.0.0-alpha.3")
 public final class EffMakeSay implements Statement {
     private final int line;

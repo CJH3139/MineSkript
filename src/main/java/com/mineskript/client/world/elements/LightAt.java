@@ -17,4 +17,12 @@ final class LightAt {
         }
         return (double) context.world().lightAt(at.x(), at.y(), at.z(), sky);
     }
+
+    static Object readCombined(Expression location, Context context) {
+        Location at = Locations.read(location, context);
+        if (!Locations.isHere(at, context)) {
+            return None.NONE;
+        }
+        return (double) context.world().combinedLightAt(at.x(), at.y(), at.z());
+    }
 }

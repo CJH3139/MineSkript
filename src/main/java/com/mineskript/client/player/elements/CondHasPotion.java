@@ -21,16 +21,16 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"h\":",
-        "\tif player has potion speed:",
-        "\t\tsend \"you are fast\"",
+        "	if player has potion speed:",
+        "		send \"you are fast\"",
         "",
         "every 5 seconds:",
-        "\tif player doesn't have any potion effects:",
-        "\t\tshow action bar \"no effects\"",
+        "	if player doesn't have any potion effects:",
+        "		show action bar \"no effects\"",
         "",
         "on key press of \"n\":",
-        "\tif player has potion effects night vision and water breathing:",
-        "\t\tsend \"ready to dive\""
+        "	if player has potion effects night vision and water breathing:",
+        "		send \"ready to dive\""
 })
 @Since("1.0.0-alpha.11")
 public final class CondHasPotion implements Condition {

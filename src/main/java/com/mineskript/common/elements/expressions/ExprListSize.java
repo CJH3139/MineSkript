@@ -23,12 +23,12 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"l\":",
-        "\tsend \"%size of {homes::*}% homes saved\"",
+        "	send \"%size of {homes::*}% homes saved\"",
         "",
         "on chat:",
-        "\tset {_words::*} to message split at \" \"",
-        "\tif number of {_words::*} is greater than 20:",
-        "\t\tsend \"that was a long message\""
+        "	set {_words::*} to message split at \" \"",
+        "	if number of {_words::*} is greater than 20:",
+        "		send \"that was a long message\""
 })
 @Since("1.0.0-alpha.8")
 public final class ExprListSize implements Expression {

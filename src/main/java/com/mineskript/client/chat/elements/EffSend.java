@@ -16,10 +16,10 @@ import java.util.Optional;
 @Description({"Shows a message in your own chat. It is never sent to the server and only you see it. Any value can be sent: numbers, items and entities are turned into text, and a list is joined like \"a, b and c\". Also written message, send message or send messages.",
         "Works even without a world, which makes it useful in on load for status messages."})
 @Examples({"on key press of \"k\":",
-        "\tsend \"you are at %round player's x-coordinate%, %round player's y-coordinate%, %round player's z-coordinate%\"",
+        "	send \"you are at %round player's x-coordinate%, %round player's y-coordinate%, %round player's z-coordinate%\"",
         "",
         "on player join:",
-        "\tsend online player names"})
+        "	send online player names"})
 @Since("1.0.0-alpha")
 public final class EffSend implements Statement {
     private final int line;

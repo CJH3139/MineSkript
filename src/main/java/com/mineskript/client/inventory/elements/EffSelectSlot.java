@@ -15,12 +15,12 @@ import java.util.Optional;
 @Name("Select Hotbar Slot")
 @Description("Selects a hotbar slot, changing what you hold. Slots are numbered 0 to 8 from left to right, so select slot 0 picks the first slot. Decimals are rounded, and numbers outside 0 to 8 are clamped to the nearest end.")
 @Examples({"on key press of \"r\":",
-        "\tselect hotbar slot 0",
-        "\tclick use",
+        "	select hotbar slot 0",
+        "	click use",
         "",
         "on mouse scroll:",
-        "\tif key \"left alt\" is held:",
-        "\t\tselect slot 8"})
+        "	if key \"left alt\" is held:",
+        "		select slot 8"})
 @Since("1.0.0-alpha.2")
 public final class EffSelectSlot implements Statement {
     private static final int FIRST_SLOT = 0;

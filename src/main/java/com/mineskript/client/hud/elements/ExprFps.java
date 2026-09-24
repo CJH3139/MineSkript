@@ -15,7 +15,7 @@ import java.util.Optional;
 @Description("The game's current frames per second, as a whole number. Also written frame rate. Works without a world.")
 @Examples({
         "on key press of \"f\":",
-        "\tsend \"%fps% fps\""
+        "	send \"%fps% fps\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprFps implements Expression {

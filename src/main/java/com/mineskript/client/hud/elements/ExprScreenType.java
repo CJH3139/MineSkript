@@ -18,7 +18,7 @@ import java.util.Optional;
 })
 @Examples({
         "on screen open:",
-        "\tsend \"screen type: %screen type%\""
+        "	send \"screen type: %screen type%\""
 })
 @Since("1.0.0-alpha.5")
 public final class ExprScreenType implements Expression {

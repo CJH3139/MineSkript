@@ -25,13 +25,13 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"t\":",
-        "\tsend title \"Competition Started\" with subtitle \"Have fun, stay safe!\" for 5 seconds",
+        "	send title \"Competition Started\" with subtitle \"Have fun, stay safe!\" for 5 seconds",
         "",
         "on death:",
-        "\tsend title \"oops\" to player for 3 seconds with fade in 1 second and fade out 1 second",
+        "	send title \"oops\" to player for 3 seconds with fade in 1 second and fade out 1 second",
         "",
         "on key press of \"y\":",
-        "\tsend subtitle \"Party!\""
+        "	send subtitle \"Party!\""
 })
 @Since("1.0.0-alpha.11")
 public final class EffSendTitle implements Statement {

@@ -23,13 +23,13 @@ import java.util.Set;
 })
 @Examples({
         "on item switch:",
-        "\tsend \"slot %selected slot%: %held item%\"",
+        "	send \"slot %selected slot%: %held item%\"",
         "",
         "on key press of \"x\":",
-        "\tadd 1 to selected slot",
+        "	add 1 to selected slot",
         "",
         "on key press of \"h\":",
-        "\tset player's hotbar slot to 3"
+        "	set player's hotbar slot to 3"
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.8", "1.0.0-alpha.11"})
 public final class ExprSelectedSlot extends GameValueExpression implements Changeable {

@@ -16,8 +16,8 @@ import java.util.Optional;
 @Description({"The custom model data number of an item, which servers use to give items their own look. Since Minecraft 1.21.4 an item can carry a list of numbers; this gives the first one, or none when the item has no custom model data numbers.",
         "Items read back from saved variables have no custom model data. If the value is not an item the line stops with a \"there is no item\" error."})
 @Examples({"on key press of \"m\":",
-        "\tif custom model data of held item is set:",
-        "\t\tsend \"model %custom model data of held item%\""})
+        "	if custom model data of held item is set:",
+        "		send \"model %custom model data of held item%\""})
 @Since("1.0.0-alpha.9")
 public final class ExprCustomModelData extends ItemPropertyExpression {
     private ExprCustomModelData(Expression item) {

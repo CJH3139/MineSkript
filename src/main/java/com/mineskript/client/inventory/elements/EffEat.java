@@ -19,10 +19,10 @@ import java.util.Optional;
 @Description({"Eats or drinks the item in your hand by holding the use button until the game says you are no longer using an item, then letting go. The trigger waits while this happens, so the next line runs once you have finished eating.",
         "If the item cannot be eaten, the button is held for about 2 ticks and then released. With an item that stays in use while the button is down, such as a bow or shield, the trigger keeps waiting until something else stops the use. Written eat, drink or consume, followed by optional held or holding and then item or food."})
 @Examples({"on hunger change:",
-        "\tif hunger of player is less than 14:",
-        "\t\tif player is holding cooked beef:",
-        "\t\t\teat held item",
-        "\t\t\tsend \"ate, hunger now %hunger of player%\""})
+        "	if hunger of player is less than 14:",
+        "		if player is holding cooked beef:",
+        "			eat held item",
+        "			send \"ate, hunger now %hunger of player%\""})
 @Since("1.0.0-alpha.4")
 public final class EffEat implements Statement {
     private static final int START_TICKS = 2;

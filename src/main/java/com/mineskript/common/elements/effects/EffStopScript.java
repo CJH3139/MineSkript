@@ -17,9 +17,9 @@ import java.util.Optional;
 @Description({"Cancels every running or waiting trigger from one script file. The name is matched ignoring case, and .ms is added if you leave it off, so \"miner\" and \"Miner.ms\" both stop miner.ms. If it names the script you are in, the current trigger stops too; otherwise the current trigger carries on.",
         "The script stays loaded and its events keep firing. Unlike Stop All Scripts, it does not release keys or controls that the stopped script was holding, so release them yourself."})
 @Examples({"on key press of \"x\":",
-        "\tstop script \"autominer\"",
-        "\trelease attack",
-        "\tsend \"autominer stopped\""})
+        "	stop script \"autominer\"",
+        "	release attack",
+        "	send \"autominer stopped\""})
 @Since("1.0.0-alpha.5")
 public final class EffStopScript implements Statement {
     private final int line;

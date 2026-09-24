@@ -27,15 +27,15 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"r\":",
-        "\tif block below player is stone:",
-        "\t\tsend \"standing on stone\"",
+        "	if block below player is stone:",
+        "		send \"standing on stone\"",
         "",
         "on key press of \"r\":",
-        "\tsend \"2 blocks up: %block 2 above player%, north: %block north of player%\"",
+        "	send \"2 blocks up: %block 2 above player%, north: %block north of player%\"",
         "",
         "on key press of \"r\":",
-        "\tif block above target block is air:",
-        "\t\tsend \"nothing on top of it\""
+        "	if block above target block is air:",
+        "		send \"nothing on top of it\""
 })
 @Since({"1.0.0-alpha", "1.0.0-alpha.11"})
 public final class ExprBlock implements Expression {

@@ -15,7 +15,7 @@ import java.util.Optional;
 @Description("The display name of an item as text, the same name its tooltip shows (so a renamed item gives its custom name). An empty stack gives air. If the value is not an item (for example an unset variable) the line stops with a \"there is no item\" error. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"n\":",
-        "\tsend \"holding %name of held item%\""
+        "	send \"holding %name of held item%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprItemName extends ItemPropertyExpression {

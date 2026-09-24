@@ -23,13 +23,13 @@ import java.util.Set;
 })
 @Examples({
         "on key press of \"y\":",
-        "\tsend \"yaw %yaw%, pitch %pitch%\"",
+        "	send \"yaw %yaw%, pitch %pitch%\"",
         "",
         "on key press of \"t\":",
-        "\tadd 180 to yaw",
+        "	add 180 to yaw",
         "",
         "on key press of \"r\":",
-        "\tset player's yaw to 0"
+        "	set player's yaw to 0"
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.8", "1.0.0-alpha.11"})
 public final class ExprYaw extends GameValueExpression implements Changeable {

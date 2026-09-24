@@ -14,9 +14,9 @@ import java.util.Optional;
 @Description("The closest other player whose entity your client has loaded (players within render distance, not the whole tab list). Returns none when nobody else is nearby. The value is an entity snapshot, so use entity properties like name of and distance of. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "every 2 seconds:",
-        "\tif nearest player is set:",
-        "\t\tif nearest player is within 10 blocks:",
-        "\t\t\tshow action bar \"%name of nearest player% is close\""
+        "	if nearest player is set:",
+        "		if nearest player is within 10 blocks:",
+        "			show action bar \"%name of nearest player% is close\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprNearestPlayer extends GameValueExpression {

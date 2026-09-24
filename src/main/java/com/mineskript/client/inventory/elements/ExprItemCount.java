@@ -14,7 +14,7 @@ import java.util.Optional;
 @Description("How many items are in a stack, as a whole number. Also written amount of. An empty stack gives 0. If the value is not an item the line stops with a \"there is no item\" error.")
 @Examples({
         "on key press of \"c\":",
-        "\tsend \"%count of held item% in hand, %amount of offhand item% in offhand\""
+        "	send \"%count of held item% in hand, %amount of offhand item% in offhand\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprItemCount extends ItemPropertyExpression {

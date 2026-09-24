@@ -20,13 +20,13 @@ import java.util.Optional;
 @Description({"A location a number of blocks away from another one in a direction: above (also over), below (also under or beneath), north, south, east or west. Written like Skript, as the location 2 meters above the player or the location north of {home}, or shorter as 2 above the player or 3 blocks north of {home} wherever a location is expected.",
         "Without a number the distance is 1 block. The number is not rounded, so 0.5 above is half a block up. North is -z, south is +z, east is +x and west is -x. The new location is in the same dimension as the one it starts from."})
 @Examples({"on key press of \"b\":",
-        "\tshow a \"red\" beam at the location 3 blocks north of player",
+        "	show a \"red\" beam at the location 3 blocks north of player",
         "",
         "on key press of \"h\":",
-        "\tspawn a hologram \"&6here\" at 2 above player",
+        "	spawn a hologram \"&6here\" at 2 above player",
         "",
         "on key press of \"k\":",
-        "\tsend \"%location 1.5 meters below location(0, 64, 0)%\""})
+        "	send \"%location 1.5 meters below location(0, 64, 0)%\""})
 @Since("1.0.0-alpha.10")
 public final class ExprRelativeLocation implements Expression {
     private static final String DIRECTIONS = "(up:above|up:over|down:below|down:under|down:beneath"

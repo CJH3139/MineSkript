@@ -17,7 +17,7 @@ import java.util.Optional;
 @Description("Rounds a number to a given number of decimal places, halves rounding up. The place count is rounded and kept between 0 and 15. Useful for storing or comparing a tidy value, since text already shows at most 2 decimal places.")
 @Examples({
         "on key press of \"c\":",
-        "\tsend \"x: %player's x-coordinate rounded to 1 place%\""
+        "	send \"x: %player's x-coordinate rounded to 1 place%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprRoundedToPlaces implements Expression {

@@ -24,11 +24,11 @@ public final class WorldFunctions {
                                 + " such as \"the_end\", gets it added. Unlike Skript's location function there is"
                                 + " no yaw and pitch, because MineSkript locations are only a position.")
                 .examples("on key press of \"l\":",
-                        "\tlook at location(0.5, 64.5, 0.5)",
+                        "	look at location(0.5, 64.5, 0.5)",
                         "",
                         "on key press of \"h\":",
-                        "\tset {nether portal} to location(10, 70, -4, \"minecraft:the_nether\")",
-                        "\tsend \"saved %{nether portal}%\"")
+                        "	set {nether portal} to location(10, 70, -4, \"minecraft:the_nether\")",
+                        "	send \"saved %{nether portal}%\"")
                 .since("1.0.0-alpha.10");
     }
 

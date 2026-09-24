@@ -20,12 +20,12 @@ import java.util.Optional;
         "A subtitle is only drawn while a title is on screen, so show it together with a title. Needs a world.",
         "Skript's spellings, send title (with a subtitle and times) and send action bar, do the same and are described under Send Title and Action Bar."})
 @Examples({"every 5 seconds:",
-        "\tif health of player is less than 6:",
-        "\t\tshow subtitle \"%health of player% hp left\"",
-        "\t\tshow title \"low health\"",
+        "	if health of player is less than 6:",
+        "		show subtitle \"%health of player% hp left\"",
+        "		show title \"low health\"",
         "",
         "on move:",
-        "\tshow action bar \"x %round player's x-coordinate%  z %round player's z-coordinate%\""})
+        "	show action bar \"x %round player's x-coordinate%  z %round player's z-coordinate%\""})
 @Since("1.0.0-alpha.2")
 public final class EffHudText implements Statement {
     private enum Target {

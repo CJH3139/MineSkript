@@ -21,14 +21,14 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"b\":",
-        "\tsend \"you are in %biome%\"",
+        "	send \"you are in %biome%\"",
         "",
         "every 5 seconds:",
-        "\tif biome is \"minecraft:desert\":",
-        "\t\tshow action bar \"bring water\"",
+        "	if biome is \"minecraft:desert\":",
+        "		show action bar \"bring water\"",
         "",
         "on key press of \"b\":",
-        "\tsend \"the block you look at is in %biome of target block%\""
+        "	send \"the block you look at is in %biome of target block%\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprBiome implements Expression {

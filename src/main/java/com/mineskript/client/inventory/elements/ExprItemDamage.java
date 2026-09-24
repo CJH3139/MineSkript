@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description("How much durability an item has lost, as a whole number: 0 on a brand new tool, rising as it wears down. Items without durability give 0. This is Skript's damage; the uses left are durability. If the value is not an item the line stops with a \"there is no item\" error.")
 @Examples({
         "on key press of \"d\":",
-        "\tset {_left} to max damage of held item - damage of held item",
-        "\tsend \"%{_left}% uses left\""
+        "	set {_left} to max damage of held item - damage of held item",
+        "	send \"%{_left}% uses left\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprItemDamage extends ItemPropertyExpression {

@@ -23,12 +23,12 @@ import java.util.Optional;
 })
 @Examples({
         "every 5 ticks:",
-        "\tif fall distance is greater than 10:",
-        "\t\tshow title \"falling!\"",
+        "	if fall distance is greater than 10:",
+        "		show title \"falling!\"",
         "",
         "on land:",
-        "\tif fall distance is greater than 3:",
-        "\t\tsend \"fell %fall distance% blocks\""
+        "	if fall distance is greater than 3:",
+        "		send \"fell %fall distance% blocks\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprFallDistance extends GameValueExpression {

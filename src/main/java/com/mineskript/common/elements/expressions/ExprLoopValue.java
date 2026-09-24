@@ -17,13 +17,13 @@ import java.util.Optional;
 @Description("The current value of the innermost loop. In loop N times it is the pass number (1, 2, 3...); in a loop over a list it is the current element, and in a loop over a list variable such as {homes::*} it is the current entry's value (loop-index gives its index). Its type is whatever the list holds. Using it outside a loop, or inside a while loop, is a parse error.")
 @Examples({
         "on key press of \"l\":",
-        "\tloop \"red,green,blue\" split at \",\":",
-        "\t\tsend \"colour: %loop-value%\"",
+        "	loop \"red,green,blue\" split at \",\":",
+        "		send \"colour: %loop-value%\"",
         "",
         "on key press of \"l\":",
-        "\tloop stone, dirt and gravel:",
-        "\t\tif block below player is loop-value:",
-        "\t\t\tsend \"standing on %loop-value%\""
+        "	loop stone, dirt and gravel:",
+        "		if block below player is loop-value:",
+        "			send \"standing on %loop-value%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprLoopValue implements Expression {

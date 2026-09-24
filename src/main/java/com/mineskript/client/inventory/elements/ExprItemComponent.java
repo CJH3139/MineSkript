@@ -20,13 +20,13 @@ import java.util.Optional;
         "Gives none when the item does not have that component or the id is not a component. Items read back from saved variables have no components. If the value is not an item the line stops with a \"there is no item\" error.",
         "Only data your game already received is read; nothing is asked from the server."})
 @Examples({"on key press of \"c\":",
-        "\tset {_data} to component \"custom_data\" of held item",
-        "\tif {_data} is set:",
-        "\t\tsend \"custom data: %{_data}%\"",
+        "	set {_data} to component \"custom_data\" of held item",
+        "	if {_data} is set:",
+        "		send \"custom data: %{_data}%\"",
         "",
         "on item tooltip:",
-        "\tif data component \"rarity\" of event-item is \"epic\":",
-        "\t\tadd \"&5&lepic!\" to the tooltip"})
+        "	if data component \"rarity\" of event-item is \"epic\":",
+        "		add \"&5&lepic!\" to the tooltip"})
 @Since("1.0.0-alpha.9")
 public final class ExprItemComponent implements Expression {
     private final Expression id;

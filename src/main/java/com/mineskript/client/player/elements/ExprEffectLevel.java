@@ -17,12 +17,12 @@ import java.util.Optional;
 @Description("The level of an active status effect on you, as a whole number: 1 for Speed I, 2 for Speed II, and 0 when you do not have the effect. The name can be a plain effect name like speed or jump boost (spaces become underscores) or a full id like minecraft:speed. Also written effect level of. Skript's form, tier of speed of player, takes the effect written out instead of as text (see Potion Effect Tier). Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on effect gain:",
-        "\tset {_lvl} to level of effect \"speed\"",
-        "\tsend \"speed level %{_lvl}%\"",
+        "	set {_lvl} to level of effect \"speed\"",
+        "	send \"speed level %{_lvl}%\"",
         "",
         "every 1 second:",
-        "\tif effect level of \"poison\" is greater than 0:",
-        "\t\tshow action bar \"poisoned\""
+        "	if effect level of \"poison\" is greater than 0:",
+        "		show action bar \"poisoned\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprEffectLevel implements Expression {

@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description({"Cancels every trigger that is running or waiting, in every script, and releases every key, attack and use control that scripts are holding. The trigger that runs it stops too. Scripts stay loaded, so their events fire again the next time they happen. Cancel all running scripts also works.",
         "Nothing after stop all scripts runs in the same trigger, so put any message before it."})
 @Examples({"on key press of \"f12\":",
-        "\tshow action bar \"stopping all scripts\"",
-        "\tstop all scripts"})
+        "	show action bar \"stopping all scripts\"",
+        "	stop all scripts"})
 @Since("1.0.0-alpha.5")
 public final class EffStopAllScripts implements Statement {
     private final int line;

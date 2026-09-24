@@ -17,12 +17,12 @@ import java.util.Optional;
 })
 @Examples({
         "every 5 seconds:",
-        "\tif durability of held item is less than 20:",
-        "\t\tif max durability of held item is greater than 0:",
-        "\t\t\tshow title \"tool almost broken\"",
+        "	if durability of held item is less than 20:",
+        "		if max durability of held item is greater than 0:",
+        "			show title \"tool almost broken\"",
         "",
         "on key press of \"d\":",
-        "\tsend \"%held item's durability% uses left\""
+        "	send \"%held item's durability% uses left\""
 })
 @Since("1.0.0-alpha.11")
 public final class ExprDurability extends ItemPropertyExpression {

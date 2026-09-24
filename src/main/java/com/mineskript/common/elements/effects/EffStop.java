@@ -13,12 +13,12 @@ import java.util.Optional;
 @Name("Stop")
 @Description("Ends the current trigger immediately; nothing after it runs. Other triggers, including other runs of the same one that are waiting, are not affected. Also written exit, stop trigger or exit trigger.")
 @Examples({"on key press of \"r\":",
-        "\tif player is not holding diamond pickaxe:",
-        "\t\tsend \"hold a diamond pickaxe\"",
-        "\t\tstop",
-        "\thold attack",
-        "\twait 5 seconds",
-        "\trelease attack"})
+        "	if player is not holding diamond pickaxe:",
+        "		send \"hold a diamond pickaxe\"",
+        "		stop",
+        "	hold attack",
+        "	wait 5 seconds",
+        "	release attack"})
 @Since("1.0.0-alpha")
 public final class EffStop implements Statement {
     private final int line;

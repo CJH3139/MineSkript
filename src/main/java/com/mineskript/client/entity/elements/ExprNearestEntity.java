@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description("The closest entity to you, excluding yourself, out of every entity your client has loaded. That includes mobs, other players, dropped items, arrows and experience orbs, with no distance limit. Returns none when there are no other entities. The value is a snapshot taken when read. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"e\":",
-        "\tif nearest entity is set:",
-        "\t\tsend \"closest: %id of nearest entity% at %distance of nearest entity% blocks\""
+        "	if nearest entity is set:",
+        "		send \"closest: %id of nearest entity% at %distance of nearest entity% blocks\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprNearestEntity extends GameValueExpression {

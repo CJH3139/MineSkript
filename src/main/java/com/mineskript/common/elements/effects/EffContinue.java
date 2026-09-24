@@ -15,10 +15,10 @@ import java.util.Optional;
 @Description({"Skips the rest of the current pass of the innermost loop and moves on to the next one. Works in loop and while sections.",
         "Only allowed inside a loop: anywhere else it is an error when the script loads."})
 @Examples({"on load:",
-        "\tloop 5 times:",
-        "\t\tif loop-value is 3:",
-        "\t\t\tcontinue",
-        "\t\tsend \"%loop-value%\""})
+        "	loop 5 times:",
+        "		if loop-value is 3:",
+        "			continue",
+        "		send \"%loop-value%\""})
 @Since("1.0.0-alpha.2")
 public final class EffContinue implements Statement {
     private final int line;

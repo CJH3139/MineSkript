@@ -16,12 +16,12 @@ import java.util.Optional;
 @Description("Which pass of the innermost loop is running, starting at 1. Also written loop-counter, loop iteration or loop counter. Works in every kind of loop, including while. Using it outside a loop is a parse error.")
 @Examples({
         "on key press of \"l\":",
-        "\tloop 3 times:",
-        "\t\tsend \"pass %loop-iteration%\"",
+        "	loop 3 times:",
+        "		send \"pass %loop-iteration%\"",
         "",
         "on key press of \"l\":",
-        "\tloop online player names:",
-        "\t\tsend \"%loop-iteration%. %loop-value%\""
+        "	loop online player names:",
+        "		send \"%loop-iteration%. %loop-value%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprLoopIteration implements Expression {

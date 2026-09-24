@@ -14,8 +14,8 @@ import java.util.Optional;
 @Description({"Opens your inventory screen by pressing your inventory key binding, as if you pressed E.",
         "Does nothing if the inventory control has no key bound. Needs a world."})
 @Examples({"on key press of \"i\":",
-        "\tif player is sneaking:",
-        "\t\topen the inventory"})
+        "	if player is sneaking:",
+        "		open the inventory"})
 @Since("1.0.0-alpha.2")
 public final class EffOpenInventory implements Statement {
     private final int line;

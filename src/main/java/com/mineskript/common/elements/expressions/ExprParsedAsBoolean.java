@@ -20,9 +20,9 @@ import java.util.Optional;
 @Description("Turns text into true or false. true, yes and on give true; false, no and off give false; case and surrounding spaces are ignored. Anything else returns none.")
 @Examples({
         "on chat send:",
-        "\tset {_answer} to message parsed as boolean",
-        "\tif {_answer} is true:",
-        "\t\tsend \"agreed\""
+        "	set {_answer} to message parsed as boolean",
+        "	if {_answer} is true:",
+        "		send \"agreed\""
 })
 @Since("1.0.0-alpha.5")
 public final class ExprParsedAsBoolean implements Expression {

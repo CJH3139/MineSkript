@@ -25,7 +25,7 @@ public final class TextFunctions {
                 .description("Joins texts, and any other values, into one text with nothing in between, such as"
                         + " concat(\"level \", 5) giving level 5.")
                 .examples("on key press of \"c\":",
-                        "\tsend concat(\"you are at y \", round(player's y-coordinate))")
+                        "	send concat(\"you are at y \", round(player's y-coordinate))")
                 .since(SINCE);
         registry.addFunction("formatNumber", SkType.TEXT, TextFunctions::format,
                         FunctionParameter.of("number", SkType.NUMBER),
@@ -38,8 +38,8 @@ public final class TextFunctions {
                                 + " starts the decimals. Commas and dots are always written this way, whatever"
                                 + " language your game uses. An invalid format gives no value.")
                 .examples("on key press of \"m\":",
-                        "\tsend \"you have %formatNumber(total experience)% experience points\"",
-                        "\tsend \"health: %formatNumber(health of player, \"0.0\")%\"")
+                        "	send \"you have %formatNumber(total experience)% experience points\"",
+                        "	send \"health: %formatNumber(health of player, \"0.0\")%\"")
                 .since(SINCE);
     }
 

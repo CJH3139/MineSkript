@@ -18,9 +18,9 @@ import java.util.Optional;
 @Description("The two texts joined together, with nothing added in between. Include any space you want in one of the texts.")
 @Examples({
         "on key press of \"j\":",
-        "\tset {_a} to \"Mine\"",
-        "\tset {_b} to \"Skript\"",
-        "\tsend \"%{_a} joined with {_b}%\""
+        "	set {_a} to \"Mine\"",
+        "	set {_b} to \"Skript\"",
+        "	send \"%{_a} joined with {_b}%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprJoin implements Expression {

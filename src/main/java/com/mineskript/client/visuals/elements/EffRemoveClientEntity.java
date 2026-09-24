@@ -18,12 +18,12 @@ import java.util.Optional;
 @Description({"Removes a client entity (hologram, item display or block display) you spawned, given by its number from last spawned client entity, or every client entity at once. Removing one that is already gone does nothing.",
         "Client entities are also removed by themselves when you leave the world or change dimension, and when the script that made them is reloaded."})
 @Examples({"on key press of \"g\":",
-        "\tif {-home hologram} is set:",
-        "\t\tremove client entity {-home hologram}",
-        "\t\tdelete {-home hologram}",
+        "	if {-home hologram} is set:",
+        "		remove client entity {-home hologram}",
+        "		delete {-home hologram}",
         "",
         "on key press of \"k\":",
-        "\tremove all client entities"})
+        "	remove all client entities"})
 @Since("1.0.0-alpha.9")
 public final class EffRemoveClientEntity implements Statement {
     private final int line;

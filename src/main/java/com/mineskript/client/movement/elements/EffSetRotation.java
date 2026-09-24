@@ -18,9 +18,9 @@ import java.util.Optional;
 @Description({"Sets the direction you face. Yaw is the horizontal angle in degrees: 0 faces south, 90 west, 180 north and -90 east. Pitch is the vertical angle: 0 is level, -90 straight up and 90 straight down.",
         "Needs a world."})
 @Examples({"on key press of \"n\":",
-        "\tset yaw to 180",
-        "\tset pitch to 0",
-        "\tsend \"facing north\""})
+        "	set yaw to 180",
+        "	set pitch to 0",
+        "	send \"facing north\""})
 @Since("1.0.0-alpha.2")
 public final class EffSetRotation implements Statement {
     private final int line;

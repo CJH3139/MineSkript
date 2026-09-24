@@ -21,13 +21,13 @@ import java.util.Optional;
 })
 @Examples({
         "on chat send:",
-        "\tset {_n} to message parsed as number",
-        "\tif {_n} is set:",
-        "\t\tsend \"double that is %{_n} * 2%\"",
+        "	set {_n} to message parsed as number",
+        "	if {_n} is set:",
+        "		send \"double that is %{_n} * 2%\"",
         "",
         "on key press of \"n\":",
-        "\tset {_t} to \"41\"",
-        "\tsend \"%({_t} parsed as number) + 1%\""
+        "	set {_t} to \"41\"",
+        "	send \"%({_t} parsed as number) + 1%\""
 })
 @Since("1.0.0-alpha.5")
 public final class ExprParsedAsNumber implements Expression {

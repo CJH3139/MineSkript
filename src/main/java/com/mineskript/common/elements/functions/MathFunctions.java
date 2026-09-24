@@ -169,8 +169,8 @@ public final class MathFunctions {
                 .description("Whether a number is NaN (not a number), the result of sums such as 0 / 0 or"
                         + " sqrt(-1).")
                 .examples("on load:",
-                        "\tif isNaN(sqrt(-1)):",
-                        "\t\tsend \"not a number\"")
+                        "	if isNaN(sqrt(-1)):",
+                        "		send \"not a number\"")
                 .since(SINCE);
     }
 
@@ -196,12 +196,12 @@ public final class MathFunctions {
                 .description("The total experience points needed to reach a level from nothing, as Minecraft counts"
                         + " them. Decimal levels are cut down to a whole level first.")
                 .examples("on key press of \"x\":",
-                        "\tsend \"level 30 takes %calcExperience(30)% points\"")
+                        "	send \"level 30 takes %calcExperience(30)% points\"")
                 .since(SINCE);
     }
 
     private static String[] script(String call) {
-        return new String[] {"on load:", "\tsend \"" + call + " is %" + call + "%\""};
+        return new String[] {"on load:", "	send \"" + call + " is %" + call + "%\""};
     }
 
     private static FunctionInfo unary(SyntaxRegistry registry, String name, DoubleUnaryOperator operation) {

@@ -179,11 +179,15 @@ public interface GameBridge {
 
     int lightAt(double x, double y, double z, boolean sky);
 
+    int combinedLightAt(double x, double y, double z);
+
     boolean itemExists(String id);
 
     int lightLevel();
 
     int skyLight();
+
+    int combinedLight();
 
     boolean canSeeSky();
 

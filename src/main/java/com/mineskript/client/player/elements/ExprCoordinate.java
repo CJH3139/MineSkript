@@ -22,11 +22,11 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"c\":",
-        "\tsend \"at %player's x-coordinate%, %player's y-coordinate%, %player's z-coordinate%\"",
+        "	send \"at %player's x-coordinate%, %player's y-coordinate%, %player's z-coordinate%\"",
         "",
         "every 1 second:",
-        "\tif y-coordinate of player is less than 0:",
-        "\t\tshow action bar \"below sea of deepslate\""
+        "	if y-coordinate of player is less than 0:",
+        "		show action bar \"below sea of deepslate\""
 })
 @Since("1.0.0-alpha")
 public final class ExprCoordinate implements Expression {

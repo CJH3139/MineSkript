@@ -15,14 +15,14 @@ import java.util.Optional;
 @Description({"Stops the message or command that triggered the event from being sent. Only allowed inside on chat send and on command send; anywhere else it is an error when the script loads. Written cancel event, cancel the message or cancel the command, which all do the same thing.",
         "The decision is made when the trigger first pauses or finishes, so cancel event has to run before any wait in the trigger. If several triggers handle the same message, any one of them cancelling is enough."})
 @Examples({"on chat send:",
-        "\tif message contains \"password\":",
-        "\t\tcancel event",
-        "\t\tsend \"not sending that\"",
+        "	if message contains \"password\":",
+        "		cancel event",
+        "		send \"not sending that\"",
         "",
         "on command send:",
-        "\tif message starts with \"op \":",
-        "\t\tcancel the command",
-        "\t\tshow action bar \"blocked /op\""})
+        "	if message starts with \"op \":",
+        "		cancel the command",
+        "		show action bar \"blocked /op\""})
 @Since("1.0.0-alpha.6")
 public final class EffCancelEvent implements Statement {
     private final int line;

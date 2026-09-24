@@ -22,11 +22,11 @@ import java.util.Optional;
 })
 @Examples({
         "on chat send:",
-        "\tset {_new} to message with \"gg\" replaced with \"good game\"",
-        "\tsend \"%{_new}%\"",
+        "	set {_new} to message with \"gg\" replaced with \"good game\"",
+        "	send \"%{_new}%\"",
         "",
         "on chat send:",
-        "\tsend message with \"GG\" replaced with \"good game\" with case sensitivity"
+        "	send message with \"GG\" replaced with \"good game\" with case sensitivity"
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprReplace implements Expression {

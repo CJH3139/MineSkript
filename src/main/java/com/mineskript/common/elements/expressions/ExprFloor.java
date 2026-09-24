@@ -17,7 +17,7 @@ import java.util.Optional;
 @Description("Rounds a number down to the whole number at or below it, so floor 2.7 is 2 and floor -2.3 is -3. Flooring a player coordinate gives the coordinate of the block they are in.")
 @Examples({
         "on key press of \"c\":",
-        "\tsend \"block %floor player's x-coordinate%, %floor player's y-coordinate%, %floor player's z-coordinate%\""
+        "	send \"block %floor player's x-coordinate%, %floor player's y-coordinate%, %floor player's z-coordinate%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprFloor implements Expression {

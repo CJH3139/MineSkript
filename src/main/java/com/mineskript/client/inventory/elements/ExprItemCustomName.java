@@ -15,10 +15,10 @@ import java.util.Optional;
 @Description({"The name an item was given, in an anvil or by the server, as plain text without colours. An item that was never renamed has no custom name, so this gives none: check it with is set. Compare with name of, which gives the name the tooltip shows either way.",
         "Items read back from saved variables keep their name but not their other data, so they have no custom name. If the value is not an item the line stops with a \"there is no item\" error."})
 @Examples({"on key press of \"n\":",
-        "\tif custom name of held item is set:",
-        "\t\tsend \"renamed to %custom name of held item%\"",
-        "\telse:",
-        "\t\tsend \"not renamed\""})
+        "	if custom name of held item is set:",
+        "		send \"renamed to %custom name of held item%\"",
+        "	else:",
+        "		send \"not renamed\""})
 @Since("1.0.0-alpha.9")
 public final class ExprItemCustomName extends ItemPropertyExpression {
     private ExprItemCustomName(Expression item) {

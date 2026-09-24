@@ -18,12 +18,12 @@ import java.util.Optional;
         "For the player it is the position of your feet, in the dimension you are in. For an entity it is its position when the entity value was read (the bottom of the entity). For a block, such as target block or block at, it is the block's corner with the lowest x, y and z, so the location of the block at location(10.7, 64, -3.2) is x: 10, y: 64, z: -4.",
         "A block whose position is not known, such as the target block when you are not looking at one, stops the line with an error. A location in text reads like x: 1, y: 64, z: -3 in minecraft:overworld."})
 @Examples({"on key press of \"h\":",
-        "\tset {home} to location of player",
-        "\tsend \"home set at %{home}%\"",
+        "	set {home} to location of player",
+        "	send \"home set at %{home}%\"",
         "",
         "on key press of \"i\":",
-        "\tif target block is not air:",
-        "\t\tsend \"that block is at %target block's location%\""})
+        "	if target block is not air:",
+        "		send \"that block is at %target block's location%\""})
 @Since("1.0.0-alpha.10")
 public final class ExprLocationOf implements Expression {
     private final Expression source;

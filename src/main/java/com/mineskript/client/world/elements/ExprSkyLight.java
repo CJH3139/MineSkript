@@ -18,11 +18,11 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"l\":",
-        "\tsend \"block light %light level%, sky light %sky light%\"",
+        "	send \"block light %block light level%, sky light %sky light%\"",
         "",
         "on key press of \"l\":",
-        "\tif sunlight level of block above player is 15:",
-        "\t\tsend \"open sky above\""
+        "	if sunlight level of block above player is 15:",
+        "		send \"open sky above\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprSkyLight implements Expression {

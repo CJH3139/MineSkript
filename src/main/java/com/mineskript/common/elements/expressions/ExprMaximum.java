@@ -17,10 +17,10 @@ import java.util.Optional;
 @Description("The larger of two numbers. Also written max of.")
 @Examples({
         "on key press of \"m\":",
-        "\tset {_arrows} to number of arrow in inventory",
-        "\tset {_over} to {_arrows} - 64",
-        "\tset {_extra} to max of {_over} and 0",
-        "\tsend \"%{_extra}% arrows beyond one stack\""
+        "	set {_arrows} to number of arrow in inventory",
+        "	set {_over} to {_arrows} - 64",
+        "	set {_extra} to max of {_over} and 0",
+        "	send \"%{_extra}% arrows beyond one stack\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprMaximum implements Expression {

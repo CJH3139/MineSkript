@@ -15,8 +15,8 @@ import java.util.Optional;
 @Description("How far an entity is from you in blocks, as a decimal number, measured between your position and the entity's position. The distance is captured when the entity value is read and is not updated later. If the value is not an entity the line stops with a \"there is no entity\" error.")
 @Examples({
         "every 1 second:",
-        "\tif nearest player is set:",
-        "\t\tshow action bar \"%name of nearest player%: %distance of nearest player% blocks\""
+        "	if nearest player is set:",
+        "		show action bar \"%name of nearest player%: %distance of nearest player% blocks\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprEntityDistance extends EntityPropertyExpression {

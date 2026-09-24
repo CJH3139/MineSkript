@@ -15,11 +15,11 @@ import java.util.Optional;
 @Description({"The number of the client entity (hologram, item display or block display) that spawn last made in this trigger, like Skript's last spawned entity. Keep it in a variable to move the entity, change a hologram's text or remove it later.",
         "It is none until the trigger spawns something. The number stays valid until the entity is removed; using it after that does nothing."})
 @Examples({"on key press of \"h\":",
-        "\tspawn a hologram \"&ahello\" at location(0.5, 70, 0.5)",
-        "\tset {-hello} to last spawned client entity",
+        "	spawn a hologram \"&ahello\" at location(0.5, 70, 0.5)",
+        "	set {-hello} to last spawned client entity",
         "",
         "on key press of \"g\":",
-        "\tremove client entity {-hello}"})
+        "	remove client entity {-hello}"})
 @Since("1.0.0-alpha.9")
 public final class ExprLastSpawnedClientEntity implements Expression {
     private ExprLastSpawnedClientEntity() {

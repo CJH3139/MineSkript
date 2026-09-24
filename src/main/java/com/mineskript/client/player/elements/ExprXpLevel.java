@@ -14,11 +14,11 @@ import java.util.Optional;
 @Description("Your experience level as a whole number, the green number above the hotbar. Also written experience level, and like Skript level of player or player's level. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on level up:",
-        "\tsend \"reached level %xp level%\"",
+        "	send \"reached level %xp level%\"",
         "",
         "on key press of \"l\":",
-        "\tif player's level is at least 30:",
-        "\t\tsend \"ready to enchant\""
+        "	if player's level is at least 30:",
+        "		send \"ready to enchant\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprXpLevel extends GameValueExpression {

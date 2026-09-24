@@ -14,10 +14,10 @@ import java.util.Optional;
 @Description("Your maximum air supply in ticks as a whole number, normally 300 (15 seconds). Also written max air of player or player's max air. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"a\":",
-        "\tsend \"air %air% of %max air%\"",
+        "	send \"air %air% of %max air%\"",
         "",
         "on key press of \"a\":",
-        "\tsend \"%player's max air% ticks of air at most\""
+        "	send \"%player's max air% ticks of air at most\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprMaxAir extends GameValueExpression {

@@ -17,7 +17,7 @@ import java.util.Optional;
 @Description("Rounds a number to the nearest whole number. Halves round up, towards positive infinity, so round 2.5 is 3 and round -2.5 is -2.")
 @Examples({
         "on key press of \"c\":",
-        "\tsend \"block x: %round player's x-coordinate%\""
+        "	send \"block x: %round player's x-coordinate%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprRound implements Expression {

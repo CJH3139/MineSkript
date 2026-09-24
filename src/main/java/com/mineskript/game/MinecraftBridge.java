@@ -669,6 +669,11 @@ public final class MinecraftBridge implements GameBridge {
     }
 
     @Override
+    public int combinedLightAt(double x, double y, double z) {
+        return minecraft().level.getMaxLocalRawBrightness(BlockPos.containing(x, y, z));
+    }
+
+    @Override
     public boolean itemExists(String id) {
         Identifier key = Identifier.tryParse(id);
         return key != null && BuiltInRegistries.ITEM.containsKey(key);
@@ -684,6 +689,12 @@ public final class MinecraftBridge implements GameBridge {
     public int skyLight() {
         Minecraft minecraft = minecraft();
         return minecraft.level.getBrightness(LightLayer.SKY, minecraft.player.blockPosition());
+    }
+
+    @Override
+    public int combinedLight() {
+        Minecraft minecraft = minecraft();
+        return minecraft.level.getMaxLocalRawBrightness(minecraft.player.blockPosition());
     }
 
     @Override

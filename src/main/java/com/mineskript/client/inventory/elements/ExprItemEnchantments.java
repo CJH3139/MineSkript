@@ -20,11 +20,11 @@ import java.util.Optional;
 @Description({"The enchantments of an item as a list of enchantment types, like Skript: each one the enchantment and its level, printed as sharpness 5 or fire aspect 2, sorted by id. Enchanted books give the enchantments stored in them. Enchantments from other mods or data packs keep their namespace, such as mymod:frost 1. An item without enchantments gives an empty list.",
         "Compare an entry with an enchantment type written out, as in loop-value is sharpness 5, or with text such as \"sharpness 5\". Use level of sharpness of an item to get one level as a number, and is enchanted with to check for one. Items read back from saved variables have no enchantments. If the value is not an item the line stops with a \"there is no item\" error."})
 @Examples({"on key press of \"e\":",
-        "\tsend \"enchantments: %enchantments of held item%\"",
+        "	send \"enchantments: %enchantments of held item%\"",
         "",
         "on key press of \"e\":",
-        "\tloop enchantments of held item:",
-        "\t\tsend \"has %loop-value%\""})
+        "	loop enchantments of held item:",
+        "		send \"has %loop-value%\""})
 @Since({"1.0.0-alpha.9", "1.0.0-alpha.11"})
 public final class ExprItemEnchantments extends ItemPropertyExpression {
     private ExprItemEnchantments(Expression item) {

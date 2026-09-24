@@ -16,7 +16,7 @@ import java.util.Optional;
 @Description("Your own username as text. Written name of player or player's name. Printing player in text gives the same result. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on world join:",
-        "\tsend \"welcome back, %name of player%\""
+        "	send \"welcome back, %name of player%\""
 })
 @Since("1.0.0-alpha")
 public final class ExprPlayerName implements Expression {

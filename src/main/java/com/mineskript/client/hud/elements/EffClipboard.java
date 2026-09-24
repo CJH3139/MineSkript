@@ -15,9 +15,9 @@ import java.util.Optional;
 @Name("Copy To Clipboard")
 @Description("Puts a value on your system clipboard as text, ready to paste anywhere. Numbers, items and lists are turned into text the same way Send shows them.")
 @Examples({"on key press of \"c\":",
-        "\tif key \"ctrl\" is held:",
-        "\t\tcopy \"%round player's x-coordinate% %round player's y-coordinate% %round player's z-coordinate%\" to clipboard",
-        "\t\tshow action bar \"coordinates copied\""})
+        "	if key \"ctrl\" is held:",
+        "		copy \"%round player's x-coordinate% %round player's y-coordinate% %round player's z-coordinate%\" to clipboard",
+        "		show action bar \"coordinates copied\""})
 @Since("1.0.0-alpha.2")
 public final class EffClipboard implements Statement {
     private final int line;

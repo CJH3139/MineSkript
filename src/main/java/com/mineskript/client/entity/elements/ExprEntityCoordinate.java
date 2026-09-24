@@ -20,8 +20,8 @@ import java.util.function.Function;
 @Description("The exact x, y or z position of an entity, as a decimal number (y is the bottom of the entity). Accepts x-coordinate, x-coord, x coordinate or x coord, and the same for y and z. The position is the one captured when the entity value was read, so a copy stored in a variable does not follow the entity. If the value is not an entity the line stops with a \"there is no entity\" error. A variable holding an entity also works: its coordinates are read through its location (see Location Coordinate).")
 @Examples({
         "on key press of \"e\":",
-        "\tif target entity is set:",
-        "\t\tsend \"at %x-coordinate of target entity%, %y-coordinate of target entity%, %z-coordinate of target entity%\""
+        "	if target entity is set:",
+        "		send \"at %x-coordinate of target entity%, %y-coordinate of target entity%, %z-coordinate of target entity%\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprEntityCoordinate extends EntityPropertyExpression {

@@ -13,8 +13,8 @@ import java.util.Optional;
 @Name("Take Screenshot")
 @Description("Saves a screenshot to your screenshots folder, the same as pressing F2.")
 @Examples({"on advancement:",
-        "\twait 10 ticks",
-        "\ttake a screenshot"})
+        "	wait 10 ticks",
+        "	take a screenshot"})
 @Since("1.0.0-alpha.2")
 public final class EffScreenshot implements Statement {
     private final int line;

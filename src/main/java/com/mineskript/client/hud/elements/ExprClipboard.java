@@ -20,10 +20,10 @@ import java.util.Set;
 @Description("The text on your system clipboard, or empty text when it holds none. Works without a world. Setting it puts the value on the clipboard as text, the same as Copy To Clipboard.")
 @Examples({
         "on key press of \"v\":",
-        "\tsend \"clipboard: %clipboard%\"",
+        "	send \"clipboard: %clipboard%\"",
         "",
         "on key press of \"c\":",
-        "\tset clipboard to \"%player's x-coordinate% %player's y-coordinate% %player's z-coordinate%\""
+        "	set clipboard to \"%player's x-coordinate% %player's y-coordinate% %player's z-coordinate%\""
 })
 @Since("1.0.0-alpha.8")
 public final class ExprClipboard implements Expression, Changeable {

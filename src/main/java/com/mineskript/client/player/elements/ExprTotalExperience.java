@@ -18,10 +18,10 @@ import java.util.Optional;
 })
 @Examples({
         "on xp change:",
-        "\tsend \"total xp: %total xp%\"",
+        "	send \"total xp: %total xp%\"",
         "",
         "on key press of \"x\":",
-        "\tsend \"you have %player's total experience% experience points\""
+        "	send \"you have %player's total experience% experience points\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprTotalExperience implements Expression {

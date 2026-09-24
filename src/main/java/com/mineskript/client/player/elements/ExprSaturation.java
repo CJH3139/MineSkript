@@ -15,11 +15,11 @@ import java.util.Optional;
 @Description("Your food saturation level, a decimal number from 0 up to your hunger level (at most 20). Hunger only starts dropping once saturation reaches 0. Written saturation, saturation of player or player's saturation, like Skript. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"h\":",
-        "\tsend \"hunger %hunger of player%, saturation %saturation%\"",
+        "	send \"hunger %hunger of player%, saturation %saturation%\"",
         "",
         "every 5 seconds:",
-        "\tif player's saturation is 0:",
-        "\t\tshow action bar \"hunger will start to drop\""
+        "	if player's saturation is 0:",
+        "		show action bar \"hunger will start to drop\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprSaturation implements Expression {

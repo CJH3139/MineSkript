@@ -17,7 +17,7 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"p\":",
-        "\tsend \"%players online% players loaded nearby\""
+        "	send \"%players online% players loaded nearby\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprPlayersOnline extends GameValueExpression {

@@ -19,9 +19,9 @@ import java.util.Optional;
 @Description("Turns text into a whole number. Text that is a number with a fraction, such as 2.5, returns none, as does text that is not a number at all. A whole value written with decimals, like 3.0, is accepted as 3.")
 @Examples({
         "on chat send:",
-        "\tset {_slot} to message parsed as integer",
-        "\tif {_slot} is set:",
-        "\t\tselect slot {_slot}"
+        "	set {_slot} to message parsed as integer",
+        "	if {_slot} is set:",
+        "		select slot {_slot}"
 })
 @Since("1.0.0-alpha.5")
 public final class ExprParsedAsInteger implements Expression {

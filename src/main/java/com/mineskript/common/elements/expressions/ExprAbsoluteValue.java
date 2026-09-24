@@ -17,8 +17,8 @@ import java.util.Optional;
 @Description("The number without its sign: absolute value of -5 is 5 and of 5 is 5. Also written abs of.")
 @Examples({
         "on key press of \"d\":",
-        "\tset {_dx} to abs of player's x-coordinate",
-        "\tsend \"%{_dx}% blocks from x 0\""
+        "	set {_dx} to abs of player's x-coordinate",
+        "	send \"%{_dx}% blocks from x 0\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprAbsoluteValue implements Expression {

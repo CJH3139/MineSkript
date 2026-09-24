@@ -15,7 +15,7 @@ import java.util.Optional;
 @Description("Your current horizontal speed in blocks per tick, as a decimal number. Vertical movement (falling or jumping) is not included. Multiply by 20 for blocks per second. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on key press of \"s\":",
-        "\tsend \"%speed * 20% blocks per second\""
+        "	send \"%speed * 20% blocks per second\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprSpeed extends GameValueExpression {

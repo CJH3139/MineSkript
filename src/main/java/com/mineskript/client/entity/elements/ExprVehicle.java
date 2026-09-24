@@ -16,17 +16,17 @@ import java.util.Optional;
 @Description("The entity you are riding, such as a horse, boat or minecart. Written vehicle, vehicle of player or player's vehicle, like Skript. Returns nothing (none) when you are not riding anything, which prints as <none>. The value is a snapshot taken when it is read. Needs a world: outside a world the line stops with a \"no world\" error.")
 @Examples({
         "on mount:",
-        "\tsend \"riding %name of vehicle% (%id of vehicle%)\"",
+        "	send \"riding %name of vehicle% (%id of vehicle%)\"",
         "",
         "on key press of \"v\":",
-        "\tif vehicle is set:",
-        "\t\tsend \"riding %vehicle%\"",
-        "\telse:",
-        "\t\tsend \"on foot\"",
+        "	if vehicle is set:",
+        "		send \"riding %vehicle%\"",
+        "	else:",
+        "		send \"on foot\"",
         "",
         "on mount:",
-        "\tif player's vehicle is horse:",
-        "\t\tsend \"giddy up\""
+        "	if player's vehicle is horse:",
+        "		send \"giddy up\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprVehicle implements Expression {

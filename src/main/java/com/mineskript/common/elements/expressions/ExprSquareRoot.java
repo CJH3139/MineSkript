@@ -17,10 +17,10 @@ import java.util.Optional;
 @Description("The square root of a number. Also written sqrt of. The square root of a negative number is not a real number and prints as NaN.")
 @Examples({
         "on key press of \"d\":",
-        "\tset {_x} to player's x-coordinate",
-        "\tset {_z} to player's z-coordinate",
-        "\tset {_squared} to {_x} ^ 2 + {_z} ^ 2",
-        "\tsend \"%sqrt of {_squared}% blocks from 0, 0\""
+        "	set {_x} to player's x-coordinate",
+        "	set {_z} to player's z-coordinate",
+        "	set {_squared} to {_x} ^ 2 + {_z} ^ 2",
+        "	send \"%sqrt of {_squared}% blocks from 0, 0\""
 })
 @Since("1.0.0-alpha.2")
 public final class ExprSquareRoot implements Expression {

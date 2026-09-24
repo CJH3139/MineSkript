@@ -19,16 +19,16 @@ import java.util.Optional;
 })
 @Examples({
         "on key press of \"i\":",
-        "\tsend \"first hotbar slot: %item in slot 0%\"",
+        "	send \"first hotbar slot: %item in slot 0%\"",
         "",
         "on key press of \"i\":",
-        "\tloop 9 times:",
-        "\t\tset {_slot} to loop-iteration - 1",
-        "\t\tsend \"slot %{_slot}%: %item in slot {_slot}%\"",
+        "	loop 9 times:",
+        "		set {_slot} to loop-iteration - 1",
+        "		send \"slot %{_slot}%: %item in slot {_slot}%\"",
         "",
         "on key press of \"i\":",
-        "\tif slot 40 of player's inventory is shield:",
-        "\t\tsend \"shield ready\""
+        "	if slot 40 of player's inventory is shield:",
+        "		send \"shield ready\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprItemInSlot implements Expression {

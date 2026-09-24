@@ -22,18 +22,18 @@ import java.util.Optional;
 })
 @Examples({
         "on chat:",
-        "\tset {_start} to first 5 characters of message",
-        "\tsend \"starts with: %{_start}%\"",
+        "	set {_start} to first 5 characters of message",
+        "	send \"starts with: %{_start}%\"",
         "",
         "on key press of \"t\":",
-        "\tset {_id} to id of held item",
-        "\tsend \"ends in %last 3 characters of {_id}%\"",
+        "	set {_id} to id of held item",
+        "	send \"ends in %last 3 characters of {_id}%\"",
         "",
         "on key press of \"t\":",
-        "\tset {_t} to \"minecraft\"",
-        "\tsend \"%subtext of {_t} from characters 5 to 9%\"",
-        "\tsend \"%{_t} from character 1 to 4%\"",
-        "\tsend \"%the first character of {_t}%\""
+        "	set {_t} to \"minecraft\"",
+        "	send \"%subtext of {_t} from characters 5 to 9%\"",
+        "	send \"%{_t} from character 1 to 4%\"",
+        "	send \"%the first character of {_t}%\""
 })
 @Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
 public final class ExprSubstring implements Expression {

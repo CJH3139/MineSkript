@@ -20,14 +20,14 @@ import java.util.Optional;
 @Description({"The x, y or z coordinate of a location, as a decimal number. Accepts x-coordinate, x-coord, x coordinate or x coord, and the same for y and z, written either as x-coordinate of {home} or {home}'s x-coordinate.",
         "It also works on anything that has a location, such as a variable holding an entity. The coordinates of the player, an entity or the target block written directly (player's x-coordinate, x-coordinate of target entity, x-coordinate of target block) are read by their own expressions and give the same numbers."})
 @Examples({"on key press of \"h\":",
-        "\tset {home} to location of player",
+        "	set {home} to location of player",
         "",
         "on key press of \"j\":",
-        "\tif {home} is set:",
-        "\t\tsend \"home is at height %{home}'s y-coordinate%\"",
+        "	if {home} is set:",
+        "		send \"home is at height %{home}'s y-coordinate%\"",
         "",
         "on key press of \"k\":",
-        "\tsend \"%x-coordinate of location(10, 64, -3)%\""})
+        "	send \"%x-coordinate of location(10, 64, -3)%\""})
 @Since("1.0.0-alpha.10")
 public final class ExprLocationCoordinate implements Expression {
     private static final String AXES = "(x:x-coordinate|x:x-coord|x:x coordinate|x:x coord"

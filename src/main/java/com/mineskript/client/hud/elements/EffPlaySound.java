@@ -16,8 +16,8 @@ import java.util.Optional;
 @Description({"Plays a sound for you alone, at full volume and normal pitch, using its sound event id such as \"minecraft:ui.button.click\" or \"entity.experience_orb.pickup\". The namespace is optional and defaults to minecraft.",
         "An unknown sound id is silently ignored rather than reported. Needs a world."})
 @Examples({"on chat:",
-        "\tif message contains \"%name of player%\":",
-        "\t\tplay sound \"minecraft:block.note_block.pling\""})
+        "	if message contains \"%name of player%\":",
+        "		play sound \"minecraft:block.note_block.pling\""})
 @Since("1.0.0-alpha.2")
 public final class EffPlaySound implements Statement {
     private final int line;

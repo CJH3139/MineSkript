@@ -27,12 +27,12 @@ import java.util.OptionalInt;
         "Get its number with last spawned client entity to move it, change a hologram's text or remove it later. Hologram text can use & colour codes, such as &c for red. The item or block is written like elsewhere, such as diamond or gold block, or taken from an item.",
         "Client entities are removed when you leave the world or change dimension, and when the script that made them is reloaded, so a location in another dimension than yours stops the line with an error. At most 256 can exist at once; spawning more stops the line with an error. An unknown item or block also stops the line with an error."})
 @Examples({"on key press of \"h\":",
-        "\tspawn a hologram with text \"&6home\" at location(0.5, 66, 0.5)",
-        "\tset {-home hologram} to last spawned client entity",
+        "	spawn a hologram with text \"&6home\" at location(0.5, 66, 0.5)",
+        "	set {-home hologram} to last spawned client entity",
         "",
         "on key press of \"j\":",
-        "\tspawn an item display of diamond at 2 above player",
-        "\tspawn a block display of gold block at location(10, 64, 10)"})
+        "	spawn an item display of diamond at 2 above player",
+        "	spawn a block display of gold block at location(10, 64, 10)"})
 @Since("1.0.0-alpha.9, 1.0.0-alpha.10 (locations)")
 public final class EffSpawnClientEntity implements Statement {
     public static final int LIMIT = 256;
