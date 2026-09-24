@@ -204,6 +204,8 @@ public interface GameBridge {
 
     void copyToClipboard(String text);
 
+    String clipboard();
+
     void takeScreenshot();
 
     void disconnect();

@@ -1,5 +1,6 @@
 package com.mineskript.lang.runtime;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Block;
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.Function;
@@ -175,10 +176,10 @@ public final class Execution {
 
     void call(Function function, List<Object> arguments, int line) {
         if (context.functionDepth() >= MAX_CALL_DEPTH) {
-            throw new ScriptError("function \"" + function.name() + "\" went more than " + MAX_CALL_DEPTH + " calls deep");
+            throw new ScriptError(Language.format("runtime.too-deep", function.name(), MAX_CALL_DEPTH));
         }
         if (function.body() == null) {
-            throw new ScriptError("function \"" + function.name() + "\" failed to load");
+            throw new ScriptError(Language.format("runtime.function-failed-to-load", function.name()));
         }
         Map<String, Object> locals = new HashMap<>();
         for (int i = 0; i < arguments.size(); i++) {
@@ -197,7 +198,7 @@ public final class Execution {
                 return;
             }
         }
-        throw new ScriptError("return outside a function");
+        throw new ScriptError(Language.get("runtime.return-outside-function"));
     }
 
     void nextIteration() {
@@ -205,7 +206,7 @@ public final class Execution {
             popFrame();
         }
         if (frames.isEmpty() || frames.peek().function) {
-            throw new ScriptError("continue outside a loop");
+            throw new ScriptError(Language.get("runtime.continue-outside-loop"));
         }
         Frame frame = frames.peek();
         frame.index = frame.block.statements().size();
@@ -219,7 +220,7 @@ public final class Execution {
                 return;
             }
         }
-        throw new ScriptError("exit loop outside a loop");
+        throw new ScriptError(Language.get("runtime.exit-loop-outside-loop"));
     }
 
     void stop() {

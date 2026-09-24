@@ -1,5 +1,6 @@
 package com.mineskript.script;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.ParsedScript;
 import java.nio.file.Path;
@@ -14,6 +15,11 @@ public final class Messages {
     private Messages() {
     }
 
+    /** The one line every reload shows when another reload is still running. */
+    private static List<MessageLine> busy() {
+        return List.of(new MessageLine(MessageLine.Kind.WARNING, Language.get("command.busy")));
+    }
+
     public static boolean typedTheAlias(String input) {
         String text = input.strip();
         int space = text.indexOf(' ');
@@ -21,26 +27,26 @@ public final class Messages {
     }
 
     public static List<MessageLine> unknownBranch() {
-        return List.of(new MessageLine(MessageLine.Kind.ERROR, "not a MineSkript command, type /mineskript help for the tree"));
+        return List.of(new MessageLine(MessageLine.Kind.ERROR, Language.get("command.unknown")));
     }
 
     public static List<MessageLine> help() {
         return List.of(
-                new MessageLine(MessageLine.Kind.SUCCESS, "the command tree, /mineskript or /ms"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms help, this list"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload, reload every script"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload scripts, the same thing spelled out"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload <file.ms>, reload one script"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload variables, re-read variables.json"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload all, the config, variables and every script"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms reload config, re-read " + Config.NAME),
-                new MessageLine(MessageLine.Kind.INFO, "/ms list, what is loaded now"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms errors, the errors from the last load"),
-                new MessageLine(MessageLine.Kind.INFO, "/ms info, version, folder, counts and ticks since the last full reload"));
+                new MessageLine(MessageLine.Kind.SUCCESS, Language.get("command.help.title")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.help")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.reload")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.reload-scripts")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.reload-file")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.reload-variables")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.reload-all")),
+                new MessageLine(MessageLine.Kind.INFO, Language.format("command.help.reload-config", Config.NAME)),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.list")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.errors")),
+                new MessageLine(MessageLine.Kind.INFO, Language.get("command.help.info")));
     }
 
     public static List<MessageLine> startingScripts() {
-        return starting("every script");
+        return starting(Language.get("command.starting.scripts"));
     }
 
     public static List<MessageLine> startingFile(String file) {
@@ -52,59 +58,64 @@ public final class Messages {
     }
 
     public static List<MessageLine> startingEverything() {
-        return starting("the config, variables and every script");
+        return starting(Language.get("command.starting.everything"));
     }
 
     private static List<MessageLine> starting(String what) {
-        return List.of(new MessageLine(MessageLine.Kind.INFO, "reloading " + what));
+        return List.of(new MessageLine(MessageLine.Kind.INFO, Language.format("command.starting", what)));
     }
 
     public static List<MessageLine> reloaded(LoadReport report, long millis) {
         if (report == null) {
-            return List.of(new MessageLine(MessageLine.Kind.WARNING, "a reload is already running, ignored"));
+            return busy();
         }
-        String body = "loaded " + LoadReport.plural(report.scriptCount(), "script") + ", " + LoadReport.plural(report.triggerCount(), "trigger");
+        String scripts = LoadReport.plural(report.scriptCount(), "script");
+        String triggers = LoadReport.plural(report.triggerCount(), "trigger");
         int errors = report.errors().size();
         if (errors == 0) {
-            return List.of(new MessageLine(MessageLine.Kind.SUCCESS, body + " (" + millis + " ms)"));
+            return List.of(new MessageLine(MessageLine.Kind.SUCCESS,
+                    Language.format("command.reloaded", scripts, triggers, millis)));
         }
-        return List.of(new MessageLine(MessageLine.Kind.WARNING, body + ", " + LoadReport.plural(errors, "error") + " (" + millis + " ms)"));
+        return List.of(new MessageLine(MessageLine.Kind.WARNING, Language.format("command.reloaded-with-errors",
+                scripts, triggers, LoadReport.plural(errors, "error"), millis)));
     }
 
     public static List<MessageLine> fileReload(FileReload result, Path dir) {
         String triggers = LoadReport.plural(result.triggerCount(), "trigger");
-        String took = " (" + result.millis() + " ms)";
+        String errors = LoadReport.plural(result.errors().size(), "error");
+        long millis = result.millis();
         return switch (result.outcome()) {
             case RELOADED -> List.of(new MessageLine(MessageLine.Kind.SUCCESS,
-                    "reloaded " + result.file() + ", " + triggers + took));
+                    Language.format("command.file.reloaded", result.file(), triggers, millis)));
             case ADDED -> result.errors().isEmpty()
                     ? List.of(new MessageLine(MessageLine.Kind.SUCCESS,
-                            "added " + result.file() + ", " + triggers + took))
+                            Language.format("command.file.added", result.file(), triggers, millis)))
                     : List.of(new MessageLine(MessageLine.Kind.WARNING,
-                            "added " + result.file() + ", " + triggers + ", " + LoadReport.plural(result.errors().size(), "error") + took));
+                            Language.format("command.file.added-with-errors",
+                                    result.file(), triggers, errors, millis)));
             case KEPT -> List.of(
                     new MessageLine(MessageLine.Kind.ERROR,
-                            "did not reload " + result.file() + ", " + LoadReport.plural(result.errors().size(), "error") + took),
+                            Language.format("command.file.kept", result.file(), errors, millis)),
                     new MessageLine(MessageLine.Kind.WARNING, result.triggerCount() == 0
-                            ? "nothing from " + result.file() + " is running, it has no triggers"
-                            : "the version already running is unchanged, " + triggers));
+                            ? Language.format("command.file.kept-no-triggers", result.file())
+                            : Language.format("command.file.kept-unchanged", triggers)));
             case REMOVED -> List.of(new MessageLine(MessageLine.Kind.SUCCESS,
-                    "unloaded " + result.file() + ", it is no longer in the folder" + took));
+                    Language.format("command.file.removed", result.file(), millis)));
             case MISSING -> List.of(new MessageLine(MessageLine.Kind.ERROR,
-                    "no script named " + result.file() + " in " + dir + took));
+                    Language.format("command.file.missing", result.file(), dir, millis)));
             case REFUSED -> List.of(new MessageLine(MessageLine.Kind.ERROR,
-                    "refused the name " + result.file() + ", a reload only reads .ms files directly in " + dir + took));
-            case BUSY -> List.of(new MessageLine(MessageLine.Kind.WARNING, "a reload is already running, ignored"));
+                    Language.format("command.file.refused", result.file(), dir, millis)));
+            case BUSY -> busy();
         };
     }
 
     public static List<MessageLine> variablesReloaded(Path file, VariablesReload result, long millis) {
-        String took = " (" + millis + " ms)";
         return switch (result) {
-            case RELOADED -> List.of(new MessageLine(MessageLine.Kind.SUCCESS, "re-read " + file.getFileName() + took));
+            case RELOADED -> List.of(new MessageLine(MessageLine.Kind.SUCCESS,
+                    Language.format("command.reread", file.getFileName(), millis)));
             case UNREADABLE -> List.of(new MessageLine(MessageLine.Kind.ERROR,
-                    "did not re-read " + file.getFileName() + ", it could not be read" + took));
-            case BUSY -> List.of(new MessageLine(MessageLine.Kind.WARNING, "a reload is already running, ignored"));
+                    Language.format("command.reread-failed", file.getFileName(), millis)));
+            case BUSY -> busy();
         };
     }
 
@@ -113,15 +124,16 @@ public final class Messages {
     }
 
     public static List<MessageLine> configReloaded(Path file, ConfigReload result, List<String> warnings, long millis) {
-        String took = " (" + millis + " ms)";
         if (result == ConfigReload.BUSY) {
-            return List.of(new MessageLine(MessageLine.Kind.WARNING, "a reload is already running, ignored"));
+            return busy();
         }
         List<MessageLine> lines = new ArrayList<>();
         if (result == ConfigReload.RELOADED) {
-            lines.add(new MessageLine(MessageLine.Kind.SUCCESS, "re-read " + file.getFileName() + took));
+            lines.add(new MessageLine(MessageLine.Kind.SUCCESS,
+                    Language.format("command.reread", file.getFileName(), millis)));
         } else {
-            lines.add(new MessageLine(MessageLine.Kind.ERROR, "did not re-read " + file.getFileName() + ", it could not be read" + took));
+            lines.add(new MessageLine(MessageLine.Kind.ERROR,
+                    Language.format("command.reread-failed", file.getFileName(), millis)));
         }
         lines.addAll(configWarnings(warnings));
         return List.copyOf(lines);
@@ -137,12 +149,13 @@ public final class Messages {
 
     public static List<MessageLine> list(Path dir, List<ParsedScript> scripts, List<ParseError> errors) {
         if (scripts.isEmpty()) {
-            return List.of(new MessageLine(MessageLine.Kind.WARNING, "no scripts loaded from " + dir));
+            return List.of(new MessageLine(MessageLine.Kind.WARNING, Language.format("command.list.empty", dir)));
         }
         List<MessageLine> lines = new ArrayList<>();
-        lines.add(new MessageLine(MessageLine.Kind.SUCCESS, LoadReport.plural(scripts.size(), "script") + " loaded from " + dir));
+        lines.add(new MessageLine(MessageLine.Kind.SUCCESS,
+                Language.format("command.list.title", LoadReport.plural(scripts.size(), "script"), dir)));
         for (ParsedScript script : scripts) {
-            String text = script.file() + ", " + LoadReport.plural(script.triggers().size(), "trigger");
+            String triggers = LoadReport.plural(script.triggers().size(), "trigger");
             int count = 0;
             for (ParseError error : errors) {
                 if (error.file().equals(script.file())) {
@@ -150,9 +163,11 @@ public final class Messages {
                 }
             }
             if (count == 0) {
-                lines.add(new MessageLine(MessageLine.Kind.INFO, text));
+                lines.add(new MessageLine(MessageLine.Kind.INFO,
+                        Language.format("command.list.script", script.file(), triggers)));
             } else {
-                lines.add(new MessageLine(MessageLine.Kind.WARNING, text + ", " + LoadReport.plural(count, "error")));
+                lines.add(new MessageLine(MessageLine.Kind.WARNING, Language.format("command.list.script-with-errors",
+                        script.file(), triggers, LoadReport.plural(count, "error"))));
             }
         }
         return List.copyOf(lines);
@@ -160,10 +175,11 @@ public final class Messages {
 
     public static List<MessageLine> errors(String origin, List<ParseError> errors, ScriptSources sources) {
         if (errors.isEmpty()) {
-            return List.of(new MessageLine(MessageLine.Kind.SUCCESS, "no errors from " + origin));
+            return List.of(new MessageLine(MessageLine.Kind.SUCCESS, Language.format("command.errors.none", origin)));
         }
         List<MessageLine> lines = new ArrayList<>();
-        lines.add(new MessageLine(MessageLine.Kind.ERROR, LoadReport.plural(errors.size(), "error") + " from " + origin));
+        lines.add(new MessageLine(MessageLine.Kind.ERROR,
+                Language.format("command.errors.title", LoadReport.plural(errors.size(), "error"), origin)));
         for (ParseError error : errors) {
             lines.add(new MessageLine(MessageLine.Kind.ERROR, error.toString()));
             String source = sources.line(error.file(), error.line());
@@ -174,11 +190,24 @@ public final class Messages {
         return List.copyOf(lines);
     }
 
+    /** The /ms info lines, ending with the addons that are loaded. */
+    public static List<MessageLine> info(String version, Path dir, int scripts, int triggers, long ticks,
+            List<String> addons) {
+        List<MessageLine> lines = new ArrayList<>(info(version, dir, scripts, triggers, ticks));
+        lines.add(new MessageLine(MessageLine.Kind.INFO, addons.isEmpty()
+                ? Language.get("command.info.no-addons")
+                : Language.format("command.info.addons",
+                        LoadReport.plural(addons.size(), "addon"), String.join(", ", addons))));
+        return List.copyOf(lines);
+    }
+
     public static List<MessageLine> info(String version, Path dir, int scripts, int triggers, long ticks) {
         return List.of(
-                new MessageLine(MessageLine.Kind.SUCCESS, "MineSkript " + version),
-                new MessageLine(MessageLine.Kind.INFO, "folder " + dir),
-                new MessageLine(MessageLine.Kind.INFO, LoadReport.plural(scripts, "script") + ", " + LoadReport.plural(triggers, "trigger")),
-                new MessageLine(MessageLine.Kind.INFO, ticks + (ticks == 1 ? " tick" : " ticks") + " since the last full reload"));
+                new MessageLine(MessageLine.Kind.SUCCESS, Language.format("command.info.version", version)),
+                new MessageLine(MessageLine.Kind.INFO, Language.format("command.info.folder", dir)),
+                new MessageLine(MessageLine.Kind.INFO, Language.format("command.info.counts",
+                        LoadReport.plural(scripts, "script"), LoadReport.plural(triggers, "trigger"))),
+                new MessageLine(MessageLine.Kind.INFO,
+                        Language.format(ticks == 1 ? "command.info.tick" : "command.info.ticks", ticks)));
     }
 }

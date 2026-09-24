@@ -76,7 +76,10 @@ public final class PatternMatcher {
 
     private boolean matchSlot(PatternElement.Slot slot, int position, int reserve, Continuation next) {
         for (int end = tokens.size() - reserve; end > position; end--) {
-            Optional<Expression> expression = resolver.resolve(tokens.subList(position, end), slot.types(), scope);
+            List<Token> part = tokens.subList(position, end);
+            Optional<Expression> expression = slot.condition()
+                    ? resolver.resolveCondition(part, scope)
+                    : resolver.resolve(part, slot.types(), scope);
             if (expression.isEmpty()) {
                 continue;
             }

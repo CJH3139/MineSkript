@@ -1,5 +1,6 @@
 package com.mineskript.lang.runtime;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.EntityValue;
@@ -73,7 +74,7 @@ public final class Converters {
             if (to == SkType.TEXT) {
                 return "<none>";
             }
-            throw new ScriptError("variable is not set");
+            throw new ScriptError(Language.get("runtime.variable-not-set"));
         }
         if (to == SkType.OBJECT || typeOf(value) == to) {
             return value;
@@ -87,7 +88,7 @@ public final class Converters {
         if (to == SkType.BLOCKTYPE && value instanceof ItemValue item) {
             return item.type();
         }
-        throw new ScriptError("cannot convert " + typeName(typeOf(value)) + " to " + typeName(to));
+        throw new ScriptError(Language.format("runtime.cannot-convert", typeName(typeOf(value)), typeName(to)));
     }
 
     public static String typeName(SkType type) {

@@ -1,5 +1,6 @@
 package com.mineskript;
 
+import com.mineskript.lang.Language;
 import com.mineskript.script.ConfigReload;
 import com.mineskript.script.FileReload;
 import com.mineskript.script.LoadReport;
@@ -27,14 +28,14 @@ public final class MineSkriptCommand {
     private MineSkriptCommand() {
     }
 
-    public static void register(ScriptService service) {
+    public static void register(ScriptService service, List<String> addons) {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> {
-            LiteralCommandNode<FabricClientCommandSource> root = dispatcher.register(tree(service));
+            LiteralCommandNode<FabricClientCommandSource> root = dispatcher.register(tree(service, addons));
             dispatcher.register(ClientCommands.literal("ms").executes(root.getCommand()).redirect(root));
         });
     }
 
-    private static LiteralArgumentBuilder<FabricClientCommandSource> tree(ScriptService service) {
+    private static LiteralArgumentBuilder<FabricClientCommandSource> tree(ScriptService service, List<String> addons) {
         return ClientCommands.literal("mineskript")
                 .executes(ctx -> show(ctx.getSource(), Messages.help()))
                 .then(ClientCommands.literal("help")
@@ -55,14 +56,16 @@ public final class MineSkriptCommand {
                 .then(ClientCommands.literal("list")
                         .executes(ctx -> show(ctx.getSource(), Messages.list(service.dir(), service.registry().scripts(), service.errors()))))
                 .then(ClientCommands.literal("errors")
-                        .executes(ctx -> show(ctx.getSource(), Messages.errors("the last load", service.errors(), service.sources()))))
+                        .executes(ctx -> show(ctx.getSource(), Messages.errors(Language.get("command.errors.origin"),
+                                service.errors(), service.sources()))))
                 .then(ClientCommands.literal("info")
                         .executes(ctx -> show(ctx.getSource(), Messages.info(
                                 version(),
                                 service.dir(),
                                 service.registry().scripts().size(),
                                 service.registry().triggers().size(),
-                                service.dispatcher().ticks()))))
+                                service.dispatcher().ticks(),
+                                addons))))
                 .then(ClientCommands.argument("rest", StringArgumentType.greedyString())
                         .executes(MineSkriptCommand::unknown));
     }
@@ -90,7 +93,7 @@ public final class MineSkriptCommand {
     private static int showFullReload(FabricClientCommandSource source, ScriptService service, LoadReport report) {
         show(source, Messages.reloaded(report, service.lastMillis()));
         if (report != null && !report.errors().isEmpty()) {
-            show(source, Messages.errors("the last load", service.errors(), service.sources()));
+            show(source, Messages.errors(Language.get("command.errors.origin"), service.errors(), service.sources()));
         }
         return 1;
     }

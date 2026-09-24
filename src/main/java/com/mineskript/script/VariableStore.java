@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
@@ -43,9 +44,10 @@ public final class VariableStore {
             try {
                 Files.move(file, broken, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException ignored) {
-                return new Loaded(Map.of(), file.getFileName() + " could not be read: " + error.getMessage());
+                return new Loaded(Map.of(), Language.format("variables.unreadable", file.getFileName(), error.getMessage()));
             }
-            return new Loaded(Map.of(), file.getFileName() + " could not be read and was moved to " + broken.getFileName() + ": " + error.getMessage());
+            return new Loaded(Map.of(), Language.format("variables.unreadable-moved",
+                    file.getFileName(), broken.getFileName(), error.getMessage()));
         }
     }
 

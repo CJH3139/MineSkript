@@ -1,5 +1,7 @@
 package com.mineskript;
 
+import com.mineskript.api.AddonLoader;
+import com.mineskript.api.MineSkriptAddon;
 import com.mineskript.game.BlockChange;
 import com.mineskript.game.GameSignals;
 import com.mineskript.game.MinecraftBridge;
@@ -21,6 +23,8 @@ import com.mineskript.script.VariablePersistence;
 import com.mineskript.script.VariableStore;
 import com.mineskript.syntax.DefaultSyntax;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -34,6 +38,7 @@ import net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,6 +49,8 @@ public final class MineSkriptClient implements ClientModInitializer {
     public static final String MOD_ID = "mineskript";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final int STEP_BUDGET = 10_000;
+    /** The Fabric entrypoint addons list their {@link MineSkriptAddon} class under. */
+    public static final String ADDON_ENTRYPOINT = "mineskript";
 
     private static ScriptService service;
 
@@ -64,8 +71,9 @@ public final class MineSkriptClient implements ClientModInitializer {
             persistence.flushWarning();
             config.flushTo(bridge);
         });
-        service = new ScriptService(dir, new ScriptLoader(new Parser(DefaultSyntax.registry(), functions)), registry, dispatcher, persistence, config);
-        EffectCommands effects = new EffectCommands(new Parser(DefaultSyntax.registry(), functions), dispatcher, config, bridge);
+        AddonLoader.Result syntax = loadSyntax();
+        service = new ScriptService(dir, new ScriptLoader(new Parser(syntax.registry(), functions)), registry, dispatcher, persistence, config);
+        EffectCommands effects = new EffectCommands(new Parser(syntax.registry(), functions), dispatcher, config, bridge);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.level != null) {
@@ -115,6 +123,8 @@ public final class MineSkriptClient implements ClientModInitializer {
         });
         ClientSendMessageEvents.ALLOW_CHAT.register(message -> effects.allowChat(message) && dispatcher.onChatSend(message));
         ClientSendMessageEvents.ALLOW_COMMAND.register(dispatcher::onCommandSend);
+        ClientSendMessageEvents.MODIFY_CHAT.register(dispatcher::modifyChatSend);
+        ClientSendMessageEvents.MODIFY_COMMAND.register(dispatcher::modifyCommandSend);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(dispatcher::onDisconnect));
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
             client.getSoundManager().addListener((sound, events, range) -> {
@@ -126,8 +136,40 @@ public final class MineSkriptClient implements ClientModInitializer {
             logReport(service.start());
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> service.saveVariables());
-        MineSkriptCommand.register(service);
+        MineSkriptCommand.register(service, syntax.addons());
         LOGGER.info("MineSkript loaded, scripts folder {}", dir);
+    }
+
+    /** The one syntax registry every parser uses: the built-in syntax, then each addon's. */
+    private static AddonLoader.Result loadSyntax() {
+        AddonLoader.Result result = AddonLoader.load(DefaultSyntax::registry, discoverAddons());
+        for (AddonLoader.Failure failure : result.failures()) {
+            LOGGER.error("MineSkript addon {} failed to register its syntax and was not loaded", failure.addon(), failure.error());
+        }
+        if (!result.addons().isEmpty()) {
+            LOGGER.info("MineSkript addons loaded: {}", String.join(", ", result.addons()));
+        }
+        return result;
+    }
+
+    private static List<MineSkriptAddon> discoverAddons() {
+        List<EntrypointContainer<MineSkriptAddon>> containers;
+        try {
+            containers = FabricLoader.getInstance().getEntrypointContainers(ADDON_ENTRYPOINT, MineSkriptAddon.class);
+        } catch (RuntimeException | LinkageError error) {
+            LOGGER.error("MineSkript could not load its addons, starting without any", error);
+            return List.of();
+        }
+        List<MineSkriptAddon> addons = new ArrayList<>();
+        for (EntrypointContainer<MineSkriptAddon> container : containers) {
+            try {
+                addons.add(container.getEntrypoint());
+            } catch (RuntimeException | LinkageError error) {
+                LOGGER.error("MineSkript addon from mod {} could not be created and was not loaded",
+                        container.getProvider().getMetadata().getId(), error);
+            }
+        }
+        return addons;
     }
 
     private static void logReport(LoadReport report) {

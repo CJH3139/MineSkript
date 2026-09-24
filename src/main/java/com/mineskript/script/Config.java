@@ -1,5 +1,6 @@
 package com.mineskript.script;
 
+import com.mineskript.lang.Language;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +51,7 @@ public record Config(boolean effectCommands, String effectCommandPrefix) {
             empty = false;
             int colon = line.indexOf(':');
             if (colon < 0) {
-                warnings.add(warning(name, number, "has no \":\"", line));
+                warnings.add(warning(name, number, Language.get("config.no-colon"), line));
                 continue;
             }
             String key = line.substring(0, colon).strip().toLowerCase(Locale.ROOT);
@@ -64,19 +65,19 @@ public record Config(boolean effectCommands, String effectCommandPrefix) {
                         effectCommands = false;
                         repeated(warnings, applied, name, key, number);
                     } else {
-                        warnings.add(warning(name, number, "wants true or false", line));
+                        warnings.add(warning(name, number, Language.get("config.wants-boolean"), line));
                     }
                 }
                 case "effect command prefix" -> {
                     prefix = value;
                     repeated(warnings, applied, name, key, number);
                     if (value.isEmpty()) {
-                        warnings.add(kept(name, number, "has an empty prefix, so effect commands are off", line));
+                        warnings.add(kept(name, number, Language.get("config.empty-prefix"), line));
                     } else if (value.startsWith("/")) {
-                        warnings.add(kept(name, number, "has a prefix starting with \"/\", which the chat box sends as a command, so it never reaches MineSkript", line));
+                        warnings.add(kept(name, number, Language.get("config.slash-prefix"), line));
                     }
                 }
-                default -> warnings.add(warning(name, number, "is not a setting MineSkript knows", line));
+                default -> warnings.add(warning(name, number, Language.get("config.unknown-setting"), line));
             }
         }
         return new Loaded(new Config(effectCommands, prefix), List.copyOf(warnings), empty);
@@ -89,16 +90,15 @@ public record Config(boolean effectCommands, String effectCommandPrefix) {
     private static void repeated(List<String> warnings, Map<String, Integer> applied, String name, String key, int number) {
         Integer before = applied.put(key, number);
         if (before != null) {
-            warnings.add(name + " line " + number + " sets \"" + key + "\" again, so line " + number
-                    + " is the one that counts, not line " + before);
+            warnings.add(Language.format("config.set-again", name, number, key, before));
         }
     }
 
     private static String warning(String name, int number, String problem, String line) {
-        return name + " line " + number + " " + problem + ", ignored: " + line;
+        return Language.format("config.ignored", name, number, problem, line);
     }
 
     private static String kept(String name, int number, String problem, String line) {
-        return name + " line " + number + " " + problem + ", applied as written: " + line;
+        return Language.format("config.applied", name, number, problem, line);
     }
 }

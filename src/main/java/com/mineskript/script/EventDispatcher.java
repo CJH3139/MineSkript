@@ -5,6 +5,7 @@ import com.mineskript.game.GameBridge;
 import com.mineskript.game.GameSignals;
 import com.mineskript.game.SnapshotNeeds;
 import com.mineskript.game.WorldSnapshot;
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.EntityValue;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public final class EventDispatcher {
@@ -99,6 +101,8 @@ public final class EventDispatcher {
     private boolean pendingSave;
     private boolean chatSending;
     private boolean commandSending;
+    private Rewrite chatRewrite;
+    private Rewrite commandRewrite;
     private SnapshotNeeds needed = SnapshotNeeds.nothing();
     private SnapshotNeeds previousNeeds = SnapshotNeeds.nothing();
     private SnapshotNeeds justEnabled = SnapshotNeeds.nothing();
@@ -109,6 +113,8 @@ public final class EventDispatcher {
     private Set<String> eventNames = Set.of();
     private long lastDayTime = Long.MIN_VALUE;
     private double reportedHealth = Double.NaN;
+    private BiConsumer<Trigger, Map<String, Object>> firing = (trigger, values) -> {
+    };
 
     public EventDispatcher(ScriptRegistry registry, GameBridge game, Interpreter interpreter, Scheduler scheduler) {
         this(registry, game, interpreter, scheduler, new Variables(), () -> {
@@ -203,27 +209,50 @@ public final class EventDispatcher {
     }
 
     public boolean onChatSend(String message) {
+        chatRewrite = null;
         if (chatSending) {
             return true;
         }
         chatSending = true;
         try {
-            return fireMessage(Event.ChatSend.class, message);
+            Sent sent = fireMessage(Event.ChatSend.class, message);
+            chatRewrite = Rewrite.of(message, sent);
+            return sent.allowed();
         } finally {
             chatSending = false;
         }
     }
 
     public boolean onCommandSend(String command) {
+        commandRewrite = null;
         if (commandSending) {
             return true;
         }
         commandSending = true;
         try {
-            return fireMessage(Event.CommandSend.class, command);
+            Sent sent = fireMessage(Event.CommandSend.class, command);
+            commandRewrite = Rewrite.of(command, sent);
+            return sent.allowed();
         } finally {
             commandSending = false;
         }
+    }
+
+    /**
+     * The text to really send for a chat message that {@link #onChatSend} just allowed: what an on chat send trigger
+     * set the message to, or the message unchanged. Fabric asks for it right after allowing the same message.
+     */
+    public String modifyChatSend(String message) {
+        Rewrite rewrite = chatRewrite;
+        chatRewrite = null;
+        return Rewrite.apply(rewrite, message);
+    }
+
+    /** The command to really send, without its slash, after {@link #onCommandSend} allowed it. */
+    public String modifyCommandSend(String command) {
+        Rewrite rewrite = commandRewrite;
+        commandRewrite = null;
+        return Rewrite.apply(rewrite, command);
     }
 
     public void onSignal(GameSignals.Signal signal) {
@@ -257,28 +286,47 @@ public final class EventDispatcher {
         }
     }
 
-    private boolean fireMessage(Class<? extends Event> type, String message) {
+    /** Whether an outgoing message may leave, and its text after the triggers had their say. */
+    private record Sent(boolean allowed, String message) {
+    }
+
+    /** A replacement for exactly one outgoing message, so it can never land on a different one. */
+    private record Rewrite(String original, String replacement) {
+        static Rewrite of(String original, Sent sent) {
+            return sent.allowed() && !sent.message().equals(original) ? new Rewrite(original, sent.message()) : null;
+        }
+
+        static String apply(Rewrite rewrite, String message) {
+            return rewrite != null && rewrite.original().equals(message) ? rewrite.replacement() : message;
+        }
+    }
+
+    private Sent fireMessage(Class<? extends Event> type, String message) {
         if (!game.hasWorld()) {
-            return true;
+            return new Sent(true, message);
         }
         boolean allowed = true;
+        String text = message;
         boolean outer = worldExpected;
         worldExpected = true;
         try {
             for (Trigger trigger : List.copyOf(registry.triggers())) {
                 if (worldEnded()) {
-                    return allowed;
+                    return new Sent(allowed, text);
                 }
                 if (type.isInstance(trigger.event())) {
-                    Context context = context(trigger, Map.of("message", message));
+                    Context context = context(trigger, Map.of("message", text));
                     runSafely(new Execution(trigger, context));
-                    allowed &= !context.cancelled();
+                    allowed &= !(trigger.event().context().cancellable() && context.cancelled());
+                    if (context.eventValue("message") instanceof String changed) {
+                        text = changed;
+                    }
                 }
             }
         } finally {
             worldExpected = outer;
         }
-        return allowed;
+        return new Sent(allowed, text);
     }
 
     public void onLoad() {
@@ -710,7 +758,13 @@ public final class EventDispatcher {
         return runSafely(new Execution(trigger, context(trigger, values)));
     }
 
+    /** Lets tests see the values each trigger is started with, to check them against what its event declares. */
+    void onFiring(BiConsumer<Trigger, Map<String, Object>> observer) {
+        firing = observer;
+    }
+
     private Context context(Trigger trigger, Map<String, Object> values) {
+        firing.accept(trigger, values);
         return new Context(game, trigger.file(), values, variables).control(control);
     }
 
@@ -746,7 +800,7 @@ public final class EventDispatcher {
                 runSafely(entry.execution());
             } else if (ticks >= entry.deadlineTick()) {
                 game.showError(new ScriptError(entry.execution().context().file(), entry.line(),
-                        "wait until timed out after " + WaitUntil.TIMEOUT_TICKS / TICKS_PER_SECOND + " seconds").toString());
+                        Language.format("runtime.wait-until-timeout", WaitUntil.TIMEOUT_TICKS / TICKS_PER_SECOND)).toString());
             } else {
                 survivors.add(entry);
             }

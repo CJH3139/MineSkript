@@ -1,5 +1,6 @@
 package com.mineskript.lang.runtime;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.EntityValue;
@@ -59,7 +60,8 @@ public final class Comparators {
         if (left instanceof String x && right instanceof EntityValue y) {
             return y.id().equals(BlockType.fromWords(x).id()) ? 0 : 1;
         }
-        throw new ScriptError("cannot compare " + Converters.typeName(Converters.typeOf(a)) + " with " + Converters.typeName(Converters.typeOf(b)));
+        throw new ScriptError(Language.format("runtime.cannot-compare",
+                Converters.typeName(Converters.typeOf(a)), Converters.typeName(Converters.typeOf(b))));
     }
 
     public static boolean test(Relation relation, Object a, Object b) {

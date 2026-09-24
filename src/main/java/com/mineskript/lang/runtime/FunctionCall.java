@@ -1,5 +1,6 @@
 package com.mineskript.lang.runtime;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.Flow;
 import com.mineskript.lang.ast.Function;
@@ -40,12 +41,12 @@ public final class FunctionCall implements Expression, Statement {
     public Object evaluate(Context context) {
         Function function = resolve();
         if (!function.returns()) {
-            throw new ScriptError("function \"" + function.name() + "\" doesn't return anything");
+            throw new ScriptError(Language.format("runtime.function-returns-nothing", function.name()));
         }
         Execution call = Execution.ofCall(function, values(function, context), context, line);
         if (new Interpreter(STEP_BUDGET).run(call) == Interpreter.Outcome.WAITING) {
             call.stop();
-            throw new ScriptError("function \"" + function.name() + "\" can't wait when its value is used, call it on its own line instead");
+            throw new ScriptError(Language.format("runtime.function-cannot-wait", function.name()));
         }
         Object result = call.returned();
         return result == None.NONE ? None.NONE : Converters.convert(result, function.returnType(), context);
@@ -67,7 +68,8 @@ public final class FunctionCall implements Expression, Statement {
     private List<Object> values(Function function, Context context) {
         List<Function.Parameter> parameters = function.parameters();
         if (arguments.size() > parameters.size() || arguments.size() < function.requiredParameters()) {
-            throw new ScriptError("function \"" + function.name() + "\" no longer takes " + arguments.size() + " arguments");
+            throw new ScriptError(Language.format("runtime.function-argument-count",
+                    function.name(), arguments.size()));
         }
         List<Object> values = new ArrayList<>();
         for (int i = 0; i < parameters.size(); i++) {

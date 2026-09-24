@@ -1,20 +1,27 @@
 package com.mineskript.syntax;
 
+import com.mineskript.client.ClientModule;
+import com.mineskript.common.CommonModule;
+import com.mineskript.lang.module.ModuleLoader;
+import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
-import com.mineskript.syntax.conditions.ConditionSyntax;
-import com.mineskript.syntax.effects.EffectSyntax;
-import com.mineskript.syntax.events.EventSyntax;
-import com.mineskript.syntax.expressions.ExpressionSyntax;
+import java.util.List;
 
+/** MineSkript's own syntax: the built-in modules, loaded in order. */
 public final class DefaultSyntax {
     private DefaultSyntax() {
     }
 
+    /**
+     * The built-in top-level modules: {@code common} first, since it defines the event values every other module's
+     * events declare, then {@code client} with one child per game feature.
+     */
+    public static List<SyntaxModule> modules() {
+        return List.of(new CommonModule(), new ClientModule());
+    }
+
     public static void registerAll(SyntaxRegistry registry) {
-        EventSyntax.register(registry);
-        ExpressionSyntax.register(registry);
-        ConditionSyntax.register(registry);
-        EffectSyntax.register(registry);
+        ModuleLoader.load(registry, modules());
     }
 
     public static SyntaxRegistry registry() {

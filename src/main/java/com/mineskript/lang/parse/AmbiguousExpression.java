@@ -1,5 +1,6 @@
 package com.mineskript.lang.parse;
 
+import com.mineskript.lang.ast.Changeable;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.runtime.Context;
@@ -36,6 +37,11 @@ public final class AmbiguousExpression implements Expression {
     @Override
     public boolean isList() {
         return primary.isList();
+    }
+
+    @Override
+    public Optional<Changeable> changer() {
+        return primary.changer();
     }
 
     @Override

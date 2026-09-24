@@ -1,11 +1,12 @@
 package com.mineskript.lang.runtime;
 
-import java.util.HashMap;
+import com.mineskript.lang.ast.IndexedValues;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class Variables {
-    private final Map<String, Object> global = new HashMap<>();
-    private final Map<String, Object> ram = new HashMap<>();
+    private final Map<String, Object> global = new LinkedHashMap<>();
+    private final Map<String, Object> ram = new LinkedHashMap<>();
     private int version;
 
     public Map<String, Object> global() {
@@ -39,6 +40,16 @@ public final class Variables {
     void delete(VariableScope scope, String name) {
         map(scope).remove(name);
         if (scope == VariableScope.GLOBAL) {
+            version++;
+        }
+    }
+
+    IndexedValues list(VariableScope scope, String prefix) {
+        return ListVariables.read(map(scope), prefix);
+    }
+
+    void deleteList(VariableScope scope, String prefix) {
+        if (ListVariables.delete(map(scope), prefix) && scope == VariableScope.GLOBAL) {
             version++;
         }
     }

@@ -1,6 +1,7 @@
 package com.mineskript.script;
 
 import com.mineskript.game.GameBridge;
+import com.mineskript.lang.Language;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -52,14 +53,14 @@ public final class ConfigFile {
             text = Files.readString(file, StandardCharsets.UTF_8);
         } catch (IOException error) {
             current = Config.DEFAULTS;
-            pending.add("could not read " + name() + ", using the defaults: " + error.getMessage());
+            pending.add(Language.format("config.unreadable", name(), error.getMessage()));
             return false;
         }
         Config.Loaded loaded = Config.parse(name(), text);
         current = loaded.config();
         pending.addAll(loaded.warnings());
         if (loaded.empty()) {
-            pending.add(name() + " has no settings in it, using the defaults");
+            pending.add(Language.format("config.empty", name()));
         }
         return true;
     }

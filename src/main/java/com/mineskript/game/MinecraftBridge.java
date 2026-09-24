@@ -754,6 +754,11 @@ public final class MinecraftBridge implements GameBridge {
     }
 
     @Override
+    public String clipboard() {
+        return minecraft().keyboardHandler.getClipboard();
+    }
+
+    @Override
     public void takeScreenshot() {
         Screenshot.grab(minecraft(), false);
     }

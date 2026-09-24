@@ -1,5 +1,6 @@
 package com.mineskript;
 
+import com.mineskript.lang.Language;
 import com.mineskript.script.MessageLine;
 import com.mineskript.script.Messages;
 import java.util.List;
@@ -41,7 +42,7 @@ public final class MineSkriptMessages {
         return Component.literal(Messages.PREFIX).setStyle(Style.EMPTY
                 .withColor(ChatFormatting.AQUA)
                 .withBold(true)
-                .withHoverEvent(new HoverEvent.ShowText(Component.literal("MineSkript, type /ms help"))));
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal(Language.get("command.hover")))));
     }
 
     private static String indent() {

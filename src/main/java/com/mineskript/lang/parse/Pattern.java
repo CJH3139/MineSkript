@@ -8,6 +8,9 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class Pattern {
+    /** The slot type that takes a whole condition instead of an expression, written {@code %condition%}. */
+    public static final String CONDITION = "condition";
+
     private static final Map<String, SkType> TYPE_NAMES = Map.ofEntries(
             Map.entry("string", SkType.TEXT),
             Map.entry("strings", SkType.TEXT),
@@ -179,6 +182,9 @@ public final class Pattern {
             boolean optional = body.startsWith("-");
             if (optional) {
                 body = body.substring(1);
+            }
+            if (body.equalsIgnoreCase(CONDITION)) {
+                return new PatternElement.Slot(slotCount++, List.of(SkType.BOOLEAN), optional, true);
             }
             List<SkType> types = new ArrayList<>();
             for (String name : body.split("/")) {

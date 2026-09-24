@@ -50,3 +50,20 @@ test {
         exceptionFormat "full"
     }
 }
+
+tasks.register('docsJson', JavaExec) {
+    group = 'documentation'
+    description = 'Writes the documentation of every syntax element to JSON. Pass -Pout=<file> to choose where.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.mineskript.doc.JSONGenerator'
+    args((project.findProperty('out') ?: 'build/docs/docs.json').toString(), project.version.toString())
+}
+
+tasks.register('checkScripts', JavaExec) {
+    group = 'verification'
+    description = 'Parses every mineskript code block and examples entry under -Pdir=<folder>.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.mineskript.tools.ScriptBlockCheck'
+    args((project.findProperty('dir') ?: '.').toString())
+}

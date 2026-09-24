@@ -54,6 +54,7 @@ public final class FakeGameBridge implements GameBridge {
     public int maxAir = 300;
     public int armor;
     public double yaw;
+    public String clipboard = "";
     public double pitch;
     public double speed;
     public double fallDistance;
@@ -569,7 +570,13 @@ public final class FakeGameBridge implements GameBridge {
 
     @Override
     public void copyToClipboard(String text) {
+        clipboard = text;
         calls.add("clipboard:" + text);
+    }
+
+    @Override
+    public String clipboard() {
+        return clipboard;
     }
 
     @Override

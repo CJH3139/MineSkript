@@ -1,11 +1,14 @@
 package com.mineskript.lang.runtime;
 
 import com.mineskript.game.GameBridge;
+import com.mineskript.lang.Language;
+import com.mineskript.lang.ast.IndexedValues;
 import com.mineskript.lang.ast.LoopState;
 import com.mineskript.lang.ast.None;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class Context {
@@ -26,9 +29,9 @@ public final class Context {
 
     public Context(GameBridge game, String file, Map<String, Object> eventValues, Variables variables) {
         this.game = game;
-        this.eventValues = Map.copyOf(eventValues);
+        this.eventValues = new HashMap<>(eventValues);
         this.variables = variables;
-        scopes.push(new Scope(file, new HashMap<>()));
+        scopes.push(new Scope(file, new LinkedHashMap<>()));
     }
 
     public ScriptControl control() {
@@ -67,14 +70,19 @@ public final class Context {
     public Object eventValue(String key) {
         Object value = eventValues.get(key);
         if (value == null) {
-            throw new ScriptError("\"" + key + "\" is not available in this event");
+            throw new ScriptError(Language.format("runtime.not-available-in-event", key));
         }
         return value;
     }
 
+    /** Replaces an event value for the rest of this run, such as the outgoing text of on chat send. */
+    public void setEventValue(String key, Object value) {
+        eventValues.put(key, value);
+    }
+
     public GameBridge world() {
         if (!game.hasWorld()) {
-            throw new ScriptError("no world");
+            throw new ScriptError(Language.get("runtime.no-world"));
         }
         return game;
     }
@@ -100,12 +108,26 @@ public final class Context {
         }
     }
 
+    /** The entries of the list variable {prefix::*}, in the order they were first set. */
+    public IndexedValues getList(VariableScope scope, String prefix) {
+        return scope == VariableScope.LOCAL ? ListVariables.read(locals(), prefix) : variables.list(scope, prefix);
+    }
+
+    /** Deletes every entry of {prefix::*}, including nested ones such as {prefix::a::b}. */
+    public void deleteList(VariableScope scope, String prefix) {
+        if (scope == VariableScope.LOCAL) {
+            ListVariables.delete(locals(), prefix);
+        } else {
+            variables.deleteList(scope, prefix);
+        }
+    }
+
     public int functionDepth() {
         return scopes.size() - 1;
     }
 
     void enterFunction(String functionFile, Map<String, Object> arguments) {
-        scopes.push(new Scope(functionFile, new HashMap<>(arguments)));
+        scopes.push(new Scope(functionFile, new LinkedHashMap<>(arguments)));
     }
 
     void exitFunction() {
@@ -129,7 +151,7 @@ public final class Context {
     public LoopState currentLoop() {
         LoopState state = loops.peek();
         if (state == null) {
-            throw new ScriptError("not inside a loop");
+            throw new ScriptError(Language.get("runtime.not-in-loop"));
         }
         return state;
     }

@@ -20,12 +20,12 @@ class ConditionsTest {
     private final Context context = context(game, Map.of("message", "hello"));
 
     private boolean test(String text) {
-        return condition(text, new Event.Chat()).test(context);
+        return condition(text, SyntaxTestSupport.event("on chat")).test(context);
     }
 
     private boolean parses(String text) {
         SyntaxTestSupport.SyntaxRegistryHolder holder = SyntaxTestSupport.holder();
-        return holder.registry().matchFirst(holder.registry().conditions(), Tokenizer.tokenize(text), holder.parser(), SyntaxTestSupport.scope(new Event.Chat())).isPresent();
+        return holder.registry().matchFirst(holder.registry().conditions(), Tokenizer.tokenize(text), holder.parser(), SyntaxTestSupport.scope(SyntaxTestSupport.event("on chat"))).isPresent();
     }
 
     @Test

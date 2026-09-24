@@ -1,5 +1,6 @@
 package com.mineskript.lang.parse;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
@@ -18,10 +19,11 @@ public record ArithmeticExpression(char operator, Expression left, Expression ri
         Object a = left.evaluate(context);
         Object b = right.evaluate(context);
         if (a == None.NONE || b == None.NONE) {
-            throw new ScriptError("variable is not set");
+            throw new ScriptError(Language.get("runtime.variable-not-set"));
         }
         if (!(a instanceof Double x) || !(b instanceof Double y)) {
-            throw new ScriptError("cannot apply " + operator + " to " + Converters.typeName(Converters.typeOf(a)) + " and " + Converters.typeName(Converters.typeOf(b)));
+            throw new ScriptError(Language.format("runtime.cannot-apply", operator,
+                    Converters.typeName(Converters.typeOf(a)), Converters.typeName(Converters.typeOf(b))));
         }
         return switch (operator) {
             case '+' -> x + y;
@@ -29,7 +31,7 @@ public record ArithmeticExpression(char operator, Expression left, Expression ri
             case '*' -> x * y;
             case '/' -> {
                 if (y == 0.0) {
-                    throw new ScriptError("division by zero");
+                    throw new ScriptError(Language.get("runtime.division-by-zero"));
                 }
                 yield x / y;
             }

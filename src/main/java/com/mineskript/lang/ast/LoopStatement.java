@@ -79,7 +79,8 @@ public record LoopStatement(int line, Kind kind, Block body) implements Statemen
             if (index >= items.size()) {
                 return false;
             }
-            state.next(items.get(index++));
+            String key = items instanceof IndexedValues indexed ? indexed.index(index) : null;
+            state.next(items.get(index++), key);
             return true;
         }
 

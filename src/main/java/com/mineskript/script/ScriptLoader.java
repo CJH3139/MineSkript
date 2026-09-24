@@ -1,5 +1,6 @@
 package com.mineskript.script;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.ParsedScript;
 import com.mineskript.lang.parse.Parser;
@@ -66,7 +67,7 @@ public final class ScriptLoader {
                 scripts.add(parse(file, texts.get(file), sources));
             }
         } catch (IOException error) {
-            scripts.add(new ParsedScript(dir.toString(), List.of(), List.of(new ParseError(dir.toString(), 0, "cannot read scripts folder: " + error.getMessage()))));
+            scripts.add(new ParsedScript(dir.toString(), List.of(), List.of(new ParseError(dir.toString(), 0, Language.format("loader.cannot-read-folder", error.getMessage())))));
         } finally {
             parser.functions().forgetDeclared();
         }
@@ -120,7 +121,7 @@ public final class ScriptLoader {
     private ParsedScript parse(Path file, Source source, ScriptSources sources) {
         String name = file.getFileName().toString();
         if (source.text() == null) {
-            ParsedScript script = new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, "cannot read file: " + source.error())));
+            ParsedScript script = new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, Language.format("loader.cannot-read-file", source.error()))));
             sources.capture(name, "", script.errors());
             return script;
         }

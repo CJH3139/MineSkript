@@ -124,6 +124,15 @@ class MessagesTest {
     }
 
     @Test
+    void infoEndsWithTheLoadedAddons(@TempDir Path dir) {
+        List<String> none = text(Messages.info("1.0.0-alpha", dir, 2, 5, 1200, List.of()));
+        assertEquals(text(Messages.info("1.0.0-alpha", dir, 2, 5, 1200)), none.subList(0, 4));
+        assertEquals("INFO no addons", none.get(4));
+        assertEquals("INFO 1 addon: Example", text(Messages.info("1.0.0-alpha", dir, 0, 0, 1, List.of("Example"))).get(4));
+        assertEquals("INFO 2 addons: A, B", text(Messages.info("1.0.0-alpha", dir, 0, 0, 1, List.of("A", "B"))).get(4));
+    }
+
+    @Test
     void helpHasOneLinePerBranchOfTheTree() {
         List<String> lines = text(Messages.help());
         assertEquals(11, lines.size());

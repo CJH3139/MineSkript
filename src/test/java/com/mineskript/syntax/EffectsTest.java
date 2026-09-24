@@ -26,7 +26,7 @@ class EffectsTest {
     private final Context context = context(game, Map.of("message", "hi"));
 
     private Flow run(String text) {
-        Statement statement = effect(text, new Event.Chat());
+        Statement statement = effect(text, SyntaxTestSupport.event("on chat"));
         assertEquals(1, statement.line());
         return statement.execute(context);
     }

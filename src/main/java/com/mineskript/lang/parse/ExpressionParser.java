@@ -39,6 +39,14 @@ public final class ExpressionParser implements SlotResolver {
         return parse(tokens, types, scope);
     }
 
+    @Override
+    public Optional<Expression> resolveCondition(List<Token> tokens, ParseScope scope) {
+        if (owner == null) {
+            return Optional.empty();
+        }
+        return owner.combine(tokens, scope).map(ConditionExpression::new);
+    }
+
     public Optional<Expression> parse(List<Token> tokens, List<SkType> types, ParseScope scope) {
         if (tokens.isEmpty()) {
             return Optional.empty();
@@ -119,7 +127,7 @@ public final class ExpressionParser implements SlotResolver {
 
     private Optional<Expression> literal(List<Token> tokens, List<SkType> types, ParseScope scope) {
         if (tokens.size() == 1 && !tokens.get(0).quoted() && tokens.get(0).text().startsWith("{")) {
-            return typed(VariableExpression.of(tokens.get(0).text()), types);
+            return typed(VariableExpression.parse(tokens.get(0).text(), this, scope), types);
         }
         if (tokens.size() == 1 && !tokens.get(0).quoted()) {
             switch (tokens.get(0).text()) {

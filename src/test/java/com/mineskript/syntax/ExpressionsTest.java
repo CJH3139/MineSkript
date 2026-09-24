@@ -30,9 +30,9 @@ class ExpressionsTest {
 
     @Test
     void messageOnlyExistsInsideChat() {
-        Object value = expr("message", SkType.TEXT, new Event.Chat()).evaluate(SyntaxTestSupport.context(game, Map.of("message", "hello")));
+        Object value = expr("message", SkType.TEXT, SyntaxTestSupport.event("on chat")).evaluate(SyntaxTestSupport.context(game, Map.of("message", "hello")));
         assertEquals("hello", value);
-        assertEquals("hello", expr("the chat message", SkType.TEXT, new Event.Chat()).evaluate(SyntaxTestSupport.context(game, Map.of("message", "hello"))));
+        assertEquals("hello", expr("the chat message", SkType.TEXT, SyntaxTestSupport.event("on chat")).evaluate(SyntaxTestSupport.context(game, Map.of("message", "hello"))));
         SyntaxException error = assertThrows(SyntaxException.class, () -> parser().parse("message", SkType.TEXT, scope(new Event.Load())));
         assertEquals("\"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\"", error.getMessage());
     }

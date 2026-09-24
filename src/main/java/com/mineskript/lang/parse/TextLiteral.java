@@ -1,7 +1,9 @@
 package com.mineskript.lang.parse;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.SkType;
+import com.mineskript.lang.lexer.TextScanner;
 import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.Converters;
 import java.util.ArrayList;
@@ -32,9 +34,9 @@ public final class TextLiteral implements Expression {
                 i += 2;
                 continue;
             }
-            int end = raw.indexOf('%', i + 1);
+            int end = TextScanner.closingPercent(raw, i);
             if (end < 0) {
-                throw new SyntaxException("unterminated % in string");
+                throw new SyntaxException(Language.get("parse.unterminated-percent"));
             }
             String inner = raw.substring(i + 1, end);
             List<Token> tokens;
@@ -44,7 +46,7 @@ public final class TextLiteral implements Expression {
                 return Optional.empty();
             }
             Expression expression = parser.parse(tokens, List.of(SkType.OBJECT), scope)
-                    .orElseThrow(() -> new SyntaxException("unknown expression \"" + inner + "\" in string"));
+                    .orElseThrow(() -> new SyntaxException(Language.format("parse.unknown-expression-in-string", inner)));
             if (!text.isEmpty()) {
                 segments.add(text.toString());
                 text.setLength(0);

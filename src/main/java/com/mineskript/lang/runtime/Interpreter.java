@@ -1,5 +1,6 @@
 package com.mineskript.lang.runtime;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Flow;
 import com.mineskript.lang.ast.Statement;
 
@@ -38,7 +39,7 @@ public final class Interpreter {
             if (++steps > stepBudget) {
                 String file = execution.context().file();
                 execution.stop();
-                throw new ScriptError(file, statement.line(), "step limit exceeded");
+                throw new ScriptError(file, statement.line(), Language.get("runtime.step-limit"));
             }
             try {
                 Flow flow = statement.execute(execution.context());

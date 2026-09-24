@@ -12,7 +12,7 @@ Everything runs on your own client. There is no server component, nothing is ins
 mod only ever does what you could do by hand.
 
 > [!IMPORTANT]
-> MineSkript is in **early release**. Syntax may still change between versions, and list variables are not in yet.
+> MineSkript is in **early release**. Syntax may still change between versions.
 
 ## Why a custom language?
 Modding a client normally means Java, mappings, a build system and an API surface to learn before you can make the
@@ -92,6 +92,18 @@ on key press of "g":
         send label(loop-iteration)
 ```
 
+List variables work as in Skript. `{homes::alex}` is one entry, `{homes::*}` is the whole list, and a name part
+written as `%expression%` is worked out when the line runs, so `{homes::%player%}` is a different entry per player.
+`set {l::*} to a, b and c`, `add x to {l::*}`, `remove x from {l::*}`, `remove all x from {l::*}` and
+`delete {l::*}` change a list; `loop {l::*}` sets `loop-value` and `loop-index`, and `size of {l::*}` counts it.
+Entries keep the order they were first set in rather than being sorted, variable names are case-insensitive, and saved
+lists survive a restart like any other `{global}` variable. Inside text, `""` is a literal quote:
+`send "she said ""hi"""`.
+
+Set, add and remove also work on some values of the game: `add 90 to yaw`, `remove 10 from pitch`,
+`add 1 to selected slot` (which wraps round the hotbar), `set clipboard to "..."`, and `set message to "..."` inside
+`on chat send` or `on command send`, which changes what is actually sent.
+
 The example scripts in your `mineskript` folder are the working reference, and `/ms help` lists the commands. A parse
 error names the file, the line and the text it objected to.
 
@@ -133,7 +145,7 @@ running rather than dropping it.
 - [x] A real command tree with single-file reload and completion
 - [x] Effect commands typed into chat, and the first config file
 - [x] Functions, options, `is set` and `x if condition else y`
-- [ ] List variables and dynamic variable names
+- [x] List variables, dynamic variable names and changers for game values
 - [ ] Syntax highlighting for editors
 
 ## Contributing
@@ -141,6 +153,8 @@ Issues and pull requests are welcome. If you are reporting a bug, include the sm
 the error line the game printed, since that names the file and line the parser objected to.
 
 If you use AI anywhere in a pull request, say exactly how.
+
+Code follows [code-conventions.md](code-conventions.md), which is based on Skript's.
 
 ## Building
 Requires JDK 25.
@@ -155,6 +169,10 @@ The language is deliberately isolated from Minecraft: only `game.MinecraftBridge
 `MineSkriptCommand` and `MineSkriptMessages` import anything from Minecraft or Fabric, and everything else is covered
 by unit tests that run against a fake game. That means `./gradlew test` needs no game at all, and a port to a new
 Minecraft version only touches the `game` package.
+
+Syntax is organised in modules, like Skript's: `common` holds everything that never touches the game (text, maths,
+lists, variables, loops), and `client` has one module per game feature (`client/inventory`, `client/chat`,
+`client/world` and so on). Addons are modules too; see [ADDONS.md](ADDONS.md).
 
 ## Credits
 Syntax patterns are modelled on [SkriptLang/Skript](https://github.com/SkriptLang/Skript), and the idea of scripting

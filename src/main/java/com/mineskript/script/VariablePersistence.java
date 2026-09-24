@@ -1,6 +1,7 @@
 package com.mineskript.script;
 
 import com.mineskript.game.GameBridge;
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PlayerRef;
@@ -63,7 +64,7 @@ public final class VariablePersistence {
             savedVersion = version;
             return true;
         } catch (IOException error) {
-            game.showError("could not save " + file.getFileName() + ": " + error.getMessage());
+            game.showError(Language.format("variables.cannot-save", file.getFileName(), error.getMessage()));
             return false;
         }
     }

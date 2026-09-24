@@ -1,6 +1,7 @@
 package com.mineskript.script;
 
 import com.mineskript.game.GameBridge;
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Block;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.Trigger;
@@ -46,16 +47,16 @@ public final class EffectCommands {
             return Outcome.NOT_MINE;
         }
         if (running) {
-            game.showError(new ScriptError(FILE, 0, "an effect command cannot start another effect command").toString());
+            game.showError(new ScriptError(FILE, 0, Language.get("effect-command.nested")).toString());
             return Outcome.BUSY;
         }
         if (!game.hasWorld()) {
-            game.showError(new ScriptError(FILE, 0, "there is no world to run in").toString());
+            game.showError(new ScriptError(FILE, 0, Language.get("effect-command.no-world")).toString());
             return Outcome.FAILED;
         }
         String text = message.substring(current.effectCommandPrefix().length()).strip();
         if (text.isEmpty()) {
-            game.showInfo("type an effect after " + current.effectCommandPrefix() + " to run it, like " + current.effectCommandPrefix() + "send \"hello\"");
+            game.showInfo(Language.format("effect-command.empty", current.effectCommandPrefix()));
             return Outcome.EMPTY;
         }
         ParsedEffect parsed;
@@ -80,7 +81,7 @@ public final class EffectCommands {
         if (!ran) {
             return Outcome.FAILED;
         }
-        game.showInfo("ran " + text);
+        game.showInfo(Language.format("effect-command.ran", text));
         return Outcome.RAN;
     }
 

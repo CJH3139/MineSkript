@@ -1,5 +1,6 @@
 package com.mineskript.lang.lexer;
 
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ParseError;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,28 +60,30 @@ public final class Lexer {
                 indentEnd++;
             }
             if (tabs && spaces) {
-                errors.add(new ParseError(file, number, "mixed tabs and spaces in indentation"));
+                errors.add(new ParseError(file, number, Language.get("lexer.mixed-indentation")));
                 lines.add(new Line(null, number, indentEnd));
                 continue;
             }
             lines.add(new Line(withoutComment.substring(indentEnd).stripTrailing(), number, indentEnd));
         }
         if (blockCommentStart != 0) {
-            errors.add(new ParseError(file, blockCommentStart, "block comment \"###\" is never closed"));
+            errors.add(new ParseError(file, blockCommentStart, Language.get("lexer.unclosed-block-comment")));
         }
         if (continued != null) {
-            errors.add(new ParseError(file, continuedFrom, "the last line ends with \"\\\" but nothing follows it"));
+            errors.add(new ParseError(file, continuedFrom, Language.get("lexer.dangling-continuation")));
         }
         return lines;
     }
 
     private static String stripComment(String line) {
-        boolean quoted = false;
         for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
             if (c == '"') {
-                quoted = !quoted;
-            } else if (c == '#' && !quoted) {
+                i = TextScanner.closingQuote(line, i);
+                if (i < 0) {
+                    return line;
+                }
+            } else if (c == '#') {
                 return line.substring(0, i);
             }
         }
@@ -98,7 +101,7 @@ public final class Lexer {
                 continue;
             }
             if (top.indent() != 0) {
-                errors.add(new ParseError(file, top.number(), "unexpected indentation"));
+                errors.add(new ParseError(file, top.number(), Language.get("lexer.unexpected-indentation")));
                 i = skipTrigger(lines, i + 1);
                 continue;
             }
@@ -118,13 +121,13 @@ public final class Lexer {
                     break;
                 }
                 if (line.indent() % unit != 0) {
-                    errors.add(new ParseError(file, line.number(), "unexpected indentation"));
+                    errors.add(new ParseError(file, line.number(), Language.get("lexer.unexpected-indentation")));
                     brokenInLoop = true;
                     break;
                 }
                 int depth = line.indent() / unit;
                 if (depth > parentsByDepth.size()) {
-                    errors.add(new ParseError(file, line.number(), "unexpected indentation"));
+                    errors.add(new ParseError(file, line.number(), Language.get("lexer.unexpected-indentation")));
                     brokenInLoop = true;
                     break;
                 }
@@ -133,7 +136,7 @@ public final class Lexer {
                 }
                 Node parent = parentsByDepth.getLast();
                 if (!parent.section()) {
-                    errors.add(new ParseError(file, line.number(), "unexpected indentation"));
+                    errors.add(new ParseError(file, line.number(), Language.get("lexer.unexpected-indentation")));
                     brokenInLoop = true;
                     break;
                 }
@@ -146,7 +149,7 @@ public final class Lexer {
             if (!dropped) {
                 Node empty = findEmptySection(node);
                 if (empty != null) {
-                    errors.add(new ParseError(file, empty.line(), "empty section"));
+                    errors.add(new ParseError(file, empty.line(), Language.get("lexer.empty-section")));
                     dropped = true;
                 }
             }

@@ -1,5 +1,7 @@
 package com.mineskript.lang.parse;
 
+import com.mineskript.lang.Language;
+import com.mineskript.lang.lexer.TextScanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -16,20 +18,17 @@ public final class Tokenizer {
             char c = line.charAt(i);
             if (c == '"') {
                 flush(tokens, word);
-                int end = line.indexOf('"', i + 1);
-                if (end < 0) {
-                    throw new TokenizeException("unterminated string");
-                }
-                tokens.add(new Token(line.substring(i + 1, end), true));
-                i = end + 1;
+                TextScanner.Quoted quoted = TextScanner.readString(line, i)
+                        .orElseThrow(() -> new TokenizeException(Language.get("tokenizer.unterminated-string")));
+                tokens.add(new Token(quoted.content(), true));
+                i = quoted.end() + 1;
             } else if (c == '{') {
                 flush(tokens, word);
-                int end = line.indexOf('}', i + 1);
+                int end = TextScanner.closingBrace(line, i);
                 if (end < 0) {
-                    throw new TokenizeException("unterminated variable");
+                    throw new TokenizeException(Language.get("tokenizer.unterminated-variable"));
                 }
-                String inner = line.substring(i + 1, end).trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
-                tokens.add(new Token("{" + inner + "}", false));
+                tokens.add(new Token("{" + variableName(line.substring(i + 1, end)) + "}", false));
                 i = end + 1;
             } else if (Character.isWhitespace(c)) {
                 flush(tokens, word);
@@ -45,6 +44,35 @@ public final class Tokenizer {
         }
         flush(tokens, word);
         return tokens;
+    }
+
+    /**
+     * Lowercases a variable name and collapses its whitespace, leaving each %...% part exactly as written because it is
+     * an expression that is parsed on its own.
+     */
+    private static String variableName(String raw) {
+        StringBuilder name = new StringBuilder();
+        StringBuilder plain = new StringBuilder();
+        int i = 0;
+        while (i < raw.length()) {
+            int end = raw.charAt(i) == '%' ? TextScanner.closingPercent(raw, i) : -1;
+            if (end < 0) {
+                plain.append(raw.charAt(i));
+                i++;
+                continue;
+            }
+            name.append(normalise(plain));
+            name.append(raw, i, end + 1);
+            i = end + 1;
+        }
+        name.append(normalise(plain));
+        return name.toString().strip();
+    }
+
+    private static String normalise(StringBuilder plain) {
+        String text = plain.toString().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
+        plain.setLength(0);
+        return text;
     }
 
     private static void flush(List<Token> tokens, StringBuilder word) {
