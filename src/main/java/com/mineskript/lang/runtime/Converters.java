@@ -1,10 +1,12 @@
 package com.mineskript.lang.runtime;
 
+import com.mineskript.game.GameBridge;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PlayerRef;
 import com.mineskript.lang.ast.SkType;
@@ -33,6 +35,7 @@ public final class Converters {
             case PlayerRef ignored -> context.world().playerName();
             case ItemValue item -> item.count() > 1 ? item.count() + " " + item.name() : item.name();
             case EntityValue entity -> entity.name();
+            case Location location -> locationText(location);
             case List<?> list -> joinList(list, context);
             default -> value.toString();
         };
@@ -49,6 +52,7 @@ public final class Converters {
             case PlayerRef ignored -> SkType.PLAYER;
             case ItemValue ignored -> SkType.ITEM;
             case EntityValue ignored -> SkType.ENTITY;
+            case Location ignored -> SkType.LOCATION;
             case null, default -> SkType.OBJECT;
         };
     }
@@ -59,6 +63,9 @@ public final class Converters {
         }
         if (from == SkType.BLOCK && to == SkType.BLOCKTYPE) {
             return true;
+        }
+        if (to == SkType.LOCATION) {
+            return from == SkType.PLAYER || from == SkType.ENTITY || from == SkType.BLOCK;
         }
         return from == SkType.ITEM && to == SkType.BLOCKTYPE;
     }
@@ -88,7 +95,33 @@ public final class Converters {
         if (to == SkType.BLOCKTYPE && value instanceof ItemValue item) {
             return item.type();
         }
+        if (to == SkType.LOCATION) {
+            return toLocation(value, context);
+        }
         throw new ScriptError(Language.format("runtime.cannot-convert", typeName(typeOf(value)), typeName(to)));
+    }
+
+    private static Location toLocation(Object value, Context context) {
+        return switch (value) {
+            case PlayerRef ignored -> {
+                GameBridge world = context.world();
+                yield new Location(world.playerX(), world.playerY(), world.playerZ(), world.dimension());
+            }
+            case EntityValue entity -> new Location(entity.x(), entity.y(), entity.z(), currentDimension(context));
+            case BlockValue block -> block.location()
+                    .orElseThrow(() -> new ScriptError(Language.format("runtime.block-has-no-location", block)));
+            default -> throw new ScriptError(Language.format("runtime.cannot-convert",
+                    typeName(typeOf(value)), typeName(SkType.LOCATION)));
+        };
+    }
+
+    public static String currentDimension(Context context) {
+        return context.game().hasWorld() ? context.game().dimension() : Location.DEFAULT_DIMENSION;
+    }
+
+    private static String locationText(Location location) {
+        return "x: " + formatNumber(location.x()) + ", y: " + formatNumber(location.y()) + ", z: "
+                + formatNumber(location.z()) + " in " + location.dimension();
     }
 
     public static String typeName(SkType type) {

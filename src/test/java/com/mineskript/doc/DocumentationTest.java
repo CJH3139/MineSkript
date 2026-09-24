@@ -14,7 +14,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class DocumentationTest {
-    private static final String[] SECTIONS = {"events", "conditions", "effects", "expressions"};
+    private static final String[] SECTIONS = {"events", "conditions", "effects", "expressions", "functions"};
 
     @Test
     void everyElementHasANameDescriptionExamplesAndSince() {

@@ -28,6 +28,8 @@ public final class Pattern {
             Map.entry("items", SkType.ITEM),
             Map.entry("entity", SkType.ENTITY),
             Map.entry("entities", SkType.ENTITY),
+            Map.entry("location", SkType.LOCATION),
+            Map.entry("locations", SkType.LOCATION),
             Map.entry("object", SkType.OBJECT),
             Map.entry("objects", SkType.OBJECT));
 

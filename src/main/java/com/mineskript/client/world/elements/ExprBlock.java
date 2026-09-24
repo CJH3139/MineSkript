@@ -4,8 +4,10 @@ import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
+import com.mineskript.game.GameBridge;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.ParseScope;
@@ -73,7 +75,11 @@ public final class ExprBlock implements Expression {
         if (direction[0] == 0 && direction[1] == 0 && direction[2] == 0) {
             steps = 0;
         }
-        String id = context.world().blockIdAt(direction[0] * steps, direction[1] * steps, direction[2] * steps);
-        return new BlockValue(id);
+        GameBridge world = context.world();
+        int dx = direction[0] * steps;
+        int dy = direction[1] * steps;
+        int dz = direction[2] * steps;
+        Location feet = new Location(world.playerX(), world.playerY(), world.playerZ(), world.dimension());
+        return new BlockValue(world.blockIdAt(dx, dy, dz), feet.blockCorner().offset(dx, dy, dz));
     }
 }

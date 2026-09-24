@@ -10,8 +10,10 @@ and the line.
 * `effects/`, `expressions/`, `conditions/` and `events/` hold tests for one syntax class each, and the file is named
   after that class: the test for `ExprLength.java` is `expressions/ExprLength.ms`. A file may also cover close
   relatives of its class (`ExprFloor.ms` also tests `ExprAbsoluteValue`); say so in the comment at the top.
-* `general/` holds everything that is not one syntax class: sections, functions, options, variable names, text,
-  arithmetic.
+* `functions/` holds tests for the built-in functions, one file per class that registers them: the functions of
+  `MathFunctions.java` are tested in `functions/MathFunctions.ms`.
+* `general/` holds everything that is not one syntax class: sections, functions written in scripts, options,
+  variable names, text, arithmetic.
 * When you change a syntax element, change its test to cover the new behaviour.
 
 ## Writing a test

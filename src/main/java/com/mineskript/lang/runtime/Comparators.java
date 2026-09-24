@@ -5,6 +5,7 @@ import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Timespan;
@@ -49,6 +50,9 @@ public final class Comparators {
             return x.id().equals(y.id()) ? 0 : 1;
         }
         if (left instanceof Boolean x && right instanceof Boolean y) {
+            return x.equals(y) ? 0 : 1;
+        }
+        if (left instanceof Location x && right instanceof Location y) {
             return x.equals(y) ? 0 : 1;
         }
         if (left instanceof EntityValue x && right instanceof EntityValue y) {

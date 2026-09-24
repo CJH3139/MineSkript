@@ -30,6 +30,7 @@ import com.mineskript.common.elements.events.CommonEvents;
 import com.mineskript.common.elements.events.EventValues;
 import com.mineskript.common.elements.expressions.ExprAbsoluteValue;
 import com.mineskript.common.elements.expressions.ExprCeiling;
+import com.mineskript.common.elements.expressions.ExprDistance;
 import com.mineskript.common.elements.expressions.ExprEventValue;
 import com.mineskript.common.elements.expressions.ExprFirstCharacters;
 import com.mineskript.common.elements.expressions.ExprFloor;
@@ -37,6 +38,8 @@ import com.mineskript.common.elements.expressions.ExprJoin;
 import com.mineskript.common.elements.expressions.ExprLastCharacters;
 import com.mineskript.common.elements.expressions.ExprLength;
 import com.mineskript.common.elements.expressions.ExprListSize;
+import com.mineskript.common.elements.expressions.ExprLocationCoordinate;
+import com.mineskript.common.elements.expressions.ExprLocationOf;
 import com.mineskript.common.elements.expressions.ExprLoopIndex;
 import com.mineskript.common.elements.expressions.ExprLoopIteration;
 import com.mineskript.common.elements.expressions.ExprLoopValue;
@@ -48,6 +51,7 @@ import com.mineskript.common.elements.expressions.ExprParsedAsInteger;
 import com.mineskript.common.elements.expressions.ExprParsedAsNumber;
 import com.mineskript.common.elements.expressions.ExprRandomInteger;
 import com.mineskript.common.elements.expressions.ExprRandomNumber;
+import com.mineskript.common.elements.expressions.ExprRelativeLocation;
 import com.mineskript.common.elements.expressions.ExprReplace;
 import com.mineskript.common.elements.expressions.ExprRound;
 import com.mineskript.common.elements.expressions.ExprRoundedToPlaces;
@@ -55,6 +59,8 @@ import com.mineskript.common.elements.expressions.ExprSplit;
 import com.mineskript.common.elements.expressions.ExprSquareRoot;
 import com.mineskript.common.elements.expressions.ExprSubstring;
 import com.mineskript.common.elements.expressions.ExprUppercase;
+import com.mineskript.common.elements.functions.MathFunctions;
+import com.mineskript.common.elements.functions.TextFunctions;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
@@ -96,6 +102,10 @@ public final class CommonModule implements SyntaxModule {
         ExprMaximum.register(registry);
         ExprRandomNumber.register(registry);
         ExprRandomInteger.register(registry);
+        ExprLocationOf.register(registry);
+        ExprLocationCoordinate.register(registry);
+        ExprDistance.register(registry);
+        ExprRelativeLocation.register(registry);
 
         CondIsSet.register(registry);
         CondIsIn.register(registry);
@@ -124,5 +134,8 @@ public final class CommonModule implements SyntaxModule {
         EffReduce.register(registry);
         EffDelete.register(registry);
         EffReset.register(registry);
+
+        MathFunctions.register(registry);
+        TextFunctions.register(registry);
     }
 }

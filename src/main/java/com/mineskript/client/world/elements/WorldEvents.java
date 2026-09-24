@@ -23,8 +23,8 @@ public final class WorldEvents {
                         "\t\tsend \"welcome to the nether\"")
                 .since("1.0.0-alpha.2");
         state(registry, "Block Break", "on (block break|break block|break of block)", "block break")
-                .values("block", "block x", "block y", "block z")
-                .description("Fires when you break a block. event-block is the block type that was broken and event-block x, y and z are its coordinates. Blocks broken by anyone else do not fire it.")
+                .values("block", "block x", "block y", "block z", "location")
+                .description("Fires when you break a block. event-block is the block type that was broken and event-block x, y and z are its coordinates; event-location is the same position as a location. Blocks broken by anyone else do not fire it.")
                 .examples("on block break:",
                         "\tif event-block is stone:",
                         "\t\tadd 1 to {stone mined}",
@@ -33,8 +33,8 @@ public final class WorldEvents {
                         "\tsend \"broke %event-block% at %event-block x% %event-block y% %event-block z%\"")
                 .since("1.0.0-alpha.5");
         state(registry, "Block Place", "on (block place|place block|placing of block)", "block place")
-                .values("block", "block x", "block y", "block z")
-                .description("Fires when a block you placed appears. MineSkript notes each right-click with a block item and watches the clicked position and the one next to it for up to 5 ticks; the first of them to change to a new, non-air block is reported. event-block is the placed block and event-block x, y and z its position.",
+                .values("block", "block x", "block y", "block z", "location")
+                .description("Fires when a block you placed appears. MineSkript notes each right-click with a block item and watches the clicked position and the one next to it for up to 5 ticks; the first of them to change to a new, non-air block is reported. event-block is the placed block, event-block x, y and z its position and event-location that position as a location.",
                         "Because it watches for the change, it runs a tick or more after the click, and a block that changes there for another reason in that window can be reported.")
                 .examples("on block place:",
                         "\tif event-block is obsidian:",

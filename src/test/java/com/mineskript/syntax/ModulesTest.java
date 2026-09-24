@@ -147,7 +147,13 @@ class ModulesTest {
             assertEquals("ExprItemName", expression(registry, "name of item in slot 1's length", SkType.TEXT));
             assertEquals("ExprItemName", expression(registry, "name of {_x}", SkType.TEXT));
             assertEquals("ExprJoin", expression(registry, "level of effect \"a\" joined with \"b\"", SkType.TEXT));
-            assertEquals("ExprParsedAsNumber", expression(registry, "block at 1, 2, {_z} parsed as number",
+            assertEquals("ExprLocationCoordinate", expression(registry, "x-coordinate of {_l}", SkType.NUMBER));
+            assertEquals("ExprCoordinate", expression(registry, "x-coordinate of player", SkType.NUMBER));
+            assertEquals("ExprEntityCoordinate", expression(registry, "target entity's y-coord", SkType.NUMBER));
+            assertEquals("ExprBlock", expression(registry, "block at player", SkType.BLOCK));
+            assertEquals("ExprBlockAt", expression(registry, "block at 2 above player", SkType.BLOCK));
+            assertEquals("EffLookAt", effect(registry, "look at {_l}"));
+            assertEquals("ExprParsedAsNumber", expression(registry, "block at {_l} parsed as number",
                     SkType.NUMBER));
         }
     }

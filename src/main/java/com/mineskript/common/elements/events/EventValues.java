@@ -112,6 +112,8 @@ public final class EventValues {
                 add(registry, name, SkType.NUMBER, AXIS_DESCRIPTIONS.get(name));
             }
         }
+        add(registry, "location", SkType.LOCATION,
+                "Where the event happened, in the dimension you are in: the corner of the broken or placed block (the same numbers as event-block x, y and z), or the exact position of the sound or particles (event-x, event-y and event-z).");
     }
 
     private static void add(SyntaxRegistry registry, String name, SkType type, String description) {

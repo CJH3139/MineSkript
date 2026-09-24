@@ -11,6 +11,7 @@ import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.WaitUntil;
@@ -263,7 +264,18 @@ public final class EventDispatcher {
         if (!game.hasWorld()) {
             return;
         }
-        fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals(signal.event()), signal.values());
+        fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals(signal.event()),
+                withLocation(signal.values()));
+    }
+
+    private Map<String, Object> withLocation(Map<String, Object> values) {
+        if (!(values.get("x") instanceof Double x && values.get("y") instanceof Double y
+                && values.get("z") instanceof Double z)) {
+            return values;
+        }
+        Map<String, Object> located = new HashMap<>(values);
+        located.put("location", new Location(x, y, z, game.dimension()));
+        return located;
     }
 
     public void onFrame() {
@@ -773,7 +785,8 @@ public final class EventDispatcher {
                 "block", new BlockType(change.id()),
                 "block x", (double) change.x(),
                 "block y", (double) change.y(),
-                "block z", (double) change.z()));
+                "block z", (double) change.z(),
+                "location", new Location(change.x(), change.y(), change.z(), game.dimension())));
     }
 
     private void fireAll(Predicate<Trigger> match, Map<String, Object> values) {

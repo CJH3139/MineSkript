@@ -6,11 +6,15 @@ import com.mineskript.lang.ast.EventValue;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.Statement;
+import com.mineskript.lang.function.FunctionBody;
+import com.mineskript.lang.function.FunctionInfo;
+import com.mineskript.lang.function.FunctionParameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -24,10 +28,11 @@ public final class SyntaxRegistry {
      * One registered syntax element, the class that registered it, the addon it came from ({@link #BUILT_IN} for
      * MineSkript's own) and the path of the module that registered it (such as {@code client/inventory}, or
      * {@code null} outside any module), kept only by a registry made with {@link #documenting()} so documentation can
-     * be generated in registration order.
+     * be generated in registration order. {@code event} is set for events and {@code function} for built-in
+     * functions, whose only pattern is their signature.
      */
     public record Registration(String kind, Class<?> owner, List<String> patterns, SkType returnType, EventInfo event,
-            String addon, String module) {
+            FunctionInfo function, String addon, String module) {
     }
 
     private final List<SyntaxEntry<Event>> events = new ArrayList<>();
@@ -40,6 +45,7 @@ public final class SyntaxRegistry {
     private final List<SyntaxEntry<Statement>> effects = new ArrayList<>();
     private final List<SyntaxEntry<Condition>> conditions = new ArrayList<>();
     private final Map<Tier, List<ExpressionEntry>> expressions = new EnumMap<>(Tier.class);
+    private final Map<String, FunctionInfo> functions = new LinkedHashMap<>();
 
     public SyntaxRegistry() {
         for (Tier tier : Tier.values()) {
@@ -97,8 +103,13 @@ public final class SyntaxRegistry {
     }
 
     private void record(String kind, String[] patterns, SkType returnType, EventInfo event) {
+        record(kind, patterns, returnType, event, null);
+    }
+
+    private void record(String kind, String[] patterns, SkType returnType, EventInfo event, FunctionInfo function) {
         if (documenting) {
-            registrations.add(new Registration(kind, owner(), List.of(patterns), returnType, event, addon, module));
+            registrations.add(new Registration(kind, owner(), List.of(patterns), returnType, event, function, addon,
+                    module));
         }
     }
 
@@ -220,6 +231,36 @@ public final class SyntaxRegistry {
         entries.add(insertionPoint(entries, ExpressionEntry::priority, priority),
                 new ExpressionEntry(compileExpressionPatterns(patterns), returnType, tier, factory, priority));
         record("expression", patterns, returnType, null);
+    }
+
+    /**
+     * Registers a built-in function, like Skript's default functions such as {@code round(n, d)}: scripts call it as
+     * {@code name(arguments)} anywhere a value can go, or on a line of its own. Document it with the chained calls on
+     * the returned {@link FunctionInfo}. The body receives the arguments converted to the parameter types and runs
+     * on the game thread, so it must be quick and must not block. Function names ignore case, and a script that
+     * defines a function with a built-in function's name gets a parse error.
+     *
+     * @throws IllegalArgumentException if a function with that name, ignoring case, is already registered, or the
+     *     name or parameters are invalid (see {@link FunctionInfo#FunctionInfo})
+     */
+    public FunctionInfo addFunction(String name, SkType returnType, FunctionBody body,
+            FunctionParameter... parameters) {
+        FunctionInfo function = new FunctionInfo(name, returnType, body, List.of(parameters));
+        if (functions.putIfAbsent(function.key(), function) != null) {
+            throw new IllegalArgumentException("function " + name + " is already registered");
+        }
+        record("function", new String[] {function.name()}, returnType, null, function);
+        return function;
+    }
+
+    /** The built-in function with this name, ignoring case, if there is one. */
+    public Optional<FunctionInfo> function(String name) {
+        return Optional.ofNullable(functions.get(name.toLowerCase(Locale.ROOT)));
+    }
+
+    /** Every built-in function, in the order they were registered. */
+    public List<FunctionInfo> functions() {
+        return List.copyOf(functions.values());
     }
 
     public List<SyntaxEntry<Event>> events() {

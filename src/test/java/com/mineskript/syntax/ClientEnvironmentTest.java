@@ -72,11 +72,11 @@ class ClientEnvironmentTest {
         runner.game.setBlockAt(10, 64, 10, "minecraft:stone");
         runner.run("""
                 on load:
-                    send "%block at 10, 64, 10%"
-                    send "%block at 10, 65, 10%"
-                    if block at 10, 64, 10 is stone:
+                    send "%block at location(10, 64, 10)%"
+                    send "%block at location(10, 65, 10)%"
+                    if block at location(10, 64, 10) is stone:
                         send "is stone"
-                    if block at 10, 64, 10 is not dirt:
+                    if block at location(10, 64, 10) is not dirt:
                         send "not dirt"
                 """);
         assertEquals(List.of("stone", "air", "is stone", "not dirt"), runner.game.messages);

@@ -95,6 +95,19 @@ on key press of "g":
         send label(loop-iteration)
 ```
 
+Positions are locations, as in Skript: an x, y and z together with the dimension they are in.
+`location(100, 64, -200)` makes one (in the dimension you are in, or give one as a fourth value such as
+`"the_nether"`), `location of player`, `location of target entity` and `location of target block` read one, and
+`x-coordinate of {home}`, `distance between player and {home}`, `the location 2 above {home}` (or just
+`2 above {home}`) and `block at {home}` work with them. Everything that takes a position takes a location:
+`look at`, `if player is within 5 blocks of`, `spawn a hologram "..." at`, `show a beam at` and the rest. Saved in a
+`{global}` variable, a location survives a restart. `event-location` says where a block was broken or placed, or
+where a sound or particle was.
+
+Skript's built-in functions are here too, called like your own: `round(3.14159, 2)`, `floor`, `ceil`, `abs`,
+`sqrt`, `mod(-1, 10)`, `min(...)` and `max(...)` of any values or lists, `sum`, `mean`, `clamp`, `sin` and the other
+trigonometry functions, `concat`, `formatNumber` and more. A script cannot define a function with a built-in name.
+
 List variables work as in Skript. `{homes::alex}` is one entry, `{homes::*}` is the whole list, and a name part
 written as `%expression%` is worked out when the line runs, so `{homes::%player%}` is a different entry per player.
 `set {l::*} to a, b and c`, `add x to {l::*}`, `remove x from {l::*}`, `remove all x from {l::*}` and
@@ -114,11 +127,11 @@ held item`, `custom model data of held item`, and any data component as text wit
 
 Some things only you see. `on item tooltip` runs while the game draws the tooltip of the item you hover over, and
 `add "&7worth: 5 gold" to the tooltip` (or `to the top of the tooltip`) adds your own lines, with `&` colour codes.
-These triggers run instantly, so they cannot `wait`. `spawn a hologram "&6shop" at 0.5, 66, 0.5`,
+These triggers run instantly, so they cannot `wait`. `spawn a hologram "&6shop" at location(0.5, 66, 0.5)`,
 `spawn an item display of diamond at ...` and `spawn a block display of gold block at ...` create client-side
-entities; keep `last spawned client entity` in a variable to `move client entity {h} to x, y, z`,
-`set text of hologram {h} to "..."` or `remove client entity {h}`. `show a "red" beam at 100, 64, -200` draws a
-beacon beam without a beacon, and `remove all beams` clears them. None of this is sent to the server, and it all
+entities; keep `last spawned client entity` in a variable to `move client entity {h} to 2 above player`,
+`set text of hologram {h} to "..."` or `remove client entity {h}`. `show a "red" beam at location(100, 64, -200)`
+draws a beacon beam without a beacon, and `remove all beams` clears them. None of this is sent to the server, and it all
 disappears when you leave the world or reload the script.
 
 The example scripts in your `mineskript` folder are the working reference, and `/ms help` lists the commands. A parse

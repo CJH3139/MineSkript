@@ -1,6 +1,7 @@
 # Writing a MineSkript addon
 
-An addon is a separate Fabric mod that adds syntax (events, conditions, effects and expressions) to MineSkript.
+An addon is a separate Fabric mod that adds syntax (events, conditions, effects, expressions and built-in functions)
+to MineSkript.
 Players install it next to MineSkript, and its syntax works in script files and in effect commands like the built-in
 syntax does.
 
@@ -169,6 +170,40 @@ triggers on the next client tick. `emit` does nothing while no loaded script lis
 often costs nothing. Define each event value once with `addEventValue` before the events that provide it (in a
 parent module if several child modules use it); MineSkript adds the `event-<name>` expression for it after your
 addon has loaded.
+
+### Built-in functions
+
+Built-in functions are Skript's "Java functions", such as `round(n, d)` or `location(x, y, z)`: scripts call them as
+`name(arguments)` anywhere a value can go, or on a line of their own. Register one with `addFunction` and document it
+with the chained calls, the same way events are documented:
+
+```java
+registry.addFunction("twice", SkType.NUMBER, (arguments, context) -> 2 * (Double) arguments.get(0),
+                FunctionParameter.of("n", SkType.NUMBER))
+        .description("Doubles a number.")
+        .examples("on load:", "\tsend \"%twice(21)%\"")
+        .since("1.0.0");
+```
+
+* The body (`com.mineskript.lang.function.FunctionBody`) gets one value per parameter, already converted to the
+  parameter's type: a `Double` for a number, a `String` for text, a `Location` for a location, and so on. Return a
+  value of the return type, or `None.NONE` for no value. Throw `ScriptError` to stop the line with a message.
+* Parameters come from `FunctionParameter`: `of(name, type)` for a required value, `optional(name, type, value)` for
+  one with a default (`optional(name, type, shown, context -> ...)` works the default out when the function is
+  called, such as the dimension you are in), and `list(name, type)` for any number of values, which the body gets as
+  a non-empty `List`. When a list parameter is the only one, every argument goes into it, so `max(1, {l::*}, 3)`
+  works. Parameters with a default come last.
+* Like Skript's simple Java functions, a call gives no value without running the body when an argument has no value
+  or a list argument is empty.
+* `.returnsList()` makes a function give one value per value of its list parameter, like Skript's `clamp`.
+* Function names ignore case (`isNaN` is also `isnan`) and must be unique: registering a name that is already taken
+  throws, and a script that defines a function with a built-in name gets a parse error. Choose names that are
+  unlikely to clash with other addons or with functions script writers already have.
+* The body runs on the game thread like the rest of a script, so keep it quick. Anything that reads the game goes
+  through `context.game()`.
+
+Functions appear in the generated documentation in the top-level `functions` array, with their signature (such as
+`twice(n: number) :: number`), parameters, return type, `addon` and `module`.
 
 ## Priorities and registration order
 

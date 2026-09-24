@@ -8,6 +8,8 @@ import com.mineskript.api.MineSkriptAddon;
 import com.mineskript.lang.ast.EventContext;
 import com.mineskript.lang.ast.EventValue;
 import com.mineskript.lang.ast.SkType;
+import com.mineskript.lang.function.FunctionInfo;
+import com.mineskript.lang.function.FunctionParameter;
 import com.mineskript.lang.parse.EventInfo;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.syntax.DefaultSyntax;
@@ -54,6 +56,7 @@ public final class JSONGenerator {
         JsonArray conditions = new JsonArray();
         JsonArray effects = new JsonArray();
         JsonArray expressions = new JsonArray();
+        JsonArray functions = new JsonArray();
         Map<String, List<String>> eventIdsByValue = new HashMap<>();
         List<String> ids = new ArrayList<>();
 
@@ -63,6 +66,7 @@ public final class JSONGenerator {
                 case "condition" -> add(conditions, registration, ids);
                 case "effect" -> add(effects, registration, ids);
                 case "expression" -> add(expressions, registration, ids);
+                case "function" -> functions.add(function(registration, ids));
                 default -> {
                 }
             }
@@ -85,6 +89,7 @@ public final class JSONGenerator {
         root.add("effects", effects);
         root.add("expressions", expressions);
         root.add("eventValues", eventValues);
+        root.add("functions", functions);
         return root;
     }
 
@@ -108,6 +113,33 @@ public final class JSONGenerator {
             eventIdsByValue.computeIfAbsent(value.name(), key -> new ArrayList<>()).add(id);
         }
         element.add("eventValues", values);
+        element.addProperty("addon", registration.addon());
+        element.addProperty("module", module(registration));
+        return element;
+    }
+
+    private static JsonObject function(SyntaxRegistry.Registration registration, List<String> ids) {
+        FunctionInfo function = registration.function();
+        JsonObject element = new JsonObject();
+        element.addProperty("id", unique("function-" + slug(function.name()), ids));
+        element.addProperty("name", function.name());
+        element.addProperty("signature", function.signature());
+        JsonArray parameters = new JsonArray();
+        for (FunctionParameter parameter : function.parameters()) {
+            JsonObject object = new JsonObject();
+            object.addProperty("name", parameter.name());
+            object.addProperty("type", typeName(parameter.type()));
+            object.addProperty("list", parameter.list());
+            parameter.defaultText().ifPresent(text -> object.addProperty("default", text));
+            parameters.add(object);
+        }
+        element.add("parameters", parameters);
+        element.addProperty("returnType", typeName(function.returnType()));
+        element.addProperty("returnsList", function.listResult());
+        element.add("description", array(function.description()));
+        element.add("examples", array(function.examples()));
+        element.add("since", array(function.since()));
+        element.add("keywords", array(function.keywords()));
         element.addProperty("addon", registration.addon());
         element.addProperty("module", module(registration));
         return element;
@@ -199,6 +231,7 @@ public final class JSONGenerator {
 
     private static int count(JsonObject root) {
         return root.getAsJsonArray("events").size() + root.getAsJsonArray("conditions").size()
-                + root.getAsJsonArray("effects").size() + root.getAsJsonArray("expressions").size();
+                + root.getAsJsonArray("effects").size() + root.getAsJsonArray("expressions").size()
+                + root.getAsJsonArray("functions").size();
     }
 }

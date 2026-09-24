@@ -130,7 +130,8 @@ public final class CondIsSet implements Condition {
   are parsed on every build, so they must work.
 * `@Since`: the version it ships in.
 * Events use the same fields in chained form: `registry.addEvent("Block Break", ...).description(...)
-  .examples(...).since(...)`.
+  .examples(...).since(...)`. So do built-in functions, registered with `registry.addFunction(...)` in the
+  `<Feature>Functions` class of their module, the way Skript keeps its own in `DefaultFunctions`.
 * Write for people who have never programmed. Plain words, no internal jargon.
 
 `DocumentationTest` fails the build if anything is missing or an example does not parse.
@@ -161,7 +162,8 @@ public final class CondIsSet implements Condition {
 ### Comments
 * No comments in the code. Clear names, small methods and tests explain it instead.
 * The one exception is Javadoc on the API addons use: `api`, `lang.module`, the documentation annotations in `doc`,
-  and the public methods of `SyntaxRegistry`, `EventInfo` and `Priority`.
+  the built-in function API in `lang.function` (`FunctionInfo`, `FunctionParameter`, `FunctionBody`), and the public
+  methods of `SyntaxRegistry`, `EventInfo` and `Priority`.
 
 ### Errors
 * Parse errors (`SyntaxException`) and runtime errors (`ScriptError`) are read by script writers. Say what went

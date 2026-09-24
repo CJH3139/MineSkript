@@ -1,11 +1,14 @@
 package com.mineskript.client.world.elements;
 
+import com.mineskript.client.Locations;
 import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
 import com.mineskript.lang.ast.BlockValue;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.Location;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.ParseScope;
@@ -15,41 +18,35 @@ import com.mineskript.lang.parse.Tier;
 import com.mineskript.lang.runtime.Context;
 import java.util.Optional;
 
-@Name("Block At Position")
-@Description("The block at the given x, y and z world coordinates. Decimal coordinates are fine: the block containing that point is used. Returns a block, printed as its plain name such as grass_block, and air for empty space or unloaded areas. Needs a world: outside a world the line stops with a \"no world\" error.")
+@Name("Block At Location")
+@Description({"The block at a location, such as location(10, 64, -3), a saved {home} or 2 below player. Decimal coordinates are fine: the block containing that point is used. Returns a block, printed as its plain name such as grass_block, and air for empty space or unloaded areas. Needs a world: outside a world the line stops with a \"no world\" error.",
+        "Your game only knows the dimension you are in, so a location in another dimension has no block: the result is none."})
 @Examples({
         "on key press of \"b\":",
-        "\tsend \"spawn block: %block at 0, 64, 0%\"",
+        "\tsend \"spawn block: %block at location(0, 64, 0)%\"",
         "",
         "on key press of \"b\":",
-        "\tset {_x} to player's x-coordinate",
-        "\tset {_y} to player's y-coordinate - 1",
-        "\tset {_z} to player's z-coordinate",
-        "\tif block at {_x}, {_y}, {_z} is diamond_ore:",
+        "\tif block at 1 below player is diamond_ore:",
         "\t\tsend \"diamonds underfoot\""
 })
-@Since("1.0.0-alpha.2")
+@Since("1.0.0-alpha.2, 1.0.0-alpha.10 (locations)")
 public final class ExprBlockAt implements Expression {
-    private final Expression x;
-    private final Expression y;
-    private final Expression z;
+    private final Expression target;
 
-    private ExprBlockAt(Expression x, Expression y, Expression z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+    private ExprBlockAt(Expression target) {
+        this.target = target;
     }
 
     public static void register(SyntaxRegistry registry) {
         registry.addExpression(SkType.BLOCK, Tier.COMBINED, Priority.after(Priority.SIMPLE), ExprBlockAt::create,
-                "[the] block at %number%, %number%, %number%");
+                "[the] block at %location%");
     }
 
     private static Optional<Expression> create(Match match, ParseScope scope) {
-        if (match.slot(0).isList() || match.slot(1).isList() || match.slot(2).isList()) {
+        if (match.slot(0).isList()) {
             return Optional.empty();
         }
-        return Optional.of(new ExprBlockAt(match.slot(0), match.slot(1), match.slot(2)));
+        return Optional.of(new ExprBlockAt(match.slot(0)));
     }
 
     @Override
@@ -59,7 +56,10 @@ public final class ExprBlockAt implements Expression {
 
     @Override
     public Object evaluate(Context context) {
-        return new BlockValue(context.world().blockAt(
-                (Double) x.evaluate(context), (Double) y.evaluate(context), (Double) z.evaluate(context)));
+        Location location = Locations.read(target, context);
+        if (!Locations.isHere(location, context)) {
+            return None.NONE;
+        }
+        return new BlockValue(context.world().blockAt(location.x(), location.y(), location.z()), location);
     }
 }

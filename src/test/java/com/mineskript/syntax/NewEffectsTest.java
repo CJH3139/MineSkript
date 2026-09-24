@@ -19,7 +19,7 @@ class NewEffectsTest {
                     swap hands
                     drop item
                     drop the whole stack
-                    look at 1, 64, -3
+                    look at location(1, 64, -3)
                     set yaw to 180
                     set pitch to -45
                     show title "hello"

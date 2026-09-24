@@ -41,9 +41,9 @@ class JSONGeneratorTest {
 
         assertEquals(List.of("event-durability", "event-item"),
                 strings(event("Durability Below").getAsJsonArray("eventValues"), "name"));
-        assertEquals(List.of("event-block", "event-block x", "event-block y", "event-block z"),
+        assertEquals(List.of("event-block", "event-block x", "event-block y", "event-block z", "event-location"),
                 strings(event("Block Break").getAsJsonArray("eventValues"), "name"));
-        assertEquals(List.of("block type", "number", "number", "number"),
+        assertEquals(List.of("block type", "number", "number", "number", "location"),
                 strings(event("Block Break").getAsJsonArray("eventValues"), "type"));
         assertEquals(List.of(), strings(event("Jump").getAsJsonArray("eventValues"), "name"));
     }

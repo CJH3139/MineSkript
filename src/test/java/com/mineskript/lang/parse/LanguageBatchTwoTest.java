@@ -41,7 +41,7 @@ class LanguageBatchTwoTest {
 
     @Test
     void withinBlocksOfAPoint() {
-        runner.run("on load:\n    if player is within 5 blocks of 0, 64, 0:\n        send \"near\"\n    if player is not within 2 blocks of 100, 64, 100:\n        send \"far\"\n");
+        runner.run("on load:\n    if player is within 5 blocks of location(0, 64, 0):\n        send \"near\"\n    if player is not within 2 blocks of location(100, 64, 100):\n        send \"far\"\n");
         assertEquals(List.of("near", "far"), runner.game.messages);
     }
 

@@ -6,6 +6,7 @@ import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.SkType;
+import com.mineskript.lang.parse.ConvertedExpression;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.ParseScope;
 import com.mineskript.lang.parse.Priority;
@@ -44,6 +45,9 @@ public final class ExprCoordinate implements Expression {
     }
 
     private static Optional<Expression> create(Match match, ParseScope scope) {
+        if (match.slot(0) instanceof ConvertedExpression converted && converted.untyped()) {
+            return Optional.empty();
+        }
         char axis = match.has("x") ? 'x' : match.has("y") ? 'y' : 'z';
         return Optional.of(new ExprCoordinate(axis));
     }

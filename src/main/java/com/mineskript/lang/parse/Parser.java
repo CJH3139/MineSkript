@@ -18,6 +18,9 @@ import com.mineskript.lang.ast.Statement;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.TryStatement;
 import com.mineskript.lang.ast.WaitUntil;
+import com.mineskript.lang.function.FunctionInfo;
+import com.mineskript.lang.function.FunctionParameter;
+import com.mineskript.lang.function.NativeFunctionCall;
 import com.mineskript.lang.lexer.LexResult;
 import com.mineskript.lang.lexer.Lexer;
 import com.mineskript.lang.lexer.Node;
@@ -193,6 +196,9 @@ public final class Parser {
             }
             try {
                 Function function = declareFunction(file, node);
+                if (registry.function(function.name()).isPresent()) {
+                    throw new Failure(node.line(), Language.format("parse.function-is-built-in", function.name()));
+                }
                 Function twin = seen.get(function.name());
                 if (twin != null) {
                     throw new Failure(node.line(), Language.format("parse.function-defined-on-line", function.name(), twin.line()));
@@ -302,6 +308,10 @@ public final class Parser {
         if (!callShaped(tokens)) {
             return Optional.empty();
         }
+        Optional<FunctionInfo> builtIn = registry.function(tokens.get(0).text());
+        if (builtIn.isPresent()) {
+            return Optional.of(nativeCall(builtIn.get(), tokens, scope));
+        }
         Optional<Function> found = findFunction(tokens.get(0).text(), scope.file());
         if (found.isEmpty()) {
             return Optional.empty();
@@ -350,33 +360,9 @@ public final class Parser {
     }
 
     private FunctionCall call(Function function, List<Token> tokens, ParseScope scope) {
-        List<List<Token>> parts = new ArrayList<>();
-        List<Token> inner = tokens.subList(2, tokens.size() - 1);
-        if (!inner.isEmpty()) {
-            int depth = 0;
-            int start = 0;
-            for (int i = 0; i < inner.size(); i++) {
-                Token token = inner.get(i);
-                if (token.is("(")) {
-                    depth++;
-                } else if (token.is(")")) {
-                    depth--;
-                } else if (depth == 0 && token.is(",")) {
-                    parts.add(inner.subList(start, i));
-                    start = i + 1;
-                }
-            }
-            parts.add(inner.subList(start, inner.size()));
-        }
+        List<List<Token>> parts = argumentParts(tokens);
         List<Function.Parameter> parameters = function.parameters();
-        if (parts.size() > parameters.size() || parts.size() < function.requiredParameters()) {
-            String expected = function.requiredParameters() == parameters.size()
-                    ? String.valueOf(parameters.size())
-                    : Language.format("parse.argument-range", function.requiredParameters(), parameters.size());
-            throw new SyntaxException(Language.format(
-                    parameters.size() == 1 ? "parse.argument-count-one" : "parse.argument-count-many",
-                    function.name(), expected, parts.size()));
-        }
+        checkArgumentCount(function.name(), parts.size(), function.requiredParameters(), parameters.size());
         List<Expression> arguments = new ArrayList<>();
         for (int i = 0; i < parts.size(); i++) {
             Function.Parameter parameter = parameters.get(i);
@@ -386,6 +372,96 @@ public final class Parser {
                             Converters.typeName(parameter.type())))));
         }
         return new FunctionCall(function, scope.file(), functions, arguments, scope.line());
+    }
+
+    private NativeFunctionCall nativeCall(FunctionInfo function, List<Token> tokens, ParseScope scope) {
+        List<List<Token>> parts = argumentParts(tokens);
+        List<FunctionParameter> parameters = function.parameters();
+        if (parameters.size() == 1 && parameters.get(0).list() && parts.size() > 1) {
+            List<Expression> items = new ArrayList<>();
+            for (List<Token> part : parts) {
+                items.add(listArgument(function, parameters.get(0), part, 1, scope));
+            }
+            Expression joined = new ListExpression(items, parameters.get(0).type(), false);
+            return new NativeFunctionCall(function, List.of(joined), scope.line());
+        }
+        checkArgumentCount(function.name(), parts.size(), function.requiredParameters(), parameters.size());
+        List<Expression> arguments = new ArrayList<>();
+        for (int i = 0; i < parts.size(); i++) {
+            FunctionParameter parameter = parameters.get(i);
+            int position = i + 1;
+            if (parameter.list()) {
+                arguments.add(listArgument(function, parameter, parts.get(i), position, scope));
+                continue;
+            }
+            Expression argument = expressions.parse(parts.get(i), List.of(parameter.type()), scope)
+                    .orElseThrow(() -> new SyntaxException(Language.format("parse.argument-type", position,
+                            function.name(), Converters.typeName(parameter.type()))));
+            if (argument.isList()) {
+                throw new SyntaxException(Language.format("parse.argument-not-list", position, function.name(),
+                        Converters.typeName(parameter.type())));
+            }
+            arguments.add(unconverted(argument));
+        }
+        return new NativeFunctionCall(function, arguments, scope.line());
+    }
+
+    private Expression listArgument(FunctionInfo function, FunctionParameter parameter, List<Token> part, int position,
+            ParseScope scope) {
+        Optional<Expression> typed = expressions.parse(part, List.of(parameter.type()), scope);
+        if (typed.isPresent()) {
+            return unconverted(typed.get());
+        }
+        return expressions.parse(part, List.of(SkType.OBJECT), scope)
+                .filter(expression -> expression.type() == SkType.OBJECT)
+                .orElseThrow(() -> new SyntaxException(Language.format("parse.argument-type", position,
+                        function.name(), Converters.typeName(parameter.type()))));
+    }
+
+    private static Expression unconverted(Expression argument) {
+        return argument instanceof ConvertedExpression converted ? converted.inner() : argument;
+    }
+
+    private static List<List<Token>> argumentParts(List<Token> tokens) {
+        List<List<Token>> parts = new ArrayList<>();
+        List<Token> inner = tokens.subList(2, tokens.size() - 1);
+        if (inner.isEmpty()) {
+            return parts;
+        }
+        int depth = 0;
+        int start = 0;
+        for (int i = 0; i < inner.size(); i++) {
+            Token token = inner.get(i);
+            if (token.is("(")) {
+                depth++;
+            } else if (token.is(")")) {
+                depth--;
+            } else if (depth == 0 && token.is(",")) {
+                parts.add(inner.subList(start, i));
+                start = i + 1;
+            }
+        }
+        parts.add(inner.subList(start, inner.size()));
+        return parts;
+    }
+
+    private static void checkArgumentCount(String name, int given, int required, int total) {
+        if (given <= total && given >= required) {
+            return;
+        }
+        String expected = required == total
+                ? String.valueOf(total)
+                : Language.format("parse.argument-range", required, total);
+        throw new SyntaxException(Language.format(total == 1 ? "parse.argument-count-one" : "parse.argument-count-many",
+                name, expected, given));
+    }
+
+    private String withPositionHint(String message, List<Token> tokens, ParseScope scope) {
+        return PositionHint.find(tokens, part -> expressions.parse(part, List.of(SkType.NUMBER), scope)
+                        .filter(expression -> !expression.isList()).isPresent())
+                .map(numbers -> Language.format("parse.position-hint", message, numbers.get(0), numbers.get(1),
+                        numbers.get(2)))
+                .orElse(message);
     }
 
     private static boolean callShaped(List<Token> tokens) {
@@ -570,7 +646,8 @@ public final class Parser {
         List<Token> tokens = tokens(node, text);
         conditionCache.clear();
         return guarded(node, () -> combine(tokens, scope))
-                .orElseThrow(() -> new Failure(node.line(), Language.format("parse.unknown-condition", text.trim())));
+                .orElseThrow(() -> new Failure(node.line(),
+                        withPositionHint(Language.format("parse.unknown-condition", text.trim()), tokens, scope)));
     }
 
     Optional<Condition> combine(List<Token> tokens, ParseScope scope) {
@@ -699,6 +776,10 @@ public final class Parser {
         }
         List<Token> tokens = tokens(node, text);
         if (callShaped(tokens)) {
+            Optional<FunctionInfo> builtIn = registry.function(tokens.get(0).text());
+            if (builtIn.isPresent()) {
+                return guarded(node, () -> nativeCall(builtIn.get(), tokens, scope));
+            }
             Optional<Function> function = findFunction(tokens.get(0).text(), scope.file());
             if (function.isPresent()) {
                 return guarded(node, () -> call(function.get(), tokens, scope));
@@ -707,7 +788,7 @@ public final class Parser {
         return guarded(node, () -> registry.matchFirst(registry.effects(), tokens, expressions, scope)
                 .orElseThrow(() -> new Failure(node.line(), callShaped(tokens)
                         ? Language.format("parse.unknown-function", tokens.get(0).text())
-                        : Language.format("parse.unknown-effect", text))));
+                        : withPositionHint(Language.format("parse.unknown-effect", text), tokens, scope))));
     }
 
     private Statement parseReturn(Node node, String value, ParseScope scope) {

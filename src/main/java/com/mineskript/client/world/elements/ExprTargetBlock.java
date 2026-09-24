@@ -5,7 +5,9 @@ import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
+import com.mineskript.game.GameBridge;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.lang.parse.Tier;
@@ -24,7 +26,16 @@ import java.util.Optional;
 @Since("1.0.0-alpha.2")
 public final class ExprTargetBlock extends GameValueExpression {
     private ExprTargetBlock() {
-        super(SkType.BLOCK, game -> new BlockValue(game.targetBlock()));
+        super(SkType.BLOCK, ExprTargetBlock::read);
+    }
+
+    private static BlockValue read(GameBridge game) {
+        int[] position = game.targetBlockPosition();
+        if (position == null) {
+            return new BlockValue(game.targetBlock());
+        }
+        Location location = new Location(position[0], position[1], position[2], game.dimension());
+        return new BlockValue(game.targetBlock(), location);
     }
 
     public static void register(SyntaxRegistry registry) {

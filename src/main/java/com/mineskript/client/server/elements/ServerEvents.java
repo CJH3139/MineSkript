@@ -77,16 +77,16 @@ public final class ServerEvents {
                         "\tset {-scoreboard dirty} to true")
                 .since("1.0.0-alpha.6");
         state(registry, "Sound", "on sound [(play|played)]", "sound")
-                .values("sound", "x", "y", "z")
-                .description("Fires when your client plays a sound, whether it was sent by the server or made locally (footsteps, clicks). event-sound is the sound id and event-x, event-y and event-z its position. It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.",
+                .values("sound", "x", "y", "z", "location")
+                .description("Fires when your client plays a sound, whether it was sent by the server or made locally (footsteps, clicks). event-sound is the sound id, event-x, event-y and event-z its position and event-location that position as a location. It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.",
                         "Sounds are very frequent; keep the trigger short and filter on event-sound first.")
                 .examples("on sound:",
                         "\tif event-sound is \"minecraft:entity.creeper.primed\":",
                         "\t\tshow title \"creeper\"")
                 .since("1.0.0-alpha.6");
         state(registry, "Particle", "on particle [(spawn|spawned)]", "particle")
-                .values("particle", "count", "x", "y", "z")
-                .description("Fires when the server sends a particle effect. event-particle is the particle id, event-count the particle count in the packet, and event-x, event-y and event-z the position. It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.",
+                .values("particle", "count", "x", "y", "z", "location")
+                .description("Fires when the server sends a particle effect. event-particle is the particle id, event-count the particle count in the packet, event-x, event-y and event-z the position and event-location that position as a location. It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.",
                         "Particles the client makes by itself, such as block break or footstep particles, are not sent by the server and do not fire this.")
                 .examples("on particle:",
                         "\tif event-particle is \"minecraft:totem_of_undying\":",

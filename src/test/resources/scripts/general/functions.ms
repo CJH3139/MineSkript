@@ -6,10 +6,10 @@ function double(n: number) :: number:
 function greet(name: text, greeting: text = "hello") :: text:
 	return "%{_greeting}% %{_name}%"
 
-function factorial(n: number) :: number:
+function factorial_of(n: number) :: number:
 	if {_n} <= 1:
 		return 1
-	return {_n} * factorial({_n} - 1)
+	return {_n} * factorial_of({_n} - 1)
 
 function remember(value: number):
 	set {remembered} to {_value}
@@ -23,7 +23,7 @@ test "default parameters":
 	assert greet("alex", "hi") is "hi alex" with "a given greeting did not replace the default"
 
 test "recursion":
-	assert factorial(5) is 120 with "factorial(5) was not 120"
+	assert factorial_of(5) is 120 with "factorial_of(5) was not 120"
 
 test "a function on its own line":
 	remember(7)

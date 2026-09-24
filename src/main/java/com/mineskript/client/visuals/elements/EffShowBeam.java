@@ -1,5 +1,6 @@
 package com.mineskript.client.visuals.elements;
 
+import com.mineskript.client.Locations;
 import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
@@ -7,6 +8,7 @@ import com.mineskript.doc.Since;
 import com.mineskript.game.GameBridge;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.Flow;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.Statement;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.ParseScope;
@@ -17,44 +19,38 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 @Name("Show Beam")
-@Description({"Shows a beacon beam going straight up from the block at x, y, z, drawn by your game only: nobody else sees it and no beacon is needed. Decimal coordinates are rounded down to the block. A beam already at that block is replaced.",
+@Description({"Shows a beacon beam going straight up from the block at a location, drawn by your game only: nobody else sees it and no beacon is needed. Decimal coordinates are rounded down to the block. A beam already at that block is replaced.",
         "The colour is optional and written as text: one of the 16 dye colours (white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, black) or any colour as \"#rrggbb\". Without one the beam is white. An unknown colour stops the line with an error.",
-        "A beam goes straight up through any blocks above it, like a beacon beam, and is drawn up to 512 blocks away (measured flat, ignoring height), even over chunks that are not loaded. At most 64 beams can be shown at once. They disappear when you leave the world or change dimension, and when the script that made them is reloaded."})
+        "A beam goes straight up through any blocks above it, like a beacon beam, and is drawn up to 512 blocks away (measured flat, ignoring height), even over chunks that are not loaded. At most 64 beams can be shown at once. They disappear when you leave the world or change dimension, and when the script that made them is reloaded, so a location in another dimension than yours stops the line with an error."})
 @Examples({"on key press of \"b\":",
-        "\tshow a \"red\" beam at 100, 64, -200",
-        "\tshow beam at player's x-coordinate, player's y-coordinate, player's z-coordinate",
+        "\tshow a \"red\" beam at location(100, 64, -200)",
+        "\tshow beam at player",
         "",
         "on key press of \"n\":",
-        "\tshow a \"#00ffaa\" beam at 0, 70, 0"})
-@Since("1.0.0-alpha.9")
+        "\tshow a \"#00ffaa\" beam at location(0, 70, 0)"})
+@Since("1.0.0-alpha.9, 1.0.0-alpha.10 (locations)")
 public final class EffShowBeam implements Statement {
     public static final int LIMIT = 64;
 
     private final int line;
     private final Expression color;
-    private final Expression x;
-    private final Expression y;
-    private final Expression z;
+    private final Expression target;
 
-    private EffShowBeam(int line, Expression color, Expression x, Expression y, Expression z) {
+    private EffShowBeam(int line, Expression color, Expression target) {
         this.line = line;
         this.color = color;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.target = target;
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addEffect(EffShowBeam::create, "show [a] [%-string%] beam at %number%, %number%, %number%");
+        registry.addEffect(EffShowBeam::create, "show [a] [%-string%] beam at %location%");
     }
 
     private static Optional<Statement> create(Match match, ParseScope scope) {
-        for (int i = 0; i < 4; i++) {
-            if (match.slot(i) != null && match.slot(i).isList()) {
-                return Optional.empty();
-            }
+        if (match.slot(0) != null && match.slot(0).isList() || match.slot(1).isList()) {
+            return Optional.empty();
         }
-        return Optional.of(new EffShowBeam(scope.line(), match.slot(0), match.slot(1), match.slot(2), match.slot(3)));
+        return Optional.of(new EffShowBeam(scope.line(), match.slot(0), match.slot(1)));
     }
 
     @Override
@@ -75,9 +71,10 @@ public final class EffShowBeam implements Statement {
             }
             rgb = found.getAsInt();
         }
-        int blockX = block(x, context);
-        int blockY = block(y, context);
-        int blockZ = block(z, context);
+        Location block = Locations.here(target, context).blockCorner();
+        int blockX = (int) block.x();
+        int blockY = (int) block.y();
+        int blockZ = (int) block.z();
         if (game.beamCount() >= LIMIT) {
             if (!game.removeBeam(blockX, blockY, blockZ)) {
                 throw new ScriptError("there are already " + LIMIT + " beams, remove some first");
@@ -85,9 +82,5 @@ public final class EffShowBeam implements Statement {
         }
         game.showBeam(blockX, blockY, blockZ, rgb, context.triggerFile());
         return Flow.CONTINUE;
-    }
-
-    static int block(Expression coordinate, Context context) {
-        return (int) Math.floor((Double) coordinate.evaluate(context));
     }
 }

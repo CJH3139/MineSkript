@@ -10,6 +10,7 @@ import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.Timespan;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -121,6 +122,15 @@ public final class VariableStore {
                 fields.addProperty("distance", entity.distance());
                 object.add("value", fields);
             }
+            case Location location -> {
+                object.addProperty("type", "location");
+                JsonObject fields = new JsonObject();
+                fields.addProperty("x", location.x());
+                fields.addProperty("y", location.y());
+                fields.addProperty("z", location.z());
+                fields.addProperty("dimension", location.dimension());
+                object.add("value", fields);
+            }
             default -> throw new IllegalArgumentException("cannot save a " + value.getClass().getSimpleName());
         }
         return object;
@@ -152,6 +162,11 @@ public final class VariableStore {
                 yield new EntityValue(fields.get("id").getAsString(), fields.get("name").getAsString(),
                         fields.get("x").getAsDouble(), fields.get("y").getAsDouble(),
                         fields.get("z").getAsDouble(), fields.get("distance").getAsDouble());
+            }
+            case "location" -> {
+                JsonObject fields = value.getAsJsonObject();
+                yield new Location(fields.get("x").getAsDouble(), fields.get("y").getAsDouble(),
+                        fields.get("z").getAsDouble(), fields.get("dimension").getAsString());
             }
             default -> throw new IllegalArgumentException("unknown variable type " + type);
         };

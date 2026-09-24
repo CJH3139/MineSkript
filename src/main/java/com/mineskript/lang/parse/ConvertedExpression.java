@@ -13,6 +13,10 @@ public record ConvertedExpression(Expression inner, SkType type) implements Expr
         return Converters.convert(inner.evaluate(context), type, context);
     }
 
+    public boolean untyped() {
+        return inner.type() == SkType.OBJECT;
+    }
+
     @Override
     public boolean isList() {
         return inner.isList();

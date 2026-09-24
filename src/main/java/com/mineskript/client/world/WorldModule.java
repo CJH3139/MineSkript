@@ -13,6 +13,7 @@ import com.mineskript.client.world.elements.ExprTargetBlock;
 import com.mineskript.client.world.elements.ExprTargetCoordinate;
 import com.mineskript.client.world.elements.ExprTimeOfDay;
 import com.mineskript.client.world.elements.WorldEvents;
+import com.mineskript.client.world.elements.WorldFunctions;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
@@ -39,5 +40,7 @@ public final class WorldModule implements SyntaxModule {
         ExprTargetCoordinate.register(registry);
 
         CondWeather.register(registry);
+
+        WorldFunctions.register(registry);
     }
 }

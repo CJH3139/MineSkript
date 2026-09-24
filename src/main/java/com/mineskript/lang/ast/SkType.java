@@ -10,6 +10,7 @@ public enum SkType {
     PLAYER,
     ITEM,
     ENTITY,
+    LOCATION,
     OBJECT;
 
     public boolean accepts(SkType other) {
