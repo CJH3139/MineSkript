@@ -6,11 +6,6 @@ import com.mineskript.lang.parse.SyntaxRegistry;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Defines every value a built-in event can provide, each once with one description. The events of every module
- * declare which of these they provide by name, and the generic event-name expression reads them, so the common
- * module defines them all before any other syntax is registered.
- */
 public final class EventValues {
     private static final Map<String, String> AXIS_DESCRIPTIONS = Map.ofEntries(
             Map.entry("block x",

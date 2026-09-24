@@ -4,7 +4,6 @@ import static com.mineskript.client.ClientEvents.state;
 
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The world events: blocks broken and placed, weather, time and dimension changes. */
 public final class WorldEvents {
     private WorldEvents() {
     }

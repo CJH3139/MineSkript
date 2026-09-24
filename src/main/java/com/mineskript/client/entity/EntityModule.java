@@ -12,7 +12,6 @@ import com.mineskript.client.entity.elements.ExprVehicle;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The entities around you and their properties. */
 public final class EntityModule implements SyntaxModule {
     @Override
     public String name() {

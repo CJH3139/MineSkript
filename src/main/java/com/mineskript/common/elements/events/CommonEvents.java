@@ -9,7 +9,6 @@ import com.mineskript.lang.parse.SyntaxException;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import java.util.Optional;
 
-/** The events that do not come from the game: periodic triggers and script load. */
 public final class CommonEvents {
     private CommonEvents() {
     }

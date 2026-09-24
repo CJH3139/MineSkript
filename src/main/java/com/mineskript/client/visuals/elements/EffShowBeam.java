@@ -1,0 +1,93 @@
+package com.mineskript.client.visuals.elements;
+
+import com.mineskript.doc.Description;
+import com.mineskript.doc.Examples;
+import com.mineskript.doc.Name;
+import com.mineskript.doc.Since;
+import com.mineskript.game.GameBridge;
+import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.Flow;
+import com.mineskript.lang.ast.Statement;
+import com.mineskript.lang.parse.Match;
+import com.mineskript.lang.parse.ParseScope;
+import com.mineskript.lang.parse.SyntaxRegistry;
+import com.mineskript.lang.runtime.Context;
+import com.mineskript.lang.runtime.ScriptError;
+import java.util.Optional;
+import java.util.OptionalInt;
+
+@Name("Show Beam")
+@Description({"Shows a beacon beam going straight up from the block at x, y, z, drawn by your game only: nobody else sees it and no beacon is needed. Decimal coordinates are rounded down to the block. A beam already at that block is replaced.",
+        "The colour is optional and written as text: one of the 16 dye colours (white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, black) or any colour as \"#rrggbb\". Without one the beam is white. An unknown colour stops the line with an error.",
+        "A beam goes straight up through any blocks above it, like a beacon beam, and is drawn up to 512 blocks away (measured flat, ignoring height), even over chunks that are not loaded. At most 64 beams can be shown at once. They disappear when you leave the world or change dimension, and when the script that made them is reloaded."})
+@Examples({"on key press of \"b\":",
+        "\tshow a \"red\" beam at 100, 64, -200",
+        "\tshow beam at player's x-coordinate, player's y-coordinate, player's z-coordinate",
+        "",
+        "on key press of \"n\":",
+        "\tshow a \"#00ffaa\" beam at 0, 70, 0"})
+@Since("1.0.0-alpha.9")
+public final class EffShowBeam implements Statement {
+    public static final int LIMIT = 64;
+
+    private final int line;
+    private final Expression color;
+    private final Expression x;
+    private final Expression y;
+    private final Expression z;
+
+    private EffShowBeam(int line, Expression color, Expression x, Expression y, Expression z) {
+        this.line = line;
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public static void register(SyntaxRegistry registry) {
+        registry.addEffect(EffShowBeam::create, "show [a] [%-string%] beam at %number%, %number%, %number%");
+    }
+
+    private static Optional<Statement> create(Match match, ParseScope scope) {
+        for (int i = 0; i < 4; i++) {
+            if (match.slot(i) != null && match.slot(i).isList()) {
+                return Optional.empty();
+            }
+        }
+        return Optional.of(new EffShowBeam(scope.line(), match.slot(0), match.slot(1), match.slot(2), match.slot(3)));
+    }
+
+    @Override
+    public int line() {
+        return line;
+    }
+
+    @Override
+    public Flow execute(Context context) {
+        GameBridge game = context.world();
+        int rgb = BeamColors.WHITE;
+        if (color != null) {
+            String name = (String) color.evaluate(context);
+            OptionalInt found = BeamColors.rgb(name);
+            if (found.isEmpty()) {
+                throw new ScriptError("\"" + name + "\" is not a beam colour, use a dye colour such as red or"
+                        + " light blue, or #rrggbb");
+            }
+            rgb = found.getAsInt();
+        }
+        int blockX = block(x, context);
+        int blockY = block(y, context);
+        int blockZ = block(z, context);
+        if (game.beamCount() >= LIMIT) {
+            if (!game.removeBeam(blockX, blockY, blockZ)) {
+                throw new ScriptError("there are already " + LIMIT + " beams, remove some first");
+            }
+        }
+        game.showBeam(blockX, blockY, blockZ, rgb, context.triggerFile());
+        return Flow.CONTINUE;
+    }
+
+    static int block(Expression coordinate, Context context) {
+        return (int) Math.floor((Double) coordinate.evaluate(context));
+    }
+}

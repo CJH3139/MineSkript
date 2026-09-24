@@ -46,10 +46,6 @@ public final class Tokenizer {
         return tokens;
     }
 
-    /**
-     * Lowercases a variable name and collapses its whitespace, leaving each %...% part exactly as written because it is
-     * an expression that is parsed on its own.
-     */
     private static String variableName(String raw) {
         StringBuilder name = new StringBuilder();
         StringBuilder plain = new StringBuilder();

@@ -4,6 +4,7 @@ import com.mineskript.MineSkriptClient;
 import com.mineskript.MineSkriptMessages;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.script.MessageLine;
 import com.mineskript.script.Messages;
 import com.mineskript.script.OwnChatGuard;
@@ -15,8 +16,11 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
@@ -55,6 +59,9 @@ public final class MinecraftBridge implements GameBridge {
     private final Map<String, Integer> effectScratch = new TreeMap<>();
     private final Set<String> heldKeys = new HashSet<>();
     private final OwnChatGuard ownChat = new OwnChatGuard();
+    private final ClientVisuals visuals = new ClientVisuals();
+    private boolean inTooltip;
+    private boolean tooltipFailureLogged;
     private boolean attackHeld;
     private boolean useHeld;
     private ClientLevel trackedLevel;
@@ -522,7 +529,8 @@ public final class MinecraftBridge implements GameBridge {
         if (hit == null || hit.getType() != HitResult.Type.ENTITY) {
             return null;
         }
-        return entity(((EntityHitResult) hit).getEntity());
+        Entity target = ((EntityHitResult) hit).getEntity();
+        return visuals.owns(target) ? null : entity(target);
     }
 
     @Override
@@ -545,12 +553,12 @@ public final class MinecraftBridge implements GameBridge {
         return nearestPlayerValue;
     }
 
-    private static Entity nearest(Iterable<? extends Entity> candidates) {
+    private Entity nearest(Iterable<? extends Entity> candidates) {
         LocalPlayer player = minecraft().player;
         Entity nearest = null;
         double best = Double.MAX_VALUE;
         for (Entity candidate : candidates) {
-            if (candidate == player) {
+            if (candidate == player || visuals.owns(candidate)) {
                 continue;
             }
             double distance = player.distanceToSqr(candidate);
@@ -768,6 +776,97 @@ public final class MinecraftBridge implements GameBridge {
         minecraft().disconnectFromWorld(ClientLevel.DEFAULT_QUIT_MESSAGE);
     }
 
+    @Override
+    public OptionalInt spawnClientEntity(ClientEntityKind kind, String content, double x, double y, double z, String owner) {
+        return visuals.spawn(kind, content, x, y, z, owner);
+    }
+
+    @Override
+    public int clientEntityCount() {
+        return visuals.count();
+    }
+
+    @Override
+    public boolean moveClientEntity(int handle, double x, double y, double z) {
+        return visuals.move(handle, x, y, z);
+    }
+
+    @Override
+    public boolean setClientEntityText(int handle, String text) {
+        return visuals.setText(handle, text);
+    }
+
+    @Override
+    public boolean removeClientEntity(int handle) {
+        return visuals.remove(handle);
+    }
+
+    @Override
+    public void removeAllClientEntities() {
+        visuals.removeAll();
+    }
+
+    @Override
+    public void showBeam(int x, int y, int z, int rgb, String owner) {
+        visuals.showBeam(x, y, z, rgb, owner);
+    }
+
+    @Override
+    public boolean removeBeam(int x, int y, int z) {
+        return visuals.removeBeam(x, y, z);
+    }
+
+    @Override
+    public void removeAllBeams() {
+        visuals.removeAllBeams();
+    }
+
+    @Override
+    public int beamCount() {
+        return visuals.beamCount();
+    }
+
+    @Override
+    public void removeClientVisuals(String owner) {
+        visuals.removeOwnedBy(owner);
+    }
+
+    public boolean isClientOnly(Entity entity) {
+        return visuals.owns(entity);
+    }
+
+    public void tickVisuals() {
+        visuals.sync();
+    }
+
+    public void submitBeams(LevelRenderContext context) {
+        visuals.submitBeams(context);
+    }
+
+    public void decorateTooltip(ItemStack stack, List<Component> lines, Function<ItemValue, TooltipLines> triggers) {
+        if (!GameSignals.wants("tooltip") || inTooltip || stack.isEmpty() || !minecraft().isSameThread()) {
+            return;
+        }
+        inTooltip = true;
+        try {
+            TooltipLines added = triggers.apply(item(stack));
+            int at = Math.min(1, lines.size());
+            for (String line : added.top()) {
+                lines.add(at++, Component.literal(line));
+            }
+            for (String line : added.bottom()) {
+                lines.add(Component.literal(line));
+            }
+        } catch (RuntimeException | LinkageError error) {
+            if (!tooltipFailureLogged) {
+                tooltipFailureLogged = true;
+                MineSkriptClient.LOGGER.error("MineSkript could not add script lines to an item tooltip", error);
+            }
+        } finally {
+            inTooltip = false;
+        }
+    }
+
     private List<String> readOnlineNames() {
         nameScratch.clear();
         for (PlayerInfo info : minecraft().getConnection().getListedOnlinePlayers()) {
@@ -859,7 +958,8 @@ public final class MinecraftBridge implements GameBridge {
             return ItemValue.empty();
         }
         return new ItemValue(itemId(stack.getItem()), stack.getHoverName().getString(),
-                stack.getCount(), stack.getDamageValue(), stack.getMaxDamage());
+                stack.getCount(), stack.getDamageValue(), stack.getMaxDamage(),
+                new StackDetails(stack.immutableComponents()));
     }
 
     private String itemId(Item item) {

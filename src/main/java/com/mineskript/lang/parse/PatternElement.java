@@ -19,11 +19,6 @@ public sealed interface PatternElement {
     record Branch(String tag, PatternElement element) {
     }
 
-    /**
-     * A place for a value. A condition slot, written {@code %condition%} in a pattern, takes a whole condition such as
-     * {@code {x} is set} instead of an expression, and fills its place in the {@link Match} with a boolean expression
-     * that tests it.
-     */
     record Slot(int index, List<SkType> types, boolean optional, boolean condition) implements PatternElement {
         public Slot(int index, List<SkType> types, boolean optional) {
             this(index, types, optional, false);

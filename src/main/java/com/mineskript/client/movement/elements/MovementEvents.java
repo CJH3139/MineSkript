@@ -5,7 +5,6 @@ import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import java.util.Optional;
 
-/** The key events: keys and mouse buttons going down and up. */
 public final class MovementEvents {
     private MovementEvents() {
     }

@@ -35,7 +35,6 @@ public final class ExprInventoryCount implements Expression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // Before the list size ("number of %objects%") and the other combined expressions.
         registry.addExpression(SkType.NUMBER, Tier.COMBINED, Priority.before(Priority.SIMPLE),
                 (match, scope) -> Optional.of(new ExprInventoryCount(match.slot(0))),
                 "[the] number of %blocktype% in [the] inventory");

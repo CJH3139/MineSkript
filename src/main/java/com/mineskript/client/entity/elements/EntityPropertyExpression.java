@@ -7,7 +7,6 @@ import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.ScriptError;
 import java.util.function.Function;
 
-/** Shared base for the properties of an entity ("name of %entity%" and friends). Not a syntax element itself. */
 abstract class EntityPropertyExpression implements Expression {
     private final SkType type;
     private final Function<EntityValue, Object> reader;

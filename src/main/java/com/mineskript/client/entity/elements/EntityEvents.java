@@ -4,7 +4,6 @@ import static com.mineskript.client.ClientEvents.state;
 
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The entity events: mounting, and entities spawning, despawning and dying. */
 public final class EntityEvents {
     private EntityEvents() {
     }

@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * List variables are stored flat, one map entry per element under its full name such as "homes::alex", so saved files
- * and plain variables need nothing special. A map that keeps insertion order gives the list its order.
- */
 final class ListVariables {
     static final String SEPARATOR = "::";
 

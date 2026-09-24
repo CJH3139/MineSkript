@@ -58,11 +58,6 @@ import com.mineskript.common.elements.expressions.ExprUppercase;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/**
- * Syntax that never touches the game: text, maths, lists, variables, comparisons, loops, waiting and stopping, and
- * every event value. Nothing here may use the game or Minecraft, so it works the same everywhere. It loads first,
- * because the events of every other module declare the event values it defines.
- */
 public final class CommonModule implements SyntaxModule {
     @Override
     public String name() {
@@ -71,11 +66,9 @@ public final class CommonModule implements SyntaxModule {
 
     @Override
     public void register(SyntaxRegistry registry) {
-        // Every event value is defined here, before any module declares one on its events.
         EventValues.register(registry);
         CommonEvents.register(registry);
 
-        // After the event values, so each gets its event-name expression.
         ExprEventValue.register(registry);
         ExprLoopValue.register(registry);
         ExprLoopIteration.register(registry);

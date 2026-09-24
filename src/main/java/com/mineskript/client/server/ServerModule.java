@@ -10,7 +10,6 @@ import com.mineskript.client.server.elements.ServerEvents;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The server you are connected to and what it sends: players, the tab list, titles, sounds, particles and chunks. */
 public final class ServerModule implements SyntaxModule {
     @Override
     public String name() {

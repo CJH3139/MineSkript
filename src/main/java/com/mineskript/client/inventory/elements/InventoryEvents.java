@@ -10,7 +10,6 @@ import com.mineskript.lang.parse.SyntaxException;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import java.util.Optional;
 
-/** The inventory events: switching, changing, using, eating and wearing out items. */
 public final class InventoryEvents {
     private InventoryEvents() {
     }
@@ -65,6 +64,19 @@ public final class InventoryEvents {
                 .examples("on tool break:",
                         "\tsend \"%event-item% broke\"")
                 .since("1.0.0-alpha.2");
+        state(registry, "Item Tooltip", "on [item] tooltip", "tooltip")
+                .values("item")
+                .instant()
+                .description("Fires while the game builds the tooltip of an item you hover over in an inventory, so you can add your own lines with add to tooltip. The lines are only on your screen: the item itself, and what other players see, does not change. event-item is the hovered item.",
+                        "The tooltip is rebuilt every frame while you hover, so this can run many times a second: keep it short. The trigger runs to its end straight away and cannot wait; a wait in it is an error when the script loads. Only lines added before the trigger ends are shown. An error in it is shown once, not every frame.",
+                        "It only runs while you are in a world. Tooltips the game builds in the background, such as for the creative inventory search, are left alone.")
+                .examples("on item tooltip:",
+                        "	add \"&7id: %id of event-item%\" to the tooltip",
+                        "",
+                        "on tooltip:",
+                        "	if custom name of event-item is set:",
+                        "		add \"&6renamed item\" to the top of the tooltip")
+                .since("1.0.0-alpha.9");
         registry.addEvent("Durability Below", InventoryEvents::durability, "on [held item] durability (below|under|less than) %number%")
                 .values("durability", "item")
                 .description("Fires when the durability left on the item in your main hand drops below the given number, checked once per tick. It fires only on the crossing, from at least the number to below it, for the same item in the same slot; switching to an item that is already low does not fire it. event-item is the item and event-durability the uses left.",

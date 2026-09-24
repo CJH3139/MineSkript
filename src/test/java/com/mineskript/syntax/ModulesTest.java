@@ -31,10 +31,9 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-/** The built-in module tree: it loads, every element is in exactly one module, and module order does not matter. */
 class ModulesTest {
     private static final List<String> PATHS = List.of("common", "client", "client/movement", "client/inventory",
-            "client/chat", "client/hud", "client/world", "client/entity", "client/player", "client/server");
+            "client/chat", "client/hud", "client/world", "client/entity", "client/player", "client/server", "client/visuals");
 
     @Test
     void theModuleTreeLoads() {
@@ -153,7 +152,6 @@ class ModulesTest {
         }
     }
 
-    /** The package prefix a module's elements live under, such as com.mineskript.client.inventory.elements. */
     private static String packageOf(String module) {
         return "com.mineskript." + module.replace('/', '.') + ".elements.";
     }

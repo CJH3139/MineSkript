@@ -15,7 +15,6 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-/** The message file and the code that reads it agree, and messages come out exactly as written. */
 class LanguageTest {
     private static final Path SOURCES = Path.of("src/main/java");
     private static final List<String> CALLS = List.of("Language.get(", "Language.format(");
@@ -73,7 +72,6 @@ class LanguageTest {
         assertFalse(source.contains("net.fabricmc"));
     }
 
-    /** Every string literal in the first argument of a Language.get or Language.format call, across the main code. */
     private static Set<String> usedKeys() throws IOException {
         Set<String> keys = new TreeSet<>();
         List<Path> files;

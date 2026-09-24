@@ -20,11 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * A variable such as {count}, {-session}, {_temp}, one list entry such as {homes::alex} or a whole list such as
- * {homes::*}. Parts of the name written as %expression% are evaluated each time, so {homes::%player%} names a
- * different entry per player. Names are case-insensitive: the evaluated parts are lowercased like the written ones.
- */
 public final class VariableExpression implements Expression, Changeable {
     private static final String LIST_SUFFIX = "::*";
     private static final Set<ChangeMode> SINGLE_MODES = EnumSet.of(ChangeMode.SET, ChangeMode.ADD, ChangeMode.REMOVE,
@@ -89,7 +84,6 @@ public final class VariableExpression implements Expression, Changeable {
         return segments;
     }
 
-    /** The name with every %expression% part evaluated, without the ::* of a list. */
     public String name(Context context) {
         StringBuilder name = new StringBuilder();
         for (Object segment : segments) {

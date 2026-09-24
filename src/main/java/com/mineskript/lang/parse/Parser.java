@@ -688,10 +688,10 @@ public final class Parser {
     private Statement parseEffect(Node node, ParseScope scope) {
         conditionCache.clear();
         String text = node.text();
-        if (startsWith(text, "wait until ")) {
-            return new WaitUntil(scope.line(), parseCondition(node, text.substring(11), scope));
-        }
-        if (startsWith(text, "halt until ")) {
+        if (startsWith(text, "wait until ") || startsWith(text, "halt until ")) {
+            if (!scope.canWait()) {
+                throw new Failure(node.line(), Language.get("parse.cannot-wait-here"));
+            }
             return new WaitUntil(scope.line(), parseCondition(node, text.substring(11), scope));
         }
         if (text.equalsIgnoreCase("return") || startsWith(text, "return ")) {

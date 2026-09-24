@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Event values and cancelling in the generated documentation come from what each event declares. */
 class JSONGeneratorTest {
     private final JsonObject docs = JSONGenerator.generate("test");
 
@@ -73,6 +72,18 @@ class JSONGeneratorTest {
     }
 
     @Test
+    void onlyItemTooltipIsInstant() {
+        List<String> instant = new ArrayList<>();
+        for (JsonElement element : docs.getAsJsonArray("events")) {
+            JsonObject event = element.getAsJsonObject();
+            if (event.get("instant").getAsBoolean()) {
+                instant.add(event.get("name").getAsString());
+            }
+        }
+        assertEquals(List.of("Item Tooltip"), instant);
+    }
+
+    @Test
     void theTopLevelValuesListTheEventsThatProvideThem() {
         JsonObject item = null;
         List<String> names = new ArrayList<>();
@@ -87,7 +98,8 @@ class JSONGeneratorTest {
         assertEquals("event-damage", names.get(0));
         assertEquals("item", item.get("type").getAsString());
         assertEquals(List.of("event-held-item-change", "event-inventory-change", "event-start-using-item",
-                        "event-stop-using-item", "event-consume", "event-item-break", "event-durability-below"),
+                        "event-stop-using-item", "event-consume", "event-item-break", "event-item-tooltip",
+                        "event-durability-below"),
                 strings(item.getAsJsonArray("events"), null));
     }
 }

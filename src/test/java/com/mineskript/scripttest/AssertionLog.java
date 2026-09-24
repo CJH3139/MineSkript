@@ -3,7 +3,6 @@ package com.mineskript.scripttest;
 import java.util.ArrayList;
 import java.util.List;
 
-/** The assertions that failed while one script test ran, in the order they failed. */
 public final class AssertionLog {
     private final List<String> failures = new ArrayList<>();
 

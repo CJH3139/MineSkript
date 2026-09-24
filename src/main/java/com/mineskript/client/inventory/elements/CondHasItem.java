@@ -40,7 +40,6 @@ public final class CondHasItem implements Condition {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // Its block type slot can take the words of a more specific check, as in "player has effect speed".
         registry.addCondition(Priority.COMBINED, (match, scope) -> create(match, match.patternIndex() == 1),
                 "%player% (has|have) %blocktype%",
                 "%player% (doesn't have|does not have|don't have|do not have) %blocktype%");

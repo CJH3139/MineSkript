@@ -7,7 +7,6 @@ import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.ScriptError;
 import java.util.function.Function;
 
-/** Shared base for the properties of an item ("name of %item%" and friends). Not a syntax element itself. */
 abstract class ItemPropertyExpression implements Expression {
     private final SkType type;
     private final Function<ItemValue, Object> reader;

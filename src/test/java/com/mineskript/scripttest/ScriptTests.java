@@ -18,11 +18,6 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-/**
- * Runs every {@code .ms} file under {@code src/test/resources/scripts}, the way skript-parser runs its test scripts.
- * Each file is one container: it fails as a whole when it does not parse or has no tests, and otherwise holds one
- * JUnit test for each of its {@code test} triggers. See the README in that folder for how to write them.
- */
 class ScriptTests {
     private static final String ROOT = "scripts";
 

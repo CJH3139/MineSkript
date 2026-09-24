@@ -11,6 +11,7 @@ import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.ItemValue;
+import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.WaitUntil;
 import com.mineskript.lang.parse.ParsedScript;
@@ -56,6 +57,8 @@ public final class EventDispatcher {
     private static final Set<String> DIMENSION_EVENTS = Set.of("dimension");
 
     private static final Set<String> ONLINE_NAME_EVENTS = Set.of("player join", "player leave");
+
+    private static final int TOOLTIP_ERRORS_REMEMBERED = 64;
 
     private final ScriptRegistry registry;
     private final GameBridge game;
@@ -113,6 +116,8 @@ public final class EventDispatcher {
     private Set<String> eventNames = Set.of();
     private long lastDayTime = Long.MIN_VALUE;
     private double reportedHealth = Double.NaN;
+    private final Set<String> tooltipErrors = new HashSet<>();
+    private int tooltipErrorsGeneration = -1;
     private BiConsumer<Trigger, Map<String, Object>> firing = (trigger, values) -> {
     };
 
@@ -238,17 +243,12 @@ public final class EventDispatcher {
         }
     }
 
-    /**
-     * The text to really send for a chat message that {@link #onChatSend} just allowed: what an on chat send trigger
-     * set the message to, or the message unchanged. Fabric asks for it right after allowing the same message.
-     */
     public String modifyChatSend(String message) {
         Rewrite rewrite = chatRewrite;
         chatRewrite = null;
         return Rewrite.apply(rewrite, message);
     }
 
-    /** The command to really send, without its slash, after {@link #onCommandSend} allowed it. */
     public String modifyCommandSend(String command) {
         Rewrite rewrite = commandRewrite;
         commandRewrite = null;
@@ -273,6 +273,45 @@ public final class EventDispatcher {
         fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("frame"), Map.of());
     }
 
+    public TooltipLines onTooltip(ItemValue item) {
+        TooltipLines lines = new TooltipLines();
+        if (!game.hasWorld()) {
+            return lines;
+        }
+        if (tooltipErrorsGeneration != registry.generation()) {
+            tooltipErrorsGeneration = registry.generation();
+            tooltipErrors.clear();
+        }
+        for (Trigger trigger : registry.triggers()) {
+            if (trigger.event() instanceof Event.State state && state.name().equals("tooltip")) {
+                runInstantly(trigger, Map.of("item", item), lines);
+            }
+        }
+        return lines;
+    }
+
+    private void runInstantly(Trigger trigger, Map<String, Object> values, TooltipLines lines) {
+        Context context = context(trigger, values);
+        context.setEventValue(TooltipLines.KEY, lines);
+        try {
+            if (interpreter.run(new Execution(trigger, context)) == Interpreter.Outcome.WAITING) {
+                reportOnce(new ScriptError(trigger.file(), trigger.line(), Language.get("runtime.instant-trigger-waited")));
+            }
+        } catch (ScriptError error) {
+            reportOnce(error);
+        } catch (RuntimeException error) {
+            String message = error.getMessage();
+            reportOnce(new ScriptError(trigger.file(), trigger.line(), message == null ? error.getClass().getSimpleName() : message));
+        }
+    }
+
+    private void reportOnce(ScriptError error) {
+        String text = error.toString();
+        if (tooltipErrors.size() < TOOLTIP_ERRORS_REMEMBERED && tooltipErrors.add(text)) {
+            game.showError(text);
+        }
+    }
+
     public boolean runOneOff(Trigger trigger) {
         if (!game.hasWorld()) {
             return false;
@@ -286,11 +325,9 @@ public final class EventDispatcher {
         }
     }
 
-    /** Whether an outgoing message may leave, and its text after the triggers had their say. */
     private record Sent(boolean allowed, String message) {
     }
 
-    /** A replacement for exactly one outgoing message, so it can never land on a different one. */
     private record Rewrite(String original, String replacement) {
         static Rewrite of(String original, Sent sent) {
             return sent.allowed() && !sent.message().equals(original) ? new Rewrite(original, sent.message()) : null;
@@ -351,8 +388,14 @@ public final class EventDispatcher {
         }
     }
 
+    public void unloadScript(String file) {
+        dropFrames(file);
+        game.removeClientVisuals(file);
+    }
+
     public void onDisconnect() {
         dropParked();
+        game.removeAllClientVisuals();
         keyState.clear();
         game.releaseAll();
         pendingSave = false;
@@ -758,7 +801,6 @@ public final class EventDispatcher {
         return runSafely(new Execution(trigger, context(trigger, values)));
     }
 
-    /** Lets tests see the values each trigger is started with, to check them against what its event declares. */
     void onFiring(BiConsumer<Trigger, Map<String, Object>> observer) {
         firing = observer;
     }

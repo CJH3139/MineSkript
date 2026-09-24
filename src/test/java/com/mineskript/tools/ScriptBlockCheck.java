@@ -18,12 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-/**
- * Parses every script found under a folder: each {@code ```mineskript} block in a Markdown file and each string
- * in an {@code "examples"} array of a JSON file. Exits with status 1 if any of them has a parse error.
- *
- * <p>Run with {@code ./gradlew checkScripts -Pdir=<folder>}.
- */
 public final class ScriptBlockCheck {
     private static final Pattern FENCE = Pattern.compile("```mineskript\\n(.*?)```", Pattern.DOTALL);
 

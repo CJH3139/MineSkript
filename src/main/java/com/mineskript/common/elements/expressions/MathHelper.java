@@ -2,7 +2,6 @@ package com.mineskript.common.elements.expressions;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-/** Shared number helpers for the math expressions. Not a syntax element. */
 final class MathHelper {
     private MathHelper() {
     }

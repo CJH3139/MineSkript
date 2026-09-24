@@ -1,6 +1,7 @@
 package com.mineskript.game;
 
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.ItemDetails;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.script.OwnChatGuard;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -100,6 +103,39 @@ public final class FakeGameBridge implements GameBridge {
     public ItemValue useItem = ItemValue.empty();
     public boolean consumingItem;
     public int useItemRemaining;
+
+    public record ClientEntity(ClientEntityKind kind, String content, double x, double y, double z, String owner) {
+    }
+
+    public record Beam(int x, int y, int z, int rgb, String owner) {
+    }
+
+    public record Details(String renamedTo, List<String> lore, Map<String, Integer> enchantments,
+            List<Double> customModelData, Map<String, String> components) implements ItemDetails {
+        public static Details named(String renamedTo) {
+            return new Details(renamedTo, List.of(), Map.of(), List.of(), Map.of());
+        }
+
+        @Override
+        public Optional<String> customName() {
+            return Optional.ofNullable(renamedTo);
+        }
+
+        @Override
+        public Map<String, Integer> enchantments() {
+            return Collections.unmodifiableMap(new TreeMap<>(enchantments));
+        }
+
+        @Override
+        public Optional<String> component(String id) {
+            return Optional.ofNullable(components.get(id));
+        }
+    }
+
+    public final Set<String> knownIds = new HashSet<>(Set.of("minecraft:diamond", "minecraft:stone", "minecraft:gold_block"));
+    public final Map<Integer, ClientEntity> clientEntities = new LinkedHashMap<>();
+    public final List<Beam> beams = new ArrayList<>();
+    private int nextHandle = 1;
 
     public void setBlock(int dx, int dy, int dz, String id) {
         blocks.put(dx + "," + dy + "," + dz, id);
@@ -587,6 +623,78 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public void disconnect() {
         calls.add("disconnect");
+    }
+
+    @Override
+    public OptionalInt spawnClientEntity(ClientEntityKind kind, String content, double x, double y, double z, String owner) {
+        if (kind != ClientEntityKind.HOLOGRAM && !knownIds.contains(content)) {
+            return OptionalInt.empty();
+        }
+        int handle = nextHandle++;
+        clientEntities.put(handle, new ClientEntity(kind, content, x, y, z, owner));
+        return OptionalInt.of(handle);
+    }
+
+    @Override
+    public int clientEntityCount() {
+        return clientEntities.size();
+    }
+
+    @Override
+    public boolean moveClientEntity(int handle, double x, double y, double z) {
+        ClientEntity entity = clientEntities.get(handle);
+        if (entity == null) {
+            return false;
+        }
+        clientEntities.put(handle, new ClientEntity(entity.kind(), entity.content(), x, y, z, entity.owner()));
+        return true;
+    }
+
+    @Override
+    public boolean setClientEntityText(int handle, String text) {
+        ClientEntity entity = clientEntities.get(handle);
+        if (entity == null || entity.kind() != ClientEntityKind.HOLOGRAM) {
+            return false;
+        }
+        clientEntities.put(handle, new ClientEntity(entity.kind(), text, entity.x(), entity.y(), entity.z(), entity.owner()));
+        return true;
+    }
+
+    @Override
+    public boolean removeClientEntity(int handle) {
+        return clientEntities.remove(handle) != null;
+    }
+
+    @Override
+    public void removeAllClientEntities() {
+        clientEntities.clear();
+    }
+
+    @Override
+    public void showBeam(int x, int y, int z, int rgb, String owner) {
+        removeBeam(x, y, z);
+        beams.add(new Beam(x, y, z, rgb, owner));
+    }
+
+    @Override
+    public boolean removeBeam(int x, int y, int z) {
+        return beams.removeIf(beam -> beam.x() == x && beam.y() == y && beam.z() == z);
+    }
+
+    @Override
+    public void removeAllBeams() {
+        beams.clear();
+    }
+
+    @Override
+    public int beamCount() {
+        return beams.size();
+    }
+
+    @Override
+    public void removeClientVisuals(String owner) {
+        clientEntities.values().removeIf(entity -> entity.owner().equals(owner));
+        beams.removeIf(beam -> beam.owner().equals(owner));
     }
 
     private static String effectId(String name) {

@@ -23,12 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
-/**
- * Every event declares the values it provides; this fires each event the dispatcher produces itself and checks that
- * it hands its triggers exactly those values, so the declarations cannot drift from what really arrives.
- */
 class EventContextSupplyTest {
-    /** Events whose values come from game hooks (mixins, Fabric callbacks), which only run inside the game. */
     private static final Set<String> SUPPLIED_BY_GAME_HOOKS = Set.of("Action Bar", "Title", "Subtitle", "Boss Bar",
             "Sound", "Particle", "Entity Spawn", "Entity Despawn", "Entity Death", "Chunk Load", "Chunk Unload",
             "Scroll", "Toast", "Advancement", "Disconnect");
@@ -145,6 +140,7 @@ class EventContextSupplyTest {
         dispatcher.onChatSend("hello");
         dispatcher.onCommandSend("home");
         dispatcher.onFrame();
+        dispatcher.onTooltip(new ItemValue("minecraft:stone", "stone", 1, 0, 0));
         game.hasWorld = false;
         tick();
     }

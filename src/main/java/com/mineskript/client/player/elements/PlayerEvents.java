@@ -4,7 +4,6 @@ import static com.mineskript.client.ClientEvents.state;
 
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The events about you: moving, jumping, health, hunger, experience, effects and game mode. */
 public final class PlayerEvents {
     private PlayerEvents() {
     }

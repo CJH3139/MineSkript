@@ -9,7 +9,6 @@ import com.mineskript.client.chat.elements.ExprMessage;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** Chat messages and commands, received and sent. */
 public final class ChatModule implements SyntaxModule {
     @Override
     public String name() {

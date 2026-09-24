@@ -8,12 +8,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.syntax.DefaultSyntax;
 import java.util.Optional;
 
-/**
- * The syntax script tests use: every built-in element, then the test event and {@link EffAssert}. It is only ever
- * registered here, so the shipped mod and the generated documentation never see it.
- */
 public final class TestSyntax {
-    /** The event name prefix of a test trigger; the rest of the name is what the test is called. */
     static final String EVENT_PREFIX = "script test:";
 
     private TestSyntax() {
@@ -46,7 +41,6 @@ public final class TestSyntax {
         return name;
     }
 
-    /** Whether the event is a test, and so a trigger the runner should start. */
     static boolean isTest(Event event) {
         return event instanceof Event.State state && state.name().startsWith(EVENT_PREFIX);
     }

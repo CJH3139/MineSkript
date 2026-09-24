@@ -75,7 +75,11 @@ public final class Context {
         return value;
     }
 
-    /** Replaces an event value for the rest of this run, such as the outgoing text of on chat send. */
+    public Object eventValueOrNone(String key) {
+        Object value = eventValues.get(key);
+        return value == null ? None.NONE : value;
+    }
+
     public void setEventValue(String key, Object value) {
         eventValues.put(key, value);
     }
@@ -108,12 +112,10 @@ public final class Context {
         }
     }
 
-    /** The entries of the list variable {prefix::*}, in the order they were first set. */
     public IndexedValues getList(VariableScope scope, String prefix) {
         return scope == VariableScope.LOCAL ? ListVariables.read(locals(), prefix) : variables.list(scope, prefix);
     }
 
-    /** Deletes every entry of {prefix::*}, including nested ones such as {prefix::a::b}. */
     public void deleteList(VariableScope scope, String prefix) {
         if (scope == VariableScope.LOCAL) {
             ListVariables.delete(locals(), prefix);

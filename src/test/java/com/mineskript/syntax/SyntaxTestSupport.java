@@ -36,7 +36,6 @@ public final class SyntaxTestSupport {
         return holder().parser();
     }
 
-    /** The event a header such as {@code on chat} parses to, with the values and cancelling it declares. */
     public static Event event(String header) {
         SyntaxRegistryHolder holder = holder();
         return holder.registry().matchFirst(holder.registry().events(), Tokenizer.tokenize(header), holder.parser(), scope(null))

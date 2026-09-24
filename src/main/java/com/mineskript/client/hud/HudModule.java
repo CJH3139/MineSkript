@@ -13,7 +13,6 @@ import com.mineskript.client.hud.elements.HudEvents;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** What the client shows you: titles, sounds, screens, the clipboard and screenshots. */
 public final class HudModule implements SyntaxModule {
     @Override
     public String name() {

@@ -4,7 +4,6 @@ import static com.mineskript.client.ClientEvents.state;
 
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The screen events: screens opening and closing, toasts and advancements. */
 public final class HudEvents {
     private HudEvents() {
     }

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-/** Event values and cancelling are checked against what the event being parsed declares. */
 class EventContextTest {
     private final SyntaxTestSupport.SyntaxRegistryHolder holder = SyntaxTestSupport.holder();
     private final SyntaxRegistry registry = holder.registry();

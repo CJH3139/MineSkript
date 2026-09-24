@@ -106,7 +106,7 @@ One syntax element per class, the way Skript does it:
     any value, such as `%objects% is %objects%` or `%string% contains %string%`.
   * Expressions are tried by `Tier` (`SIMPLE`, `PROPERTY`, `COMBINED`) first and by priority within a tier.
   * `Priority.before(...)` and `Priority.after(...)` place an element just before or after a base priority when it
-    must go between two groups. Say why in a comment on the registration.
+    must go between two groups. Add a test that shows which element wins.
   * A change in precedence changes how existing scripts parse: add a test that shows which element wins.
 * Shared logic goes in a package-private helper class with no `register(SyntaxRegistry)` method.
 
@@ -159,9 +159,9 @@ public final class CondIsSet implements Condition {
 * Keep methods short. If a method needs a comment to explain each section, split it.
 
 ### Comments
-* Explain why, not what.
-* Javadoc on public API that other code (or addons) will use.
-* Start comments with a capital letter and a space: `// Like this`.
+* No comments in the code. Clear names, small methods and tests explain it instead.
+* The one exception is Javadoc on the API addons use: `api`, `lang.module`, the documentation annotations in `doc`,
+  and the public methods of `SyntaxRegistry`, `EventInfo` and `Priority`.
 
 ### Errors
 * Parse errors (`SyntaxException`) and runtime errors (`ScriptError`) are read by script writers. Say what went

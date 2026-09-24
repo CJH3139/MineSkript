@@ -16,7 +16,6 @@ import com.mineskript.client.world.elements.WorldEvents;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The world around you: blocks, light, biome, time, weather and dimension. */
 public final class WorldModule implements SyntaxModule {
     @Override
     public String name() {

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Every syntax element is documented, and every documentation example parses. */
 class DocumentationTest {
     private static final String[] SECTIONS = {"events", "conditions", "effects", "expressions"};
 
@@ -70,7 +69,6 @@ class DocumentationTest {
         assertEquals(List.of(), failures, String.join("\n", failures));
     }
 
-    /** Skript-style example lines: tab indentation, an empty line between separate scripts. */
     private static List<String> scripts(JsonArray lines) {
         List<String> scripts = new ArrayList<>();
         StringBuilder current = new StringBuilder();

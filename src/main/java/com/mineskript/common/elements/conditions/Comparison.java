@@ -14,7 +14,6 @@ import com.mineskript.lang.runtime.ScriptError;
 import java.util.List;
 import java.util.Optional;
 
-/** Shared logic of the comparison conditions: is, is at least, is at most, is greater than, is less than and is between. */
 final class Comparison implements Condition {
     private final Expression left;
     private final Expression right;

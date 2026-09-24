@@ -4,7 +4,6 @@ import static com.mineskript.client.ClientEvents.state;
 
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** The server events: joining and leaving, what the server shows you, sounds, particles, chunks and client ticks. */
 public final class ServerEvents {
     private ServerEvents() {
     }

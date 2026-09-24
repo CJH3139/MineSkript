@@ -2,15 +2,9 @@ package com.mineskript.lang.ast;
 
 import java.util.List;
 
-/**
- * The event a trigger handles. Each event carries the {@link EventContext} its registration declared, which says
- * which values it provides and whether it can be cancelled. The short constructors give an event with no context,
- * which is what an event built outside the parser (a test, an effect command) has.
- */
 public sealed interface Event {
     EventContext context();
 
-    /** This event with the context its registration declared. */
     default Event withContext(EventContext context) {
         return switch (this) {
             case Periodic event -> new Periodic(event.intervalTicks(), context);

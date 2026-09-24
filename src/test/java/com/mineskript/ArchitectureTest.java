@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-/** Keeps Minecraft out of the language, and the game out of the common module, by reading the source files. */
 class ArchitectureTest {
     private static final Path SOURCES = Path.of("src/main/java/com/mineskript");
     private static final Pattern MINECRAFT = Pattern.compile("\\bnet\\.(minecraft|fabricmc)\\.");

@@ -4,6 +4,7 @@ import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.ItemValue;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 
 public interface GameBridge {
     boolean hasWorld();
@@ -209,4 +210,31 @@ public interface GameBridge {
     void takeScreenshot();
 
     void disconnect();
+
+    OptionalInt spawnClientEntity(ClientEntityKind kind, String content, double x, double y, double z, String owner);
+
+    int clientEntityCount();
+
+    boolean moveClientEntity(int handle, double x, double y, double z);
+
+    boolean setClientEntityText(int handle, String text);
+
+    boolean removeClientEntity(int handle);
+
+    void removeAllClientEntities();
+
+    void showBeam(int x, int y, int z, int rgb, String owner);
+
+    boolean removeBeam(int x, int y, int z);
+
+    void removeAllBeams();
+
+    int beamCount();
+
+    void removeClientVisuals(String owner);
+
+    default void removeAllClientVisuals() {
+        removeAllClientEntities();
+        removeAllBeams();
+    }
 }

@@ -41,8 +41,6 @@ public final class ExprBlockAt implements Expression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // After the text and maths expressions, so in block at 1, 2, {_z} parsed as number the "parsed as" applies
-        // to the whole block.
         registry.addExpression(SkType.BLOCK, Tier.COMBINED, Priority.after(Priority.SIMPLE), ExprBlockAt::create,
                 "[the] block at %number%, %number%, %number%");
     }

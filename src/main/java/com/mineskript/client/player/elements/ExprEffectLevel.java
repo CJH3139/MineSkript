@@ -33,7 +33,6 @@ public final class ExprEffectLevel implements Expression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // After the text and maths expressions, so level of effect "speed" joined with "x" joins the level with "x".
         registry.addExpression(SkType.NUMBER, Tier.COMBINED, Priority.after(Priority.SIMPLE),
                 (match, scope) -> match.slot(0).isList() ? Optional.empty() : Optional.of(new ExprEffectLevel(match.slot(0))),
                 "[the] level of effect %string%",

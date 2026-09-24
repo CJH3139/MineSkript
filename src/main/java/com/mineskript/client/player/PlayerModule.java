@@ -28,7 +28,6 @@ import com.mineskript.client.player.elements.PlayerEvents;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** You: health, hunger, experience, position, game mode, effects and what you are doing. */
 public final class PlayerModule implements SyntaxModule {
     @Override
     public String name() {

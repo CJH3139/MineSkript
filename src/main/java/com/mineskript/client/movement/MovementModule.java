@@ -11,7 +11,6 @@ import com.mineskript.client.movement.elements.MovementEvents;
 import com.mineskript.lang.module.SyntaxModule;
 import com.mineskript.lang.parse.SyntaxRegistry;
 
-/** Moving and looking around, keys and mouse buttons. */
 public final class MovementModule implements SyntaxModule {
     @Override
     public String name() {

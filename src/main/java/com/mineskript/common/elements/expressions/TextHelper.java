@@ -3,7 +3,6 @@ package com.mineskript.common.elements.expressions;
 import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.runtime.Context;
 
-/** Shared text helpers for the character range expressions. Not a syntax element. */
 final class TextHelper {
     private TextHelper() {
     }

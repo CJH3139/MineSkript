@@ -16,7 +16,6 @@ import com.mineskript.syntax.DefaultSyntax;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** The script test runner itself: failures are reported, and the test syntax never reaches the shipped mod. */
 class ScriptTestHarnessTest {
     private final ScriptTestHarness harness = new ScriptTestHarness();
 

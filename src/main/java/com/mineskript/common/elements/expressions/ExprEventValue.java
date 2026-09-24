@@ -11,11 +11,6 @@ import com.mineskript.lang.parse.Tier;
 import com.mineskript.lang.runtime.Context;
 import java.util.Optional;
 
-/**
- * The generic event-name expression, such as event-damage, for every event value defined with
- * {@link SyntaxRegistry#addEventValue(EventValue)}. It only parses inside an event that declares the value. The
- * values are documented on the events that provide them, not as a standalone expression.
- */
 @NoDoc
 public final class ExprEventValue implements Expression {
     private final String name;
@@ -34,7 +29,6 @@ public final class ExprEventValue implements Expression {
         }
     }
 
-    /** Registers the event-name expression for one generic value defined after the built-in syntax, by an addon. */
     public static void registerValue(SyntaxRegistry registry, EventValue value) {
         String name = value.name();
         registry.addExpression(value.type(), Tier.SIMPLE, (match, scope) -> {

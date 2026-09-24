@@ -17,9 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-/** Loading module trees, and trying syntax by priority rather than by the module that registered it. */
 class ModuleLoaderTest {
-    /** A module that records when it registers, with the path the registry says it is in. */
     private static final class Recording implements SyntaxModule {
         private final String name;
         private final boolean loads;

@@ -22,6 +22,7 @@ public final class EventInfo {
     private final Map<String, EventValue> knownValues;
     private final Set<String> values = new LinkedHashSet<>();
     private boolean cancellable;
+    private boolean instant;
 
     EventInfo(String name, List<String> patterns, Map<String, EventValue> knownValues) {
         this.name = name;
@@ -49,10 +50,19 @@ public final class EventInfo {
         return this;
     }
 
+    /**
+     * Declares that the game runs the triggers of this event straight away and uses what they did at once, so they
+     * must not wait: a wait in one is rejected when the script loads.
+     */
+    public EventInfo instant() {
+        instant = true;
+        return this;
+    }
+
     /** The values and cancellability this event declared, with the values in the order they were defined. */
     public EventContext context() {
         List<EventValue> declared = knownValues.values().stream().filter(value -> values.contains(value.name())).toList();
-        return new EventContext(declared, cancellable);
+        return new EventContext(declared, cancellable, instant);
     }
 
     public EventInfo description(String... description) {

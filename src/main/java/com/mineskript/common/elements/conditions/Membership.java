@@ -12,7 +12,6 @@ import com.mineskript.lang.runtime.Relation;
 import java.util.List;
 import java.util.Optional;
 
-/** Shared logic of {@link CondIsIn} and {@link CondListContains}: whether a value equals an entry of a list. */
 final class Membership implements Condition {
     private final Expression item;
     private final Expression list;

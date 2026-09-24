@@ -31,9 +31,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -49,7 +51,6 @@ public final class MineSkriptClient implements ClientModInitializer {
     public static final String MOD_ID = "mineskript";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final int STEP_BUDGET = 10_000;
-    /** The Fabric entrypoint addons list their {@link MineSkriptAddon} class under. */
     public static final String ADDON_ENTRYPOINT = "mineskript";
 
     private static ScriptService service;
@@ -76,6 +77,7 @@ public final class MineSkriptClient implements ClientModInitializer {
         EffectCommands effects = new EffectCommands(new Parser(syntax.registry(), functions), dispatcher, config, bridge);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            bridge.tickVisuals();
             if (client.level != null) {
                 for (BlockChange placed : bridge.drainPlacedBlocks()) {
                     dispatcher.onBlockPlace(placed);
@@ -88,12 +90,14 @@ public final class MineSkriptClient implements ClientModInitializer {
         });
         GameSignals.onFrame(dispatcher::onFrame);
         ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-            if (GameSignals.wants("entity spawn") && entity != Minecraft.getInstance().player) {
+            if (GameSignals.wants("entity spawn") && entity != Minecraft.getInstance().player
+                    && !bridge.isClientOnly(entity)) {
                 GameSignals.emit("entity spawn", Map.of("entity", bridge.entityValue(entity)));
             }
         });
         ClientEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
-            if (entity == Minecraft.getInstance().player || Minecraft.getInstance().player == null) {
+            if (entity == Minecraft.getInstance().player || Minecraft.getInstance().player == null
+                    || bridge.isClientOnly(entity)) {
                 return;
             }
             boolean died = entity instanceof LivingEntity living && living.isDeadOrDying();
@@ -102,6 +106,9 @@ public final class MineSkriptClient implements ClientModInitializer {
                 GameSignals.emit(event, Map.of("entity", bridge.entityValue(entity)));
             }
         });
+        ItemTooltipCallback.EVENT.register((stack, tooltipContext, flag, lines) ->
+                bridge.decorateTooltip(stack, lines, dispatcher::onTooltip));
+        LevelRenderEvents.COLLECT_SUBMITS.register(bridge::submitBeams);
         ClientChunkEvents.CHUNK_LOAD.register((level, chunk) -> GameSignals.emit("chunk load",
                 Map.of("chunk x", (double) chunk.getPos().x(), "chunk z", (double) chunk.getPos().z())));
         ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) -> GameSignals.emit("chunk unload",
@@ -140,7 +147,6 @@ public final class MineSkriptClient implements ClientModInitializer {
         LOGGER.info("MineSkript loaded, scripts folder {}", dir);
     }
 
-    /** The one syntax registry every parser uses: the built-in syntax, then each addon's. */
     private static AddonLoader.Result loadSyntax() {
         AddonLoader.Result result = AddonLoader.load(DefaultSyntax::registry, discoverAddons());
         for (AddonLoader.Failure failure : result.failures()) {

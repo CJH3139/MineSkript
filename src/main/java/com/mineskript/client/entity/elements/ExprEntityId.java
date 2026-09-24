@@ -27,8 +27,6 @@ public final class ExprEntityId extends EntityPropertyExpression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // After the item property of the same name, so the name, id or x-coordinate of a variable whose type is not
-        // known is read as an item's first, then an entity's, then yours.
         registry.addExpression(SkType.TEXT, Tier.PROPERTY, Priority.after(Priority.SIMPLE),
                 (match, scope) -> Optional.of(new ExprEntityId(match.slot(0))),
                 "[the] id of %entity%",

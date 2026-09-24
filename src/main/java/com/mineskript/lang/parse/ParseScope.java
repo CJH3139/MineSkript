@@ -8,6 +8,10 @@ public record ParseScope(String file, int line, Event event, int loopDepth, Loop
         this(file, line, event, 0, null);
     }
 
+    public boolean canWait() {
+        return event == null || !event.context().instant();
+    }
+
     public boolean inLoop() {
         return loopDepth > 0;
     }

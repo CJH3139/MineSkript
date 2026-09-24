@@ -5,7 +5,6 @@ import com.mineskript.lang.ast.Expression;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.runtime.Context;
 
-/** The value of a {@code %condition%} pattern slot: true when the condition passes. */
 public record ConditionExpression(Condition condition) implements Expression {
     @Override
     public SkType type() {

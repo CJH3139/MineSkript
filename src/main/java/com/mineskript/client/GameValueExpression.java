@@ -8,10 +8,6 @@ import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.runtime.Context;
 import java.util.function.Function;
 
-/**
- * Shared base for the client expressions that read one value straight from the game, used by several feature modules.
- * Not a syntax element itself.
- */
 public abstract class GameValueExpression implements Expression {
     private final SkType type;
     private final Function<GameBridge, Object> reader;
@@ -21,7 +17,6 @@ public abstract class GameValueExpression implements Expression {
         this.reader = reader;
     }
 
-    /** The number a set, add or remove changer should store, given the current value and the one it was handed. */
     protected static double changed(ChangeMode mode, double current, Object value) {
         double amount = (Double) value;
         return switch (mode) {

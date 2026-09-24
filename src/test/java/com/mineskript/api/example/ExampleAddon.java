@@ -7,7 +7,6 @@ import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import java.util.Optional;
 
-/** The example addon from ADDONS.md, kept here so the example always compiles and works. */
 public final class ExampleAddon implements MineSkriptAddon {
     @Override
     public String name() {

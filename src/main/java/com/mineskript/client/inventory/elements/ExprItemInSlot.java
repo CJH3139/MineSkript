@@ -32,8 +32,6 @@ public final class ExprItemInSlot implements Expression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // Before the text and maths expressions, so item in slot {_s} parsed as number takes its slot number from
-        // the text.
         registry.addExpression(SkType.ITEM, Tier.COMBINED, Priority.before(Priority.SIMPLE),
                 (match, scope) -> Optional.of(new ExprItemInSlot(match.slot(0))),
                 "[the] item in slot %number%");

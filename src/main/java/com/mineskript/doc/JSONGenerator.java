@@ -21,13 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Writes the documentation of every registered syntax element to a JSON file, read from the annotations in
- * {@link com.mineskript.doc} and the event registrations, in registration order. Each element names the addon and the
- * module it came from.
- *
- * <p>Run with {@code ./gradlew docsJson}, or {@code java com.mineskript.doc.JSONGenerator <output.json> [version]}.
- */
 public final class JSONGenerator {
     private JSONGenerator() {
     }
@@ -50,10 +43,6 @@ public final class JSONGenerator {
         return generate(version, List.of());
     }
 
-    /**
-     * The documentation of the built-in syntax and of the given addons' syntax, each element marked with the addon it
-     * came from ({@link SyntaxRegistry#BUILT_IN} for MineSkript's own). An addon that fails to register is left out.
-     */
     public static JsonObject generate(String version, List<? extends MineSkriptAddon> addons) {
         SyntaxRegistry registry = AddonLoader.load(() -> {
             SyntaxRegistry documenting = SyntaxRegistry.documenting();
@@ -112,6 +101,7 @@ public final class JSONGenerator {
         element.add("patterns", array(info.patterns()));
         EventContext context = info.context();
         element.addProperty("cancellable", context.cancellable());
+        element.addProperty("instant", context.instant());
         JsonArray values = new JsonArray();
         for (EventValue value : context.values()) {
             values.add(eventValue(value));
@@ -158,7 +148,6 @@ public final class JSONGenerator {
         into.add(element);
     }
 
-    /** The path of the module that registered the element, such as {@code client/inventory}. */
     private static String module(SyntaxRegistry.Registration registration) {
         return registration.module() == null ? "" : registration.module();
     }

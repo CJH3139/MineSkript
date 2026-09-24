@@ -54,7 +54,6 @@ public final class ExprMessage implements Expression, Changeable {
             if (event == null || !event.context().provides("message")) {
                 throw new SyntaxException("\"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\"");
             }
-            // Only a message that has not been sent yet can still be changed; that is exactly when it can be cancelled.
             return Optional.of(new ExprMessage(event.context().cancellable()));
         }, "[the] [chat] message");
     }

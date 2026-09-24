@@ -27,7 +27,6 @@ class SendMessageRewriteTest {
         return script.errors().stream().map(Object::toString).toList();
     }
 
-    /** What Fabric does: allow the message, then ask for the text to send. */
     private String sendChat(String message) {
         return dispatcher.onChatSend(message) ? dispatcher.modifyChatSend(message) : null;
     }

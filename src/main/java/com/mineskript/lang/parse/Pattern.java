@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class Pattern {
-    /** The slot type that takes a whole condition instead of an expression, written {@code %condition%}. */
     public static final String CONDITION = "condition";
 
     private static final Map<String, SkType> TYPE_NAMES = Map.ofEntries(

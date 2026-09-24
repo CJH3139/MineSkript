@@ -15,10 +15,6 @@ import com.mineskript.lang.runtime.Converters;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Shared change logic behind the set, add, increase, remove, reduce, delete and reset effects. The target decides what
- * it supports through {@link Changeable}; anything it refuses is a parse error rather than a failure at run time.
- */
 final class VariableChange implements Statement {
     private final int line;
     private final ChangeMode mode;

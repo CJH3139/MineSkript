@@ -31,8 +31,6 @@ public final class ExprLength implements Expression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // "%string%'s length" takes any value, so the typed properties go first: name of {_item}'s length is the
-        // name of ({_item}'s length).
         registry.addExpression(SkType.NUMBER, Tier.PROPERTY, Priority.PATTERN_MATCHES_EVERYTHING, ExprLength::create, "[the] length of %string%", "%string%'s length");
     }
 

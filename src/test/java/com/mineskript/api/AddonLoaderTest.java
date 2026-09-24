@@ -31,9 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-/** Loading addons into the shared registry, without Fabric: order, failures, and addon syntax at work. */
 class AddonLoaderTest {
-    /** Adds one effect that shows the addon's name. */
     private record Named(String name, String pattern) implements MineSkriptAddon {
         @Override
         public void register(SyntaxRegistry registry) {
@@ -41,7 +39,6 @@ class AddonLoaderTest {
         }
     }
 
-    /** Would add an effect, but turns itself off. */
     private record Off(String name) implements MineSkriptAddon {
         @Override
         public boolean canLoad() {
@@ -54,7 +51,6 @@ class AddonLoaderTest {
         }
     }
 
-    /** Registers an effect, then throws, as a broken addon might. */
     private static final class Broken implements MineSkriptAddon {
         @Override
         public String name() {

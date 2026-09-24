@@ -4,10 +4,12 @@ import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
+import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.Block;
 import com.mineskript.lang.ast.Flow;
 import com.mineskript.lang.ast.Statement;
 import com.mineskript.lang.ast.WaitUntil;
+import com.mineskript.lang.parse.SyntaxException;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.lang.runtime.Context;
 import java.util.List;
@@ -37,7 +39,12 @@ public final class EffEat implements Statement {
     }
 
     public static void register(SyntaxRegistry registry) {
-        registry.addEffect((match, scope) -> Optional.of(new EffEat(scope.line())),
+        registry.addEffect((match, scope) -> {
+            if (!scope.canWait()) {
+                throw new SyntaxException(Language.get("parse.cannot-wait-here"));
+            }
+            return Optional.of(new EffEat(scope.line()));
+        },
                 "(eat|drink|consume) [the] [(held|holding)] (item|food)");
     }
 

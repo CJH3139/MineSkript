@@ -226,9 +226,9 @@ public final class ScriptService {
     }
 
     private void dropFrames(String previous, String name) {
-        dispatcher.dropFrames(name);
+        dispatcher.unloadScript(name);
         if (!previous.equals(name)) {
-            dispatcher.dropFrames(previous);
+            dispatcher.unloadScript(previous);
         }
     }
 

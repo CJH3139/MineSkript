@@ -24,8 +24,6 @@ public final class ExprPlayerName implements Expression {
     }
 
     public static void register(SyntaxRegistry registry) {
-        // After the item and entity properties of the same name: a variable whose type is not known is read as an
-        // item or entity first.
         registry.addExpression(SkType.TEXT, Tier.PROPERTY, Priority.before(Priority.COMBINED),
                 (match, scope) -> Optional.of(new ExprPlayerName()),
                 "[the] name of %player%",

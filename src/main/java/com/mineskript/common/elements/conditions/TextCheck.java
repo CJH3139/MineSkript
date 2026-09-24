@@ -8,7 +8,6 @@ import com.mineskript.lang.runtime.Converters;
 import java.util.Locale;
 import java.util.Optional;
 
-/** Shared logic of the text conditions: contains, starts with, ends with and is ignoring case. */
 final class TextCheck implements Condition {
     enum Kind {
         CONTAINS,

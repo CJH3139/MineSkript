@@ -4,7 +4,6 @@ import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import java.util.Optional;
 
-/** The chat events: messages that arrive, and chat and commands you send. */
 public final class ChatEvents {
     private ChatEvents() {
     }

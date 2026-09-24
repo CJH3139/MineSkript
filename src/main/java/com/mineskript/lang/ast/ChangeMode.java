@@ -1,6 +1,5 @@
 package com.mineskript.lang.ast;
 
-/** The ways the set, add, remove, delete and reset effects can change an expression. */
 public enum ChangeMode {
     SET("set"),
     ADD("added to"),
@@ -15,7 +14,6 @@ public enum ChangeMode {
         this.phrase = phrase;
     }
 
-    /** How the mode reads after "can only be" or "not", such as "added to" or "deleted". */
     public String phrase() {
         return phrase;
     }

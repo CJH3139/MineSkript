@@ -107,6 +107,20 @@ Set, add and remove also work on some values of the game: `add 90 to yaw`, `remo
 `add 1 to selected slot` (which wraps round the hotbar), `set clipboard to "..."`, and `set message to "..."` inside
 `on chat send` or `on command send`, which changes what is actually sent.
 
+Items carry their data, the modern replacement for NBT: `custom name of held item` (none if it was never renamed),
+`lore of held item`, `enchantments of held item` (a list like `sharpness 5`), `level of enchantment "sharpness" on
+held item`, `custom model data of held item`, and any data component as text with
+`component "minecraft:custom_data" of held item`.
+
+Some things only you see. `on item tooltip` runs while the game draws the tooltip of the item you hover over, and
+`add "&7worth: 5 gold" to the tooltip` (or `to the top of the tooltip`) adds your own lines, with `&` colour codes.
+These triggers run instantly, so they cannot `wait`. `spawn a hologram "&6shop" at 0.5, 66, 0.5`,
+`spawn an item display of diamond at ...` and `spawn a block display of gold block at ...` create client-side
+entities; keep `last spawned client entity` in a variable to `move client entity {h} to x, y, z`,
+`set text of hologram {h} to "..."` or `remove client entity {h}`. `show a "red" beam at 100, 64, -200` draws a
+beacon beam without a beacon, and `remove all beams` clears them. None of this is sent to the server, and it all
+disappears when you leave the world or reload the script.
+
 The example scripts in your `mineskript` folder are the working reference, and `/ms help` lists the commands. A parse
 error names the file, the line and the text it objected to.
 
@@ -149,6 +163,7 @@ running rather than dropping it.
 - [x] Effect commands typed into chat, and the first config file
 - [x] Functions, options, `is set` and `x if condition else y`
 - [x] List variables, dynamic variable names and changers for game values
+- [x] Item data, and tooltip lines, holograms and beams only you see
 - [ ] Syntax highlighting for editors
 
 ## Contributing

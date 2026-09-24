@@ -2,7 +2,6 @@ package com.mineskript.common.elements.expressions;
 
 import com.mineskript.lang.ast.None;
 
-/** Shared number parsing for the parsed as expressions. Not a syntax element. */
 final class ParsedNumbers {
     private ParsedNumbers() {
     }

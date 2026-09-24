@@ -3,7 +3,6 @@ package com.mineskript.lang.ast;
 import java.util.AbstractList;
 import java.util.List;
 
-/** The entries of a list variable such as {homes::*}: its values in order, each with the index it is stored under. */
 public final class IndexedValues extends AbstractList<Object> {
     private final List<String> indices;
     private final List<Object> values;

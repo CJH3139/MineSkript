@@ -15,7 +15,6 @@ public final class Messages {
     private Messages() {
     }
 
-    /** The one line every reload shows when another reload is still running. */
     private static List<MessageLine> busy() {
         return List.of(new MessageLine(MessageLine.Kind.WARNING, Language.get("command.busy")));
     }
@@ -190,7 +189,6 @@ public final class Messages {
         return List.copyOf(lines);
     }
 
-    /** The /ms info lines, ending with the addons that are loaded. */
     public static List<MessageLine> info(String version, Path dir, int scripts, int triggers, long ticks,
             List<String> addons) {
         List<MessageLine> lines = new ArrayList<>(info(version, dir, scripts, triggers, ticks));

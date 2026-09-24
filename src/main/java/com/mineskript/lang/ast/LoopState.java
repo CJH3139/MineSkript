@@ -13,7 +13,6 @@ public final class LoopState {
         return iteration;
     }
 
-    /** The index of the current list variable entry, or the pass number as text for any other loop. */
     public String index() {
         return index != null ? index : String.valueOf(iteration);
     }
