@@ -34,6 +34,9 @@ The cost is that the language only does what has been built into it. That trade 
 - **Fabric API** 0.160.0+26.2
 - A **Java 25** runtime
 
+## Support
+Questions, bug reports and scripts to share: join the [support Discord](https://discord.gg/zSTDbB74wU).
+
 ## Download
 Grab the latest jar from [Releases](../../releases), or build it yourself with the instructions under
 [Building](#building).
