@@ -15,6 +15,7 @@ import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.lang.parse.Tier;
 import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.Converters;
+import com.mineskript.lang.runtime.TextPattern;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -49,10 +50,10 @@ public final class ExprParse implements Expression {
     static final String ERROR = "parse error";
 
     private final Expression text;
-    private final ParsePattern pattern;
-    private final ParsePattern.Kind kind;
+    private final TextPattern pattern;
+    private final TextPattern.Kind kind;
 
-    private ExprParse(Expression text, ParsePattern pattern, ParsePattern.Kind kind) {
+    private ExprParse(Expression text, TextPattern pattern, TextPattern.Kind kind) {
         this.text = text;
         this.pattern = pattern;
         this.kind = kind;
@@ -72,7 +73,7 @@ public final class ExprParse implements Expression {
             return Optional.empty();
         }
         if (match.patternIndex() == 1) {
-            for (ParsePattern.Kind kind : ParsePattern.Kind.values()) {
+            for (TextPattern.Kind kind : TextPattern.Kind.values()) {
                 if (match.has(kind.name().toLowerCase(Locale.ROOT))) {
                     return Optional.of(new ExprParse(match.slot(0), null, kind));
                 }
@@ -81,7 +82,7 @@ public final class ExprParse implements Expression {
         }
         String source = (String) ((ConstantExpression) match.slot(1)).value();
         try {
-            return Optional.of(new ExprParse(match.slot(0), ParsePattern.compile(source), null));
+            return Optional.of(new ExprParse(match.slot(0), TextPattern.compile(source), null));
         } catch (IllegalArgumentException error) {
             throw new SyntaxException("can't parse with the pattern \"" + source + "\": " + error.getMessage());
         }
@@ -93,7 +94,7 @@ public final class ExprParse implements Expression {
             return kind.type();
         }
         SkType type = pattern.slots().get(0).kind().type();
-        for (ParsePattern.Slot slot : pattern.slots()) {
+        for (TextPattern.Slot slot : pattern.slots()) {
             if (slot.kind().type() != type) {
                 return SkType.OBJECT;
             }
@@ -110,7 +111,7 @@ public final class ExprParse implements Expression {
     public Object evaluate(Context context) {
         String value = Converters.toText(text.evaluate(context), context);
         if (pattern == null) {
-            Optional<Object> parsed = ParsePattern.parseValue(value, kind);
+            Optional<Object> parsed = TextPattern.parseValue(value, kind);
             context.setEventValue(ERROR, parsed.isPresent() ? None.NONE
                     : value + " could not be parsed as " + describe(kind));
             return parsed.orElse(None.NONE);
@@ -124,7 +125,7 @@ public final class ExprParse implements Expression {
         return parsed.orElse(List.of());
     }
 
-    private static String describe(ParsePattern.Kind kind) {
+    private static String describe(TextPattern.Kind kind) {
         return switch (kind) {
             case ITEMTYPE -> "an item type";
             case ENTITYTYPE -> "an entity type";

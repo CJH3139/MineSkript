@@ -141,6 +141,7 @@ public final class ScriptService {
                 }
                 dropFrames(previous, name);
                 registry.removeScript(name);
+                dispatcher.refreshCommands();
                 errorsByFile.remove(name);
                 return new FileReload(name, FileReload.Outcome.REMOVED, List.of(), 0, millis(started));
             }
@@ -151,6 +152,7 @@ public final class ScriptService {
             }
             dropFrames(previous, name);
             registry.replaceScript(script);
+            dispatcher.refreshCommands();
             errorsByFile.put(name, script.errors());
             dispatcher.onLoad(name);
             FileReload.Outcome outcome = running == null ? FileReload.Outcome.ADDED : FileReload.Outcome.RELOADED;
@@ -243,6 +245,7 @@ public final class ScriptService {
             errorsByFile.put(script.file(), script.errors());
         }
         registry.replace(report.scripts());
+        dispatcher.refreshCommands();
         dispatcher.onLoad();
         persistence.flushWarning();
         return report;

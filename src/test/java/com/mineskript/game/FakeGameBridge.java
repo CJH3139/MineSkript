@@ -25,6 +25,7 @@ public final class FakeGameBridge implements GameBridge {
 
     public final List<String> calls = new ArrayList<>();
     public final List<String> messages = new ArrayList<>();
+    public List<String> scriptCommands = List.of();
     public final List<String> sentChat = new ArrayList<>();
     public final List<String> warnings = new ArrayList<>();
     public final List<String> errors = new ArrayList<>();
@@ -220,6 +221,11 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public void sendCommand(String command) {
         calls.add("command:" + command);
+    }
+
+    @Override
+    public void scriptCommands(List<String> labels) {
+        scriptCommands = List.copyOf(labels);
     }
 
     @Override

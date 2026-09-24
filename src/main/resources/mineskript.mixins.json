@@ -6,6 +6,7 @@
   "client": [
     "AdvancementToastAccessor",
     "ClientCommonPacketListenerImplMixin",
+    "ClientPacketListenerCommandsMixin",
     "ClientPacketListenerMixin",
     "MinecraftMixin",
     "ToastManagerMixin"

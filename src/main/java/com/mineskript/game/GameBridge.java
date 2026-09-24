@@ -247,6 +247,9 @@ public interface GameBridge {
 
     void removeClientVisuals(String owner);
 
+    default void scriptCommands(List<String> labels) {
+    }
+
     default void removeAllClientVisuals() {
         removeAllClientEntities();
         removeAllBeams();

@@ -1,4 +1,4 @@
-package com.mineskript.client;
+package com.mineskript.lang.runtime;
 
 public final class TextColors {
     private static final String CODES = "0123456789abcdefklmnor";

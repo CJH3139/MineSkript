@@ -1,4 +1,4 @@
-package com.mineskript.common.elements.expressions;
+package com.mineskript.lang.runtime;
 
 import com.mineskript.lang.ast.NamedValues;
 import com.mineskript.lang.ast.SkType;
@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-final class ParsePattern {
-    enum Kind {
+public final class TextPattern {
+    public enum Kind {
         TEXT(SkType.TEXT),
         NUMBER(SkType.NUMBER),
         INTEGER(SkType.NUMBER),
@@ -34,12 +34,12 @@ final class ParsePattern {
             this.type = type;
         }
 
-        SkType type() {
+        public SkType type() {
             return type;
         }
     }
 
-    record Slot(Kind kind, boolean plural) {
+    public record Slot(Kind kind, boolean plural) {
     }
 
     private sealed interface Element {
@@ -88,14 +88,18 @@ final class ParsePattern {
     private final Element root;
     private final List<Slot> slots;
 
-    private ParsePattern(String source, Element root, List<Slot> slots) {
+    private TextPattern(String source, Element root, List<Slot> slots) {
         this.source = source;
         this.root = root;
         this.slots = List.copyOf(slots);
     }
 
-    static ParsePattern compile(String source) {
-        Compiler compiler = new Compiler(source);
+    public static TextPattern compile(String source) {
+        return compile(source, Map.of());
+    }
+
+    public static TextPattern compile(String source, Map<String, Kind> extraKinds) {
+        Compiler compiler = new Compiler(source, extraKinds);
         Element root = compiler.sequence();
         if (compiler.position != source.length()) {
             throw new IllegalArgumentException("unexpected '" + source.charAt(compiler.position) + "' in the pattern");
@@ -103,42 +107,50 @@ final class ParsePattern {
         if (compiler.slots.isEmpty()) {
             throw new IllegalArgumentException("the pattern has no %type% in it, so there is nothing to parse");
         }
-        return new ParsePattern(source, root, compiler.slots);
+        return new TextPattern(source, root, compiler.slots);
     }
 
-    String source() {
+    public String source() {
         return source;
     }
 
-    List<Slot> slots() {
+    public List<Slot> slots() {
         return slots;
     }
 
-    Optional<List<Object>> match(String text) {
+    public Optional<List<Object>> match(String text) {
+        return matchSlots(text).map(TextPattern::flatten);
+    }
+
+    public Optional<List<Object>> matchSlots(String text) {
         Matcher matcher = new Matcher(text);
         if (!matcher.match(root, 0, position -> position == text.length())) {
             return Optional.empty();
         }
+        return Optional.of(Arrays.asList(matcher.values.clone()));
+    }
+
+    private static List<Object> flatten(List<Object> slotValues) {
         List<Object> values = new ArrayList<>();
-        for (Object value : matcher.values) {
+        for (Object value : slotValues) {
             if (value instanceof List<?> list) {
                 values.addAll(list);
             } else if (value != null) {
                 values.add(value);
             }
         }
-        return Optional.of(values);
+        return values;
     }
 
-    static Optional<Object> parseValue(String text, Kind kind) {
+    public static Optional<Object> parseValue(String text, Kind kind) {
         String value = text.strip();
         if (value.isEmpty()) {
             return Optional.empty();
         }
         return switch (kind) {
             case TEXT -> Optional.of(value);
-            case NUMBER -> ParsedNumbers.number(value) instanceof Double number ? Optional.of(number) : Optional.empty();
-            case INTEGER -> ParsedNumbers.number(value) instanceof Double number && number == Math.rint(number)
+            case NUMBER -> number(value) instanceof Double number ? Optional.of(number) : Optional.empty();
+            case INTEGER -> number(value) instanceof Double number && number == Math.rint(number)
                     ? Optional.of(number) : Optional.empty();
             case BOOLEAN -> switch (value.toLowerCase(Locale.ROOT)) {
                 case "true", "yes", "on" -> Optional.of(Boolean.TRUE);
@@ -149,6 +161,15 @@ final class ParsePattern {
             case ITEMTYPE -> tokens(value).flatMap(Literals::blockType).map(Object.class::cast);
             default -> NamedValues.parse(value.toLowerCase(Locale.ROOT).replaceAll("\\s+", " "), kind.type());
         };
+    }
+
+    private static Object number(String value) {
+        try {
+            double parsed = Double.parseDouble(value);
+            return Double.isFinite(parsed) ? parsed : null;
+        } catch (NumberFormatException error) {
+            return null;
+        }
     }
 
     private static Optional<List<Token>> tokens(String value) {
@@ -243,11 +264,18 @@ final class ParsePattern {
 
     private static final class Compiler {
         private final String source;
+        private final Map<String, Kind> extraKinds;
         private final List<Slot> slots = new ArrayList<>();
         private int position;
 
-        private Compiler(String source) {
+        private Compiler(String source, Map<String, Kind> extraKinds) {
             this.source = source;
+            this.extraKinds = extraKinds;
+        }
+
+        private Kind kindNamed(String name) {
+            Kind kind = KINDS.get(name);
+            return kind != null ? kind : extraKinds.get(name);
         }
 
         private Element sequence() {
@@ -311,14 +339,14 @@ final class ParsePattern {
             while (name.startsWith("-") || name.startsWith("*") || name.startsWith("~")) {
                 name = name.substring(1);
             }
-            Kind kind = KINDS.get(name);
+            Kind kind = kindNamed(name);
             boolean plural = false;
             if (kind == null && name.endsWith("s")) {
-                kind = KINDS.get(name.substring(0, name.length() - 1));
+                kind = kindNamed(name.substring(0, name.length() - 1));
                 plural = kind != null;
             }
             if (kind == null && name.endsWith("ies")) {
-                kind = KINDS.get(name.substring(0, name.length() - 3) + "y");
+                kind = kindNamed(name.substring(0, name.length() - 3) + "y");
                 plural = kind != null;
             }
             if (kind == null) {

@@ -1,6 +1,5 @@
 package com.mineskript.client.hud.elements;
 
-import com.mineskript.client.TextColors;
 import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
@@ -14,6 +13,7 @@ import com.mineskript.lang.parse.ParseScope;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.lang.runtime.Context;
 import com.mineskript.lang.runtime.Converters;
+import com.mineskript.lang.runtime.TextColors;
 import java.util.Optional;
 
 @Name("Show Title")

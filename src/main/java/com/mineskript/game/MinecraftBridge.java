@@ -21,6 +21,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -164,6 +165,19 @@ public final class MinecraftBridge implements GameBridge {
     @Override
     public void sendCommand(String command) {
         minecraft().player.connection.sendCommand(command);
+    }
+
+    @Override
+    public void scriptCommands(List<String> labels) {
+        ScriptCommandCompletions.set(labels);
+        if (minecraft().getConnection() == null) {
+            return;
+        }
+        try {
+            ClientCommands.refreshCommandCompletions();
+        } catch (IllegalStateException error) {
+            return;
+        }
     }
 
     @Override

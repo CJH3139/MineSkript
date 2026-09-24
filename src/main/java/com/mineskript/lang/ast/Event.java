@@ -18,6 +18,7 @@ public sealed interface Event {
             case State event -> new State(event.name(), context, event.filter());
             case Durability event -> new Durability(event.threshold(), context);
             case EffectCommand event -> new EffectCommand(context);
+            case Command event -> new Command(event.command(), context);
         };
     }
 
@@ -94,6 +95,12 @@ public sealed interface Event {
     record EffectCommand(EventContext context) implements Event {
         public EffectCommand() {
             this(EventContext.NONE);
+        }
+    }
+
+    record Command(ScriptCommand command, EventContext context) implements Event {
+        public Command(ScriptCommand command) {
+            this(command, EventContext.NONE);
         }
     }
 }

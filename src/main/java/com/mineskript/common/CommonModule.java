@@ -48,6 +48,7 @@ import com.mineskript.common.elements.expressions.ExprMaximum;
 import com.mineskript.common.elements.expressions.ExprMinimum;
 import com.mineskript.common.elements.expressions.ExprParsedAsBoolean;
 import com.mineskript.common.elements.expressions.ExprParsedAsInteger;
+import com.mineskript.common.elements.expressions.ExprArgument;
 import com.mineskript.common.elements.expressions.ExprParse;
 import com.mineskript.common.elements.expressions.ExprParseError;
 import com.mineskript.common.elements.expressions.ExprParsedAsNumber;
@@ -93,6 +94,7 @@ public final class CommonModule implements SyntaxModule {
         ExprParsedAsNumber.register(registry);
         ExprParse.register(registry);
         ExprParseError.register(registry);
+        ExprArgument.register(registry);
         ExprParsedAsInteger.register(registry);
         ExprParsedAsBoolean.register(registry);
         ExprRound.register(registry);

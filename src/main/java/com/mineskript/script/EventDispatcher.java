@@ -14,6 +14,7 @@ import com.mineskript.lang.ast.GameMode;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.PotionEffectType;
+import com.mineskript.lang.ast.ScriptCommand;
 import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.WaitUntil;
@@ -25,13 +26,16 @@ import com.mineskript.lang.runtime.Interpreter;
 import com.mineskript.lang.runtime.Scheduler;
 import com.mineskript.lang.runtime.ScriptControl;
 import com.mineskript.lang.runtime.ScriptError;
+import com.mineskript.lang.runtime.TextColors;
 import com.mineskript.lang.runtime.Variables;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
@@ -103,6 +107,8 @@ public final class EventDispatcher {
     private final Map<String, Long> fileGeneration = new HashMap<>();
     private WorldSnapshot previous = WorldSnapshot.empty();
     private long ticks;
+    private final Map<String, Long> commandUses = new HashMap<>();
+    private List<String> commandLabels = List.of();
     private int lastSeenVersion;
     private long lastChangeTick;
     private boolean pendingSave;
@@ -241,9 +247,81 @@ public final class EventDispatcher {
         try {
             Sent sent = fireMessage(Event.CommandSend.class, command);
             commandRewrite = Rewrite.of(command, sent);
+            if (sent.allowed() && runCommand(sent.message())) {
+                commandRewrite = null;
+                return false;
+            }
             return sent.allowed();
         } finally {
             commandSending = false;
+        }
+    }
+
+    public boolean runCommand(String line) {
+        String text = line.strip();
+        int space = 0;
+        while (space < text.length() && !Character.isWhitespace(text.charAt(space))) {
+            space++;
+        }
+        String label = text.substring(0, space).toLowerCase(Locale.ROOT);
+        Trigger trigger = commandTrigger(label);
+        if (trigger == null) {
+            return false;
+        }
+        ScriptCommand command = ((Event.Command) trigger.event()).command();
+        Optional<List<Object>> arguments = command.parse(text.substring(space));
+        if (arguments.isEmpty()) {
+            game.showMessage(TextColors.colored(command.usage()));
+            return true;
+        }
+        String key = trigger.file() + "/" + command.name();
+        if (command.cooldownTicks() > 0) {
+            Long used = commandUses.get(key);
+            long left = used == null ? 0 : used + command.cooldownTicks() - ticks;
+            if (left > 0) {
+                game.showMessage(TextColors.colored(command.cooldownMessage()
+                        .replace("%remaining time%", secondsLeft(left))));
+                return true;
+            }
+            commandUses.put(key, ticks);
+        }
+        boolean outer = worldExpected;
+        worldExpected = game.hasWorld();
+        try {
+            start(trigger, Map.of(ScriptCommand.ARGUMENTS, arguments.get(), ScriptCommand.LABEL, label));
+        } finally {
+            worldExpected = outer;
+        }
+        return true;
+    }
+
+    private static String secondsLeft(long ticks) {
+        long seconds = (ticks + 19) / 20;
+        return seconds + (seconds == 1 ? " second" : " seconds");
+    }
+
+    private Trigger commandTrigger(String label) {
+        if (label.isEmpty()) {
+            return null;
+        }
+        for (Trigger trigger : registry.triggers()) {
+            if (trigger.event() instanceof Event.Command command && command.command().labels().contains(label)) {
+                return trigger;
+            }
+        }
+        return null;
+    }
+
+    public void refreshCommands() {
+        List<String> labels = new ArrayList<>();
+        for (Trigger trigger : registry.triggers()) {
+            if (trigger.event() instanceof Event.Command command) {
+                labels.addAll(command.command().labels());
+            }
+        }
+        if (!labels.equals(commandLabels)) {
+            commandLabels = List.copyOf(labels);
+            game.scriptCommands(commandLabels);
         }
     }
 

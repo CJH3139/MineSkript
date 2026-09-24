@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mineskript.ScriptRunner;
-import com.mineskript.client.TextColors;
 import com.mineskript.client.visuals.elements.EffSetHologramText;
 import com.mineskript.game.ClientEntityKind;
 import com.mineskript.game.FakeGameBridge;
@@ -17,10 +16,11 @@ import com.mineskript.lang.parse.ParsedScript;
 import com.mineskript.lang.parse.Parser;
 import com.mineskript.lang.runtime.Interpreter;
 import com.mineskript.lang.runtime.Scheduler;
+import com.mineskript.lang.runtime.TextColors;
 import com.mineskript.script.EventDispatcher;
 import com.mineskript.script.ScriptRegistry;
-import java.util.List;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 class ClientVisualsTest {
     private final ScriptRunner runner = new ScriptRunner();

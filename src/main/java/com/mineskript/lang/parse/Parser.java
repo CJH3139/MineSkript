@@ -13,6 +13,7 @@ import com.mineskript.lang.ast.LoopKind;
 import com.mineskript.lang.ast.LoopStatement;
 import com.mineskript.lang.ast.OrCondition;
 import com.mineskript.lang.ast.Return;
+import com.mineskript.lang.ast.ScriptCommand;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.ast.StandaloneCondition;
 import com.mineskript.lang.ast.Statement;
@@ -28,13 +29,16 @@ import com.mineskript.lang.lexer.Node;
 import com.mineskript.lang.runtime.Converters;
 import com.mineskript.lang.runtime.FunctionCall;
 import com.mineskript.lang.runtime.Functions;
+import com.mineskript.lang.runtime.TextPattern;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 
@@ -60,6 +64,14 @@ public final class Parser {
             "(?i)([a-z_][a-z0-9_]*)\\s*(?::\\s*([a-z ]+?))?\\s*(?:=\\s*(.+))?");
     private static final java.util.regex.Pattern NAME = java.util.regex.Pattern.compile("[a-z_][a-z0-9_]*");
     private static final java.util.regex.Pattern OPTION = java.util.regex.Pattern.compile("\\{@([^}]*)}");
+    private static final java.util.regex.Pattern COMMAND_ARGUMENT = java.util.regex.Pattern.compile("<([^<>=]+)(?:=([^<>]*))?>");
+    private static final java.util.regex.Pattern COMMAND_NAME = java.util.regex.Pattern.compile("[a-z0-9_.-]+");
+    private static final Set<String> RESERVED_COMMANDS = Set.of("ms", "mineskript");
+    private static final Set<String> IGNORED_COMMAND_ENTRIES = Set.of("description", "permission", "permission message",
+            "executable by", "prefix", "cooldown bypass", "cooldown storage");
+    private static final Map<String, TextPattern.Kind> COMMAND_KINDS = Map.of(
+            "player", TextPattern.Kind.TEXT,
+            "offlineplayer", TextPattern.Kind.TEXT);
 
     private static final java.util.Set<String> COMPARISONS = java.util.Set.of("<", ">", "<=", ">=", "=", "!=");
 
@@ -116,12 +128,13 @@ public final class Parser {
                     errors.add(new ParseError(file, failure.line, failure.getMessage()));
                 }
             }
+            Set<String> commandLabels = new HashSet<>();
             for (Node node : prepared.nodes()) {
                 if (isFunctionHeader(node) || isOptions(node)) {
                     continue;
                 }
                 try {
-                    triggers.add(parseTrigger(file, node));
+                    triggers.add(isCommand(node) ? parseCommand(file, node, commandLabels) : parseTrigger(file, node));
                 } catch (Failure failure) {
                     errors.add(new ParseError(file, failure.line, failure.getMessage()));
                 }
@@ -486,6 +499,147 @@ public final class Parser {
         } catch (Failure failure) {
             return new ParsedEffect(null, new ParseError(file, failure.line, failure.getMessage()));
         }
+    }
+
+    private static boolean isCommand(Node node) {
+        return startsWith(node.text(), "command ") || startsWith(node.text(), "command/");
+    }
+
+    private Trigger parseCommand(String file, Node node, Set<String> taken) {
+        if (!node.section()) {
+            throw new Failure(node.line(), Language.get("parse.command-needs-section"));
+        }
+        String header = node.text().substring("command".length()).strip();
+        if (header.startsWith("/")) {
+            header = header.substring(1);
+        }
+        int space = 0;
+        while (space < header.length() && !Character.isWhitespace(header.charAt(space))) {
+            space++;
+        }
+        String name = header.substring(0, space).toLowerCase(Locale.ROOT);
+        String argumentText = header.substring(space).strip();
+        checkCommandName(node, name);
+        List<ScriptCommand.Argument> arguments = new ArrayList<>();
+        TextPattern pattern = argumentText.isEmpty() ? null : commandPattern(node, argumentText, arguments);
+        List<String> aliases = new ArrayList<>();
+        String usage = "Correct usage: /" + name + (argumentText.isEmpty() ? "" : " " + argumentText);
+        int cooldownTicks = 0;
+        String cooldownMessage = "You have to wait %remaining time% before using this command again";
+        String description = "";
+        Node trigger = null;
+        for (Node entry : node.children()) {
+            if (entry.section()) {
+                if (!entry.text().equalsIgnoreCase("trigger")) {
+                    throw new Failure(entry.line(), Language.format("parse.command-unknown-entry", entry.text()));
+                }
+                if (trigger != null) {
+                    throw new Failure(entry.line(), Language.get("parse.command-two-triggers"));
+                }
+                trigger = entry;
+                continue;
+            }
+            int colon = entry.text().indexOf(':');
+            if (colon <= 0) {
+                throw new Failure(entry.line(), Language.format("parse.command-unknown-entry", entry.text()));
+            }
+            String key = entry.text().substring(0, colon).strip().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
+            String value = entry.text().substring(colon + 1).strip();
+            switch (key) {
+                case "aliases", "alias" -> {
+                    for (String alias : value.split(",")) {
+                        String label = alias.strip().toLowerCase(Locale.ROOT);
+                        label = label.startsWith("/") ? label.substring(1) : label;
+                        if (label.isEmpty()) {
+                            continue;
+                        }
+                        checkCommandName(entry, label);
+                        aliases.add(label);
+                    }
+                }
+                case "usage" -> usage = value;
+                case "cooldown" -> cooldownTicks = Literals.timespan(tokens(entry, value))
+                        .orElseThrow(() -> new Failure(entry.line(), Language.format("parse.command-bad-cooldown", value)))
+                        .ticks();
+                case "cooldown message" -> cooldownMessage = value;
+                default -> {
+                    if (!IGNORED_COMMAND_ENTRIES.contains(key)) {
+                        throw new Failure(entry.line(), Language.format("parse.command-unknown-entry", key));
+                    }
+                    if (key.equals("description")) {
+                        description = value;
+                    }
+                }
+            }
+        }
+        if (trigger == null) {
+            throw new Failure(node.line(), Language.format("parse.command-no-trigger", name));
+        }
+        ScriptCommand command = new ScriptCommand(name, aliases, arguments, pattern, usage, description,
+                cooldownTicks, cooldownMessage);
+        for (String label : command.labels()) {
+            if (!taken.add(label)) {
+                throw new Failure(node.line(), Language.format("parse.command-duplicate", label));
+            }
+        }
+        Event event = new Event.Command(command);
+        Block body = parseBlock(trigger.children(), new ParseScope(file, trigger.line(), event));
+        return new Trigger(file, node.line(), event, body);
+    }
+
+    private static void checkCommandName(Node node, String name) {
+        if (!COMMAND_NAME.matcher(name).matches()) {
+            throw new Failure(node.line(), Language.format("parse.command-bad-name", name));
+        }
+        if (RESERVED_COMMANDS.contains(name)) {
+            throw new Failure(node.line(), Language.format("parse.command-reserved", name));
+        }
+    }
+
+    private static TextPattern commandPattern(Node node, String text, List<ScriptCommand.Argument> arguments) {
+        StringBuilder source = new StringBuilder();
+        List<Boolean> optional = new ArrayList<>();
+        List<String> fallbacks = new ArrayList<>();
+        Matcher matcher = COMMAND_ARGUMENT.matcher(text);
+        int last = 0;
+        while (matcher.find()) {
+            source.append(text.substring(last, matcher.start()).replace("%", "\\%"));
+            source.append('%').append(matcher.group(1).strip()).append('%');
+            optional.add(depth(text, matcher.start()) > 0);
+            fallbacks.add(matcher.group(2));
+            last = matcher.end();
+        }
+        source.append(text.substring(last).replace("%", "\\%"));
+        TextPattern pattern;
+        try {
+            pattern = TextPattern.compile(source.toString(), COMMAND_KINDS);
+        } catch (IllegalArgumentException error) {
+            throw new Failure(node.line(), Language.format("parse.command-bad-arguments", error.getMessage()));
+        }
+        for (int i = 0; i < pattern.slots().size(); i++) {
+            TextPattern.Slot slot = pattern.slots().get(i);
+            String fallback = fallbacks.get(i);
+            Object value = null;
+            if (fallback != null) {
+                value = (slot.plural() ? Optional.<Object>empty() : TextPattern.parseValue(fallback, slot.kind()))
+                        .orElseThrow(() -> new Failure(node.line(),
+                                Language.format("parse.command-bad-default", fallback, slot.kind().name().toLowerCase(Locale.ROOT))));
+            }
+            arguments.add(new ScriptCommand.Argument(slot.kind(), slot.plural(), optional.get(i) || value != null, value));
+        }
+        return pattern;
+    }
+
+    private static int depth(String text, int end) {
+        int depth = 0;
+        for (int i = 0; i < end; i++) {
+            if (text.charAt(i) == '[') {
+                depth++;
+            } else if (text.charAt(i) == ']') {
+                depth--;
+            }
+        }
+        return depth;
     }
 
     private Trigger parseTrigger(String file, Node node) {
