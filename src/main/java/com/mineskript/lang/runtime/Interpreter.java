@@ -51,6 +51,7 @@ public final class Interpreter {
                     case Flow.EnterTry attempt -> execution.enterTry(attempt.block(), attempt.handler());
                     case Flow.NextIteration ignored -> execution.nextIteration();
                     case Flow.ExitLoop ignored -> execution.exitLoop();
+                    case Flow.ExitSection ignored -> execution.exitSection();
                     case Flow.Stop ignored -> execution.stop();
                     case Flow.Call call -> execution.call(call.function(), call.arguments(), statement.line());
                     case Flow.Return result -> execution.returnFrom(result.value());

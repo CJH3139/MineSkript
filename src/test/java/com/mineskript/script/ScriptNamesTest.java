@@ -1,6 +1,8 @@
 package com.mineskript.script;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,11 +37,11 @@ class ScriptNamesTest {
     }
 
     @Test
-    void aNameThatCannotBeTypedAsOneUnquotedWordIsNotSuggested(@TempDir Path dir) throws IOException {
+    void namesWithSpacesAreSuggestedToo(@TempDir Path dir) throws IOException {
         write(dir, "ok.ms");
         write(dir, "two words.ms");
         assertEquals(List.of("ok.ms", "two words.ms"), ScriptNames.list(dir));
-        assertEquals(List.of("ok.ms"), ScriptNames.matching(dir, ""));
+        assertEquals(List.of("ok.ms", "two words.ms"), ScriptNames.matching(dir, ""));
     }
 
     @Test
@@ -49,12 +51,43 @@ class ScriptNamesTest {
     }
 
     @Test
-    void subfoldersAreNotListedAndOnlyPlainNamesAreEverReturned(@TempDir Path dir) throws IOException {
-        Files.createDirectories(dir.resolve("nested.ms"));
-        write(dir.resolve("nested.ms"), "inner.ms");
+    void scriptsInFoldersAreListedByTheirPathWithForwardSlashes(@TempDir Path dir) throws IOException {
+        Files.createDirectories(dir.resolve("pvp/kits"));
+        write(dir.resolve("pvp"), "combat.ms");
+        write(dir.resolve("pvp/kits"), "archer.ms");
         write(dir, "top.ms");
-        assertEquals(List.of("top.ms"), ScriptNames.list(dir));
-        assertEquals(List.of("top.ms"), ScriptNames.matching(dir, ""));
+        assertEquals(List.of("pvp/combat.ms", "pvp/kits/archer.ms", "top.ms"), ScriptNames.list(dir));
+        assertEquals(List.of("pvp/combat.ms", "pvp/kits/archer.ms"), ScriptNames.matching(dir, "pvp"));
+        assertEquals(List.of("pvp/kits/archer.ms"), ScriptNames.matching(dir, "PVP\\K"));
+        assertEquals(java.util.Optional.of("pvp/combat.ms"), ScriptNames.onDisk(dir, "pvp\\Combat.ms"));
+    }
+
+    @Test
+    void aDashDisablesAScriptOrAWholeFolderLikeSkript(@TempDir Path dir) throws IOException {
+        Files.createDirectories(dir.resolve("-old"));
+        Files.createDirectories(dir.resolve("new"));
+        write(dir.resolve("-old"), "a.ms");
+        write(dir.resolve("new"), "-b.ms");
+        write(dir.resolve("new"), "c.ms");
+        write(dir, "-d.ms");
+        assertEquals(List.of("new/c.ms"), ScriptNames.list(dir));
+    }
+
+    @Test
+    void onlyNamesThatStayInsideTheFolderAreScriptNames(@TempDir Path dir) {
+        assertTrue(ScriptNames.isScriptName("a.ms"));
+        assertTrue(ScriptNames.isScriptName("pvp/combat.ms"));
+        assertTrue(ScriptNames.isScriptName("pvp\\combat.ms"));
+        assertFalse(ScriptNames.isScriptName("../a.ms"));
+        assertFalse(ScriptNames.isScriptName("pvp/../../a.ms"));
+        assertFalse(ScriptNames.isScriptName("/a.ms"));
+        assertFalse(ScriptNames.isScriptName("C:/a.ms"));
+        assertFalse(ScriptNames.isScriptName("pvp//a.ms"));
+        assertFalse(ScriptNames.isScriptName("-old/a.ms"));
+        assertFalse(ScriptNames.isScriptName("pvp/notes.txt"));
+        assertEquals(java.util.Optional.empty(), ScriptNames.resolve(dir, "../a.ms"));
+        assertEquals(java.util.Optional.of(dir.toAbsolutePath().normalize().resolve("pvp/a.ms")),
+                ScriptNames.resolve(dir, "pvp\\a.ms"));
     }
 
     @Test

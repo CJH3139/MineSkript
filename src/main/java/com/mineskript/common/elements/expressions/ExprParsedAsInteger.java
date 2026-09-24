@@ -51,6 +51,8 @@ public final class ExprParsedAsInteger implements Expression {
     public Object evaluate(Context context) {
         String value = Converters.toText(text.evaluate(context), context).strip();
         Object number = ParsedNumbers.number(value);
-        return number instanceof Double parsed && parsed == Math.rint(parsed) ? parsed : None.NONE;
+        Object result = number instanceof Double parsed && parsed == Math.rint(parsed) ? parsed : None.NONE;
+        context.setEventValue(ExprParse.ERROR, result == None.NONE ? value + " could not be parsed as an integer" : None.NONE);
+        return result;
     }
 }

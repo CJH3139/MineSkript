@@ -11,6 +11,20 @@ class ClientEnvironmentTest {
     private final ScriptRunner runner = new ScriptRunner();
 
     @Test
+    void sentTextTurnsColourCodesIntoFormatting() {
+        runner.run("""
+                on load:
+                    send "&cred &Lbold &zplain & done"
+                    send title "&6gold" with subtitle "&7grey"
+                    send action bar "&aok"
+                    show title "&btitle"
+                """);
+        assertEquals(List.of("§cred §lbold &zplain & done"), runner.game.messages);
+        assertEquals(List.of("sendTitle:§6gold|§7grey|-1|-1|-1", "actionBar:§aok", "title:§btitle"),
+                runner.game.calls);
+    }
+
+    @Test
     void environmentReadings() {
         runner.game.biome = "minecraft:desert";
         runner.game.lightLevel = 4;

@@ -19,9 +19,10 @@ public sealed interface PatternElement {
     record Branch(String tag, PatternElement element) {
     }
 
-    record Slot(int index, List<SkType> types, boolean optional, boolean condition) implements PatternElement {
+    record Slot(int index, List<SkType> types, boolean optional, boolean condition, boolean raw)
+            implements PatternElement {
         public Slot(int index, List<SkType> types, boolean optional) {
-            this(index, types, optional, false);
+            this(index, types, optional, false, false);
         }
     }
 

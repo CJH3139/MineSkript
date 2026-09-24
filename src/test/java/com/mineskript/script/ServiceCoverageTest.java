@@ -62,7 +62,7 @@ class ServiceCoverageTest {
         write(scripts, "a.ms", "on chat:\n    send \"a\"\n");
         start(scripts);
         assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("../secret.ms").outcome());
-        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub/a.ms").outcome());
+        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub/../../secret.ms").outcome());
         assertEquals(List.of("a.ms"), files());
         dispatcher.onChat("hi");
         assertEquals(List.of("a"), game.messages);
@@ -207,7 +207,7 @@ class ServiceCoverageTest {
         assertEquals(FileReload.Outcome.MISSING, missing.outcome());
         assertEquals(1L, missing.millis());
         assertEquals(2L, service.lastMillis());
-        FileReload refused = service.reloadFile("sub/a.ms");
+        FileReload refused = service.reloadFile("../a.ms");
         assertEquals(FileReload.Outcome.REFUSED, refused.outcome());
         assertEquals(1L, refused.millis());
         assertEquals(2L, service.lastMillis());

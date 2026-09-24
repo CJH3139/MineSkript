@@ -5,6 +5,7 @@ import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.ParsedScript;
 import com.mineskript.lang.parse.Parser;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public final class ScriptLoader {
     public static final String EXAMPLE = """
@@ -60,11 +60,11 @@ public final class ScriptLoader {
             }
             texts.forEach((file, source) -> {
                 if (source.text() != null) {
-                    parser.declare(file.getFileName().toString(), source.text());
+                    parser.declare(ScriptNames.nameOf(dir, file), source.text());
                 }
             });
             for (Path file : files) {
-                scripts.add(parse(file, texts.get(file), sources));
+                scripts.add(parse(ScriptNames.nameOf(dir, file), texts.get(file), sources));
             }
         } catch (IOException error) {
             scripts.add(new ParsedScript(dir.toString(), List.of(), List.of(new ParseError(dir.toString(), 0, Language.format("loader.cannot-read-folder", error.getMessage())))));
@@ -88,7 +88,7 @@ public final class ScriptLoader {
     }
 
     public static boolean isScriptName(String file) {
-        return file.endsWith(".ms") && !file.contains("/") && !file.contains("\\");
+        return ScriptNames.isScriptName(file);
     }
 
     public Optional<ParsedScript> loadOne(Path dir, String file) {
@@ -96,18 +96,11 @@ public final class ScriptLoader {
     }
 
     public Optional<ParsedScript> loadOne(Path dir, String file, ScriptSources sources) {
-        if (!isScriptName(file)) {
+        Optional<Path> path = ScriptNames.resolve(dir, file);
+        if (path.isEmpty() || !Files.isRegularFile(path.get())) {
             return Optional.empty();
         }
-        Path path = dir.resolve(file);
-        if (!Files.isRegularFile(path)) {
-            return Optional.empty();
-        }
-        return Optional.of(parseFile(path, sources));
-    }
-
-    private ParsedScript parseFile(Path file, ScriptSources sources) {
-        return parse(file, read(file), sources);
+        return Optional.of(parse(ScriptNames.normalize(file), read(path.get()), sources));
     }
 
     private static Source read(Path file) {
@@ -118,8 +111,7 @@ public final class ScriptLoader {
         }
     }
 
-    private ParsedScript parse(Path file, Source source, ScriptSources sources) {
-        String name = file.getFileName().toString();
+    private ParsedScript parse(String name, Source source, ScriptSources sources) {
         if (source.text() == null) {
             ParsedScript script = new ParsedScript(name, List.of(), List.of(new ParseError(name, 0, Language.format("loader.cannot-read-file", source.error()))));
             sources.capture(name, "", script.errors());
@@ -131,11 +123,10 @@ public final class ScriptLoader {
     }
 
     private static List<Path> listScripts(Path dir) throws IOException {
-        try (Stream<Path> entries = Files.list(dir)) {
-            return entries
-                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".ms"))
-                    .sorted((a, b) -> a.getFileName().toString().compareTo(b.getFileName().toString()))
-                    .toList();
+        try {
+            return ScriptNames.files(dir);
+        } catch (UncheckedIOException error) {
+            throw error.getCause();
         }
     }
 }

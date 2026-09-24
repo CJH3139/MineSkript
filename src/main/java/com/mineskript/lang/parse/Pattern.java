@@ -11,6 +11,7 @@ import java.util.Set;
 
 public final class Pattern {
     public static final String CONDITION = "condition";
+    public static final String RAW_TEXT = "\"text\"";
 
     private static final Map<String, SkType> TYPE_NAMES = Map.ofEntries(
             Map.entry("string", SkType.TEXT),
@@ -251,7 +252,10 @@ public final class Pattern {
                 body = body.substring(1);
             }
             if (body.equalsIgnoreCase(CONDITION)) {
-                return new PatternElement.Slot(slotCount++, List.of(SkType.BOOLEAN), optional, true);
+                return new PatternElement.Slot(slotCount++, List.of(SkType.BOOLEAN), optional, true, false);
+            }
+            if (body.equals(RAW_TEXT)) {
+                return new PatternElement.Slot(slotCount++, List.of(SkType.TEXT), optional, false, true);
             }
             List<SkType> types = new ArrayList<>();
             for (String name : body.split("/")) {

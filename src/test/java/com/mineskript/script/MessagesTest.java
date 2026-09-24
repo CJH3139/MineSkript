@@ -58,9 +58,9 @@ class MessagesTest {
 
     @Test
     void aNameTheGuardTurnedAwaySaysItWasRefusedAndWhy(@TempDir Path dir) {
-        assertEquals(List.of("ERROR refused the name ../secret.ms, a reload only reads .ms files directly in " + dir + " (4 ms)"),
+        assertEquals(List.of("ERROR refused the name ../secret.ms, a reload only reads .ms files inside " + dir + " (4 ms)"),
                 text(Messages.fileReload(new FileReload("../secret.ms", FileReload.Outcome.REFUSED, List.of(), 0, 4), dir)));
-        assertEquals(List.of("ERROR refused the name notes.txt, a reload only reads .ms files directly in " + dir + " (4 ms)"),
+        assertEquals(List.of("ERROR refused the name notes.txt, a reload only reads .ms files inside " + dir + " (4 ms)"),
                 text(Messages.fileReload(new FileReload("notes.txt", FileReload.Outcome.REFUSED, List.of(), 0, 4), dir)));
         assertEquals(List.of("ERROR no script named nope.ms in " + dir + " (4 ms)"),
                 text(Messages.fileReload(new FileReload("nope.ms", FileReload.Outcome.MISSING, List.of(), 0, 4), dir)));

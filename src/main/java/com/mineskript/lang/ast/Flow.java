@@ -7,6 +7,7 @@ public sealed interface Flow {
     Flow STOP = new Stop();
     Flow NEXT_ITERATION = new NextIteration();
     Flow EXIT_LOOP = new ExitLoop();
+    Flow EXIT_SECTION = new ExitSection();
 
     record Continue() implements Flow {
     }
@@ -33,6 +34,9 @@ public sealed interface Flow {
     }
 
     record ExitLoop() implements Flow {
+    }
+
+    record ExitSection() implements Flow {
     }
 
     record Call(Function function, List<Object> arguments) implements Flow {

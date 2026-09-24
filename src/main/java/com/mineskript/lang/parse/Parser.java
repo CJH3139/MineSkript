@@ -14,6 +14,7 @@ import com.mineskript.lang.ast.LoopStatement;
 import com.mineskript.lang.ast.OrCondition;
 import com.mineskript.lang.ast.Return;
 import com.mineskript.lang.ast.SkType;
+import com.mineskript.lang.ast.StandaloneCondition;
 import com.mineskript.lang.ast.Statement;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.TryStatement;
@@ -505,7 +506,7 @@ public final class Parser {
         while (i < nodes.size()) {
             Node node = nodes.get(i);
             if (!node.section()) {
-                statements.add(parseEffect(node, at(scope, node)));
+                statements.add(parseLine(node, at(scope, node)));
                 i++;
                 continue;
             }
@@ -770,6 +771,18 @@ public final class Parser {
             }
         }
         return Optional.empty();
+    }
+
+    private Statement parseLine(Node node, ParseScope scope) {
+        try {
+            return parseEffect(node, scope);
+        } catch (Failure effectFailure) {
+            try {
+                return new StandaloneCondition(scope.line(), parseCondition(node, node.text(), scope));
+            } catch (Failure conditionFailure) {
+                throw effectFailure;
+            }
+        }
     }
 
     private Statement parseEffect(Node node, ParseScope scope) {

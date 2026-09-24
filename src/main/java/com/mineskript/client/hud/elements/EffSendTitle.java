@@ -1,5 +1,6 @@
 package com.mineskript.client.hud.elements;
 
+import com.mineskript.client.TextColors;
 import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
@@ -21,11 +22,12 @@ import java.util.Optional;
 @Description({
         "Shows a title, with an optional subtitle under it, in the middle of your own screen, like Skript's send title. Only you see it. for 5 seconds sets how long it stays, and with fade in and fade out how long it takes to appear and disappear. A time that is left out keeps the value of the last title shown (by default half a second to fade in, 3.5 seconds on screen and 1 second to fade out).",
         "send subtitle only sets the smaller line: it appears with the title on screen now, or with the next title, as in Skript. To show only a subtitle, send the title \" \" with it.",
-        "MineSkript runs on your own client, so the title always goes to you: to player (or to me) may be written, as in Skript, or left out. Needs a world. Show Title is the older way to show one and still works."
+        "MineSkript runs on your own client, so the title always goes to you: to player (or to me) may be written, as in Skript, or left out. Needs a world. Show Title is the older way to show one and still works.",
+        "Colour codes work like in Skript: &c for red, &l for bold, &r to reset and the rest of the & codes."
 })
 @Examples({
         "on key press of \"t\":",
-        "	send title \"Competition Started\" with subtitle \"Have fun, stay safe!\" for 5 seconds",
+        "	send title \"&6Competition Started\" with subtitle \"Have fun, stay safe!\" for 5 seconds",
         "",
         "on death:",
         "	send title \"oops\" to player for 3 seconds with fade in 1 second and fade out 1 second",
@@ -33,7 +35,7 @@ import java.util.Optional;
         "on key press of \"y\":",
         "	send subtitle \"Party!\""
 })
-@Since("1.0.0-alpha.11")
+@Since({"1.0.0-alpha.11", "1.0.0-alpha.12"})
 public final class EffSendTitle implements Statement {
     private static final String TIMES = "[for %-timespan%] [with (fade-in|fade in|fadein) %-timespan%] "
             + "[[and] [with] (fade-out|fade out|fadeout) %-timespan%]";
@@ -89,7 +91,7 @@ public final class EffSendTitle implements Statement {
             return Optional.empty();
         }
         Object value = expression.evaluate(context);
-        return value == None.NONE ? Optional.empty() : Optional.of(Converters.toText(value, context));
+        return value == None.NONE ? Optional.empty() : Optional.of(TextColors.colored(Converters.toText(value, context)));
     }
 
     private static int ticks(Expression expression, Context context) {

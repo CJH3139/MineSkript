@@ -155,7 +155,7 @@ class ReloadFileTest {
         start(root);
         assertEquals(FileReload.Outcome.MISSING, service.reloadFile("nope.ms").outcome());
         assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("notes.txt").outcome());
-        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub/a.ms").outcome());
+        assertEquals(FileReload.Outcome.MISSING, service.reloadFile("sub/a.ms").outcome());
         assertEquals(List.of("a.ms"), files());
     }
 
@@ -254,7 +254,7 @@ class ReloadFileTest {
         write(scripts, "a.ms", "on chat:\n    send \"a\"\n");
         start(scripts);
         assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("..\\secret.ms").outcome());
-        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub\\a.ms").outcome());
+        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub\\..\\..\\secret.ms").outcome());
         assertEquals(List.of("a.ms"), files());
         dispatcher.onChat("hi");
         assertEquals(List.of("a"), game.messages);
@@ -270,5 +270,30 @@ class ReloadFileTest {
         assertEquals(FileReload.Outcome.REMOVED, service.reloadFile("b.ms").outcome());
         assertEquals(List.of(), service.errors());
         assertEquals(List.of("a.ms"), files());
+    }
+
+    @Test
+    void scriptsInFoldersLoadAndReloadByTheirPath(@TempDir Path root) throws IOException {
+        Files.createDirectories(root.resolve("pvp"));
+        Files.createDirectories(root.resolve("-disabled"));
+        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "pvp/combat.ms", "on chat:\n    send \"combat 1\"\n");
+        write(root, "-disabled/off.ms", "on chat:\n    send \"off\"\n");
+        start(root);
+        assertEquals(List.of("a.ms", "pvp/combat.ms"), files());
+        dispatcher.onChat("hi");
+        assertEquals(List.of("a", "combat 1"), game.messages);
+        game.messages.clear();
+        write(root, "pvp/combat.ms", "on chat:\n    send \"combat 2\"\n    fly\n");
+        FileReload kept = service.reloadFile("pvp\\Combat.ms");
+        assertEquals(FileReload.Outcome.KEPT, kept.outcome());
+        assertEquals("pvp/combat.ms", kept.file());
+        assertEquals("pvp/combat.ms", kept.errors().get(0).file());
+        assertEquals("fly", service.sources().line("pvp/combat.ms", 3));
+        write(root, "pvp/combat.ms", "on chat:\n    send \"combat 2\"\n");
+        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("pvp/combat.ms").outcome());
+        dispatcher.onChat("hi");
+        assertEquals(List.of("a", "combat 2"), game.messages);
+        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("-disabled/off.ms").outcome());
     }
 }

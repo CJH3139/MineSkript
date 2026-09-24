@@ -123,6 +123,7 @@ public final class ScriptService {
             if (!ScriptLoader.isScriptName(file)) {
                 return new FileReload(file, FileReload.Outcome.REFUSED, List.of(), 0, millis(started));
             }
+            file = ScriptNames.normalize(file);
             String name = canonical(file);
             ParsedScript running = registry.script(name);
             ScriptNames.Listing folder = ScriptNames.listing(dir);
@@ -164,6 +165,7 @@ public final class ScriptService {
         if (!ScriptLoader.isScriptName(file)) {
             return file;
         }
+        file = ScriptNames.normalize(file);
         Optional<String> found = ScriptNames.onDisk(dir, file);
         if (found.isPresent()) {
             return found.get();

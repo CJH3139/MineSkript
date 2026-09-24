@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class ScriptSources {
     private final Path dir;
@@ -45,11 +46,12 @@ public final class ScriptSources {
     }
 
     private String fromDisk(String file, int number) {
-        if (number <= 0 || file.contains("/") || file.contains("\\")) {
+        Optional<Path> path = ScriptNames.resolve(dir, file);
+        if (number <= 0 || path.isEmpty()) {
             return "";
         }
         try {
-            List<String> lines = Files.readAllLines(dir.resolve(file), StandardCharsets.UTF_8);
+            List<String> lines = Files.readAllLines(path.get(), StandardCharsets.UTF_8);
             if (number > lines.size()) {
                 return "";
             }

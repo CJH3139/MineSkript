@@ -5,6 +5,7 @@ import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.ParseScope;
@@ -56,6 +57,8 @@ public final class ExprParsedAsNumber implements Expression {
     @Override
     public Object evaluate(Context context) {
         String value = Converters.toText(text.evaluate(context), context).strip();
-        return ParsedNumbers.number(value);
+        Object number = ParsedNumbers.number(value);
+        context.setEventValue(ExprParse.ERROR, number == None.NONE ? value + " could not be parsed as a number" : None.NONE);
+        return number;
     }
 }

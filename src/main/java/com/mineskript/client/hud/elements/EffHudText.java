@@ -1,5 +1,6 @@
 package com.mineskript.client.hud.elements;
 
+import com.mineskript.client.TextColors;
 import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
@@ -18,7 +19,8 @@ import java.util.Optional;
 @Name("Show Title")
 @Description({"Shows text on your own screen: show title puts large text in the middle, show subtitle sets the smaller line under it, and show action bar shows text just above the hotbar. A title fades in over half a second, stays for about 3.5 seconds and fades out over 1 second. Only you see it.",
         "A subtitle is only drawn while a title is on screen, so show it together with a title. Needs a world.",
-        "Skript's spellings, send title (with a subtitle and times) and send action bar, do the same and are described under Send Title and Action Bar."})
+        "Skript's spellings, send title (with a subtitle and times) and send action bar, do the same and are described under Send Title and Action Bar.",
+        "Colour codes work like in Skript: &c for red, &l for bold, &r to reset and the rest of the & codes."})
 @Examples({"every 5 seconds:",
         "	if health of player is less than 6:",
         "		show subtitle \"%health of player% hp left\"",
@@ -26,7 +28,7 @@ import java.util.Optional;
         "",
         "on move:",
         "	show action bar \"x %round player's x-coordinate%  z %round player's z-coordinate%\""})
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.12"})
 public final class EffHudText implements Statement {
     private enum Target {
         TITLE,
@@ -66,7 +68,7 @@ public final class EffHudText implements Statement {
     @Override
     public Flow execute(Context context) {
         GameBridge game = context.world();
-        String value = Converters.toText(text.evaluate(context), context);
+        String value = TextColors.colored(Converters.toText(text.evaluate(context), context));
         switch (target) {
             case TITLE -> game.showTitle(value);
             case SUBTITLE -> game.showSubtitle(value);

@@ -50,7 +50,7 @@ public final class MineSkriptCommand {
                                 .executes(ctx -> reloadEverything(ctx.getSource(), service)))
                         .then(ClientCommands.literal("config")
                                 .executes(ctx -> reloadConfig(ctx.getSource(), service)))
-                        .then(ClientCommands.argument("file", StringArgumentType.word())
+                        .then(ClientCommands.argument("file", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> suggest(service, builder))
                                 .executes(ctx -> reloadOne(ctx.getSource(), service, StringArgumentType.getString(ctx, "file")))))
                 .then(ClientCommands.literal("list")

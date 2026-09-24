@@ -223,6 +223,13 @@ public final class Execution {
         throw new ScriptError(Language.get("runtime.exit-loop-outside-loop"));
     }
 
+    void exitSection() {
+        Frame frame = frames.peek();
+        if (frame != null) {
+            frame.index = frame.block.statements().size();
+        }
+    }
+
     void stop() {
         while (!frames.isEmpty()) {
             popFrame();

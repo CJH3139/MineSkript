@@ -51,10 +51,12 @@ public final class ExprParsedAsBoolean implements Expression {
     @Override
     public Object evaluate(Context context) {
         String value = Converters.toText(text.evaluate(context), context).strip();
-        return switch (value.toLowerCase(Locale.ROOT)) {
+        Object result = switch (value.toLowerCase(Locale.ROOT)) {
             case "true", "yes", "on" -> Boolean.TRUE;
             case "false", "no", "off" -> Boolean.FALSE;
             default -> None.NONE;
         };
+        context.setEventValue(ExprParse.ERROR, result == None.NONE ? value + " could not be parsed as a boolean" : None.NONE);
+        return result;
     }
 }

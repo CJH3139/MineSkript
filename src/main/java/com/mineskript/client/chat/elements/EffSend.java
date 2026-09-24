@@ -1,5 +1,6 @@
 package com.mineskript.client.chat.elements;
 
+import com.mineskript.client.TextColors;
 import com.mineskript.doc.Description;
 import com.mineskript.doc.Examples;
 import com.mineskript.doc.Name;
@@ -14,13 +15,17 @@ import java.util.Optional;
 
 @Name("Send Message")
 @Description({"Shows a message in your own chat. It is never sent to the server and only you see it. Any value can be sent: numbers, items and entities are turned into text, and a list is joined like \"a, b and c\". Also written message, send message or send messages.",
-        "Works even without a world, which makes it useful in on load for status messages."})
+        "Works even without a world, which makes it useful in on load for status messages.",
+        "Colour codes work like in Skript: &c for red, &l for bold, &r to reset and the rest of the & codes."})
 @Examples({"on key press of \"k\":",
         "	send \"you are at %round player's x-coordinate%, %round player's y-coordinate%, %round player's z-coordinate%\"",
         "",
         "on player join:",
-        "	send online player names"})
-@Since("1.0.0-alpha")
+        "	send online player names",
+        "",
+        "on death:",
+        "	send \"&cYou died &7at &f%player's location%\""})
+@Since({"1.0.0-alpha", "1.0.0-alpha.12"})
 public final class EffSend implements Statement {
     private final int line;
     private final Expression value;
@@ -42,7 +47,7 @@ public final class EffSend implements Statement {
 
     @Override
     public Flow execute(Context context) {
-        context.game().showMessage(Converters.toText(value.evaluate(context), context));
+        context.game().showMessage(TextColors.colored(Converters.toText(value.evaluate(context), context)));
         return Flow.CONTINUE;
     }
 }

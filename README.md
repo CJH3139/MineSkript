@@ -189,7 +189,7 @@ the server unless you switch the feature off.
 ## Commands
 ```
 /ms reload                 every script
-/ms reload <file.ms>       just that one, the others keep running
+/ms reload <file.ms>       just that one, the others keep running (pvp/combat.ms for one in a folder)
 /ms reload config          re-read config.txt
 /ms reload variables       re-read saved variables
 /ms reload all             the config, variables and every script

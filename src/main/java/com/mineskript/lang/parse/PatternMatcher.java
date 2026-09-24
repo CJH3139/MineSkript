@@ -1,6 +1,7 @@
 package com.mineskript.lang.parse;
 
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.SkType;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
@@ -95,6 +96,16 @@ public final class PatternMatcher {
     }
 
     private boolean matchSlot(PatternElement.Slot slot, int position, int reserve, Continuation next) {
+        if (slot.raw()) {
+            if (position < tokens.size() && tokens.get(position).quoted()) {
+                slots[slot.index()] = new ConstantExpression(SkType.TEXT, tokens.get(position).text());
+                if (next.run(position + 1)) {
+                    return true;
+                }
+                slots[slot.index()] = null;
+            }
+            return slot.optional() && next.run(position);
+        }
         for (int end = tokens.size() - reserve; end > position; end--) {
             List<Token> part = tokens.subList(position, end);
             Optional<Expression> expression = slot.condition()
