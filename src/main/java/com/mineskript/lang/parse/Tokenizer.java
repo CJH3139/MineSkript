@@ -75,13 +75,14 @@ public final class Tokenizer {
         if (word.isEmpty()) {
             return;
         }
-        String text = word.toString().toLowerCase(Locale.ROOT);
+        String original = word.toString();
+        String text = original.toLowerCase(Locale.ROOT);
         word.setLength(0);
         if (text.length() > 2 && text.endsWith("'s")) {
-            tokens.add(new Token(text.substring(0, text.length() - 2), false));
-            tokens.add(new Token("'s", false));
+            tokens.add(new Token(text.substring(0, text.length() - 2), false, original.substring(0, original.length() - 2)));
+            tokens.add(new Token("'s", false, original.substring(original.length() - 2)));
         } else {
-            tokens.add(new Token(text, false));
+            tokens.add(new Token(text, false, original));
         }
     }
 }

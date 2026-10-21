@@ -46,6 +46,10 @@ public final class SyntaxRegistry {
     private final List<SyntaxEntry<Condition>> conditions = new ArrayList<>();
     private final Map<Tier, List<ExpressionEntry>> expressions = new EnumMap<>(Tier.class);
     private final Map<String, FunctionInfo> functions = new LinkedHashMap<>();
+    private final List<TokenParser<Expression>> rawExpressions = new ArrayList<>();
+    private final List<TokenParser<Statement>> rawEffects = new ArrayList<>();
+    private final Map<String, StructureHandler> structures = new LinkedHashMap<>();
+    private final List<ScriptListener> scriptListeners = new ArrayList<>();
 
     public SyntaxRegistry() {
         for (Tier tier : Tier.values()) {
@@ -251,6 +255,67 @@ public final class SyntaxRegistry {
         }
         record("function", new String[] {function.name()}, returnType, null, function);
         return function;
+    }
+
+    /**
+     * Registers an expression that reads its tokens itself instead of through a pattern, for syntax a pattern cannot
+     * describe, such as {@code a.b(c)}. Raw expressions are tried after every patterned expression, in registration
+     * order, and are not listed in the documentation, so describe them in your addon's own documentation.
+     */
+    public void addRawExpression(TokenParser<Expression> parser) {
+        rawExpressions.add(parser);
+    }
+
+    /**
+     * Registers an effect that reads its line itself instead of through a pattern. Raw effects are tried after every
+     * patterned effect, in registration order, and are not listed in the documentation.
+     */
+    public void addRawEffect(TokenParser<Statement> parser) {
+        rawEffects.add(parser);
+    }
+
+    /**
+     * Registers a top-level structure: a block that starts with {@code keyword}, like {@code import:}. The handler
+     * gets it before the script's functions and triggers are parsed, so it can prepare what they use.
+     *
+     * @throws IllegalArgumentException if the keyword is blank, already registered, or is one of the language's own
+     *     ({@code on}, {@code every}, {@code function}, {@code local}, {@code options} and {@code command})
+     */
+    public void addStructure(String keyword, StructureHandler handler) {
+        String key = keyword.strip().toLowerCase(Locale.ROOT);
+        if (key.isEmpty() || java.util.Set.of("on", "every", "function", "local", "options", "command").contains(key)) {
+            throw new IllegalArgumentException("can't register a structure called '" + keyword + "'");
+        }
+        if (structures.putIfAbsent(key, handler) != null) {
+            throw new IllegalArgumentException("the structure '" + keyword + "' is already registered");
+        }
+    }
+
+    /** Registers a listener that is told about every script, with its full text, just before it is parsed. */
+    public void addScriptListener(ScriptListener listener) {
+        scriptListeners.add(listener);
+    }
+
+    public List<TokenParser<Expression>> rawExpressions() {
+        return rawExpressions;
+    }
+
+    public List<TokenParser<Statement>> rawEffects() {
+        return rawEffects;
+    }
+
+    /** The structure handler for a block header, if its first word is a registered structure keyword. */
+    public Optional<StructureHandler> structure(String header) {
+        String text = header.strip().toLowerCase(Locale.ROOT);
+        int end = 0;
+        while (end < text.length() && !Character.isWhitespace(text.charAt(end))) {
+            end++;
+        }
+        return Optional.ofNullable(structures.get(text.substring(0, end)));
+    }
+
+    public List<ScriptListener> scriptListeners() {
+        return scriptListeners;
     }
 
     /** The built-in function with this name, ignoring case, if there is one. */

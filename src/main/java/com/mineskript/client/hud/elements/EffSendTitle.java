@@ -35,7 +35,7 @@ import java.util.Optional;
         "on key press of \"y\":",
         "	send subtitle \"Party!\""
 })
-@Since({"1.0.0-alpha.11", "1.0.0-alpha.12"})
+@Since({"1.0.0-alpha.11", "1.0.0-alpha.14"})
 public final class EffSendTitle implements Statement {
     private static final String TIMES = "[for %-timespan%] [with (fade-in|fade in|fadein) %-timespan%] "
             + "[[and] [with] (fade-out|fade out|fadeout) %-timespan%]";

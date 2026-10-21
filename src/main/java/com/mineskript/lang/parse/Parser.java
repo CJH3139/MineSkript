@@ -109,8 +109,26 @@ public final class Parser {
     public ParsedScript parse(String file, String source) {
         expressions.clearCache();
         conditionCache.clear();
+        for (ScriptListener listener : registry.scriptListeners()) {
+            listener.parsing(file, source);
+        }
         Prepared prepared = prepare(file, source);
         List<ParseError> errors = new ArrayList<>(prepared.errors());
+        for (Node node : prepared.nodes()) {
+            Optional<StructureHandler> structure = isOptions(node) ? Optional.empty() : registry.structure(node.text());
+            if (structure.isEmpty()) {
+                continue;
+            }
+            List<Structure.Entry> entries = new ArrayList<>();
+            for (Node child : node.children()) {
+                entries.add(new Structure.Entry(child.line(), child.text()));
+            }
+            try {
+                structure.get().load(new Structure(file, node.line(), node.text(), entries));
+            } catch (SyntaxException error) {
+                errors.add(new ParseError(file, node.line(), error.getMessage()));
+            }
+        }
         List<Trigger> triggers = new ArrayList<>();
         List<Function> loaded = new ArrayList<>();
         List<Declared> declared = declareAll(file, prepared.nodes(), errors);
@@ -130,7 +148,7 @@ public final class Parser {
             }
             Set<String> commandLabels = new HashSet<>();
             for (Node node : prepared.nodes()) {
-                if (isFunctionHeader(node) || isOptions(node)) {
+                if (isFunctionHeader(node) || isOptions(node) || registry.structure(node.text()).isPresent()) {
                     continue;
                 }
                 try {
@@ -985,9 +1003,20 @@ public final class Parser {
             }
         }
         return guarded(node, () -> registry.matchFirst(registry.effects(), tokens, expressions, scope)
+                .or(() -> rawEffect(tokens, scope))
                 .orElseThrow(() -> new Failure(node.line(), callShaped(tokens)
                         ? Language.format("parse.unknown-function", tokens.get(0).text())
                         : withPositionHint(Language.format("parse.unknown-effect", text), tokens, scope))));
+    }
+
+    private Optional<Statement> rawEffect(List<Token> tokens, ParseScope scope) {
+        for (TokenParser<Statement> raw : registry.rawEffects()) {
+            Optional<Statement> statement = raw.parse(tokens, expressions, scope);
+            if (statement.isPresent()) {
+                return statement;
+            }
+        }
+        return Optional.empty();
     }
 
     private Statement parseReturn(Node node, String value, ParseScope scope) {

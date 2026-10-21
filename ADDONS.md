@@ -205,6 +205,26 @@ registry.addFunction("twice", SkType.NUMBER, (arguments, context) -> 2 * (Double
 Functions appear in the generated documentation in the top-level `functions` array, with their signature (such as
 `twice(n: number) :: number`), parameters, return type, `addon` and `module`.
 
+### Structures and raw syntax
+
+Some syntax does not fit a pattern. For that, an addon can take over more of the parsing itself:
+
+* `addStructure(keyword, handler)` adds a top-level block such as `import:`. The handler gets a `Structure`: the file,
+  the header and every indented line, with their capitals, before the script's functions and triggers are parsed, so
+  it can prepare what they use. Throwing `SyntaxException` makes it a parse error on the header. The language's own
+  words (`on`, `every`, `function`, `local`, `options`, `command`) can't be used.
+* `addScriptListener(listener)` is told about every script file, with its full text, just before it is parsed. Use it
+  to reset what you keep per file.
+* `addRawExpression(parser)` and `addRawEffect(parser)` read a run of tokens themselves (a `TokenParser`). They are
+  tried after every patterned expression or effect, so they only see what nothing else understood. The
+  `SlotResolver` they get parses parts of the tokens as ordinary values. Raw syntax is not listed in the generated
+  documentation, so describe it in your own.
+* Tokens are lower case for matching. `Token.original()` is the word exactly as it was typed, for syntax where
+  capitals matter.
+
+These hooks give an addon more control over the language, not more power in the game: everything above about what
+scripts may do still applies.
+
 ## Priorities and registration order
 
 * MineSkript loads all of its own modules first, then each addon in the order Fabric lists the `mineskript`

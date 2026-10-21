@@ -119,6 +119,12 @@ public final class ExpressionParser implements SlotResolver {
                 }
             }
         }
+        for (TokenParser<Expression> raw : registry.rawExpressions()) {
+            Optional<Expression> parsed = raw.parse(tokens, this, scope).flatMap(expression -> typed(expression, types));
+            if (parsed.isPresent()) {
+                return parsed;
+            }
+        }
         for (SkType type : types) {
             Optional<Expression> named = Literals.named(tokens, type);
             if (named.isPresent()) {

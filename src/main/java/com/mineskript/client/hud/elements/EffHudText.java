@@ -28,7 +28,7 @@ import java.util.Optional;
         "",
         "on move:",
         "	show action bar \"x %round player's x-coordinate%  z %round player's z-coordinate%\""})
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.12"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.14"})
 public final class EffHudText implements Statement {
     private enum Target {
         TITLE,

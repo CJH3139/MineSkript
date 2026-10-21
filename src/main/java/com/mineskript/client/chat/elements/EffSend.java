@@ -25,7 +25,7 @@ import java.util.Optional;
         "",
         "on death:",
         "	send \"&cYou died &7at &f%player's location%\""})
-@Since({"1.0.0-alpha", "1.0.0-alpha.12"})
+@Since({"1.0.0-alpha", "1.0.0-alpha.14"})
 public final class EffSend implements Statement {
     private final int line;
     private final Expression value;

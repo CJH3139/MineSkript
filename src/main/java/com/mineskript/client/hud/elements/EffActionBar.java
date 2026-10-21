@@ -29,7 +29,7 @@ import java.util.Optional;
         "on key press of \"h\":",
         "	send the actionbar with text \"&ahello\" to player"
 })
-@Since({"1.0.0-alpha.11", "1.0.0-alpha.12"})
+@Since({"1.0.0-alpha.11", "1.0.0-alpha.14"})
 public final class EffActionBar implements Statement {
     private final int line;
     private final Expression text;

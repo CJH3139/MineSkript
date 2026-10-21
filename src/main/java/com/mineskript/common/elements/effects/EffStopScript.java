@@ -23,7 +23,7 @@ import java.util.Optional;
         "",
         "on key press of \"z\":",
         "	stop script \"pvp/combat\""})
-@Since({"1.0.0-alpha.5", "1.0.0-alpha.12"})
+@Since({"1.0.0-alpha.5", "1.0.0-alpha.14"})
 public final class EffStopScript implements Statement {
     private final int line;
     private final Expression name;
