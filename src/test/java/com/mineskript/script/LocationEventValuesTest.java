@@ -21,7 +21,7 @@ class LocationEventValuesTest {
             new Scheduler());
 
     private void load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         assertEquals(List.of(), script.errors().stream().map(Object::toString).toList());
         registry.replace(List.of(script));
     }
@@ -59,8 +59,8 @@ class LocationEventValuesTest {
     @Test
     void eventLocationIsOnlyAvailableWhereItIsDeclared() {
         List<String> errors = new Parser(DefaultSyntax.registry())
-                .parse("t.ms", "on jump:\n    send \"%event-location%\"\n").errors().stream()
+                .parse("t.sk", "on jump:\n    send \"%event-location%\"\n").errors().stream()
                 .map(Object::toString).toList();
-        assertEquals(List.of("t.ms:2: event-location is not available in this event"), errors);
+        assertEquals(List.of("t.sk:2: event-location is not available in this event"), errors);
     }
 }

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 class ConvertersTest {
     private final FakeGameBridge game = new FakeGameBridge();
-    private final Context context = new Context(game, "t.ms", Map.of());
+    private final Context context = new Context(game, "t.sk", Map.of());
 
     @Test
     void formatsEveryValueKind() {
@@ -70,7 +70,7 @@ class ConvertersTest {
     void playerRefToTextRequiresWorld() {
         FakeGameBridge noWorld = new FakeGameBridge();
         noWorld.hasWorld = false;
-        Context noWorldContext = new Context(noWorld, "t.ms", Map.of());
+        Context noWorldContext = new Context(noWorld, "t.sk", Map.of());
         assertThrows(ScriptError.class, () -> Converters.toText(PlayerRef.LOCAL, noWorldContext));
     }
 

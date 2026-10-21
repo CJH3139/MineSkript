@@ -142,7 +142,7 @@ class ModuleLoaderTest {
     }
 
     private static String condition(SyntaxRegistry registry, String text) {
-        ParseScope scope = new ParseScope("t.ms", 1, new Event.Load());
+        ParseScope scope = new ParseScope("t.sk", 1, new Event.Load());
         return registry.matchFirst(registry.conditions(), Tokenizer.tokenize(text), new ExpressionParser(registry),
                         scope)
                 .map(parsed -> ((Marker) parsed).name()).orElse("none");

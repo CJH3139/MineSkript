@@ -53,7 +53,7 @@ class LanguageBatchTwoTest {
 
     @Test
     void anUnclosedBlockCommentIsAnError() {
-        assertEquals(List.of("t.ms:1: block comment \"###\" is never closed"), runner.errorsOf("###\non load:\n    send \"x\"\n"));
+        assertEquals(List.of("t.sk:1: block comment \"###\" is never closed"), runner.errorsOf("###\non load:\n    send \"x\"\n"));
     }
 
     @Test
@@ -83,6 +83,6 @@ class LanguageBatchTwoTest {
 
     @Test
     void onErrorWithoutTryIsAParseError() {
-        assertEquals(List.of("t.ms:2: \"on error\" without a matching \"try\""), runner.errorsOf("on load:\n    on error:\n        send \"x\"\n"));
+        assertEquals(List.of("t.sk:2: \"on error\" without a matching \"try\""), runner.errorsOf("on load:\n    on error:\n        send \"x\"\n"));
     }
 }

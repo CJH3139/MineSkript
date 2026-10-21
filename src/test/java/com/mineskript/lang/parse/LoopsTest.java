@@ -133,14 +133,14 @@ class LoopsTest {
     @Test
     void runawayWhileHitsTheStepBudget() {
         runner.run("on load:\n    set {x} to 1\n    while {x} is 1:\n        send \"spin\"\n");
-        assertEquals(List.of("t.ms:4: step limit exceeded"), runner.game.errors);
+        assertEquals(List.of("t.sk:4: step limit exceeded"), runner.game.errors);
         assertTrue(runner.game.messages.size() > 9000);
     }
 
     @Test
     void whileConditionErrorsReportTheLoopLine() {
         runner.run("on load:\n    set {x} to 1\n    set {y} to \"a\"\n    while {x} is less than {y}:\n        send \"never\"\n");
-        assertEquals(List.of("t.ms:4: cannot compare number with text"), runner.game.errors);
+        assertEquals(List.of("t.sk:4: cannot compare number with text"), runner.game.errors);
     }
 
     @Test
@@ -160,19 +160,19 @@ class LoopsTest {
 
     @Test
     void aListInATimesHeaderIsAParseError() {
-        assertEquals(List.of("t.ms:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop 1, 2 times:\n        stop\n"));
-        assertEquals(List.of("t.ms:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop 1 and 2 times:\n        stop\n"));
+        assertEquals(List.of("t.sk:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop 1, 2 times:\n        stop\n"));
+        assertEquals(List.of("t.sk:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop 1 and 2 times:\n        stop\n"));
     }
 
     @Test
     void loopSyntaxErrors() {
-        assertEquals(List.of("t.ms:2: loop-value is only available inside a loop"), runner.errorsOf("on load:\n    send loop-value\n"));
-        assertEquals(List.of("t.ms:3: loop-value is not available inside while"), runner.errorsOf("on load:\n    while player is sneaking:\n        send loop-value\n"));
-        assertEquals(List.of("t.ms:2: loop-iteration is only available inside a loop"), runner.errorsOf("on load:\n    send loop-iteration\n"));
-        assertEquals(List.of("t.ms:2: continue is only available inside a loop"), runner.errorsOf("on load:\n    continue\n"));
-        assertEquals(List.of("t.ms:2: exit loop is only available inside a loop"), runner.errorsOf("on load:\n    exit loop\n"));
-        assertEquals(List.of("t.ms:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop banana:\n        stop\n"));
-        assertEquals(List.of("t.ms:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop \"x\" times:\n        stop\n"));
-        assertEquals(List.of("t.ms:2: unknown condition \"fly\""), runner.errorsOf("on load:\n    while fly:\n        stop\n"));
+        assertEquals(List.of("t.sk:2: loop-value is only available inside a loop"), runner.errorsOf("on load:\n    send loop-value\n"));
+        assertEquals(List.of("t.sk:3: loop-value is not available inside while"), runner.errorsOf("on load:\n    while player is sneaking:\n        send loop-value\n"));
+        assertEquals(List.of("t.sk:2: loop-iteration is only available inside a loop"), runner.errorsOf("on load:\n    send loop-iteration\n"));
+        assertEquals(List.of("t.sk:2: continue is only available inside a loop"), runner.errorsOf("on load:\n    continue\n"));
+        assertEquals(List.of("t.sk:2: exit loop is only available inside a loop"), runner.errorsOf("on load:\n    exit loop\n"));
+        assertEquals(List.of("t.sk:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop banana:\n        stop\n"));
+        assertEquals(List.of("t.sk:2: loop needs a number of times or a list"), runner.errorsOf("on load:\n    loop \"x\" times:\n        stop\n"));
+        assertEquals(List.of("t.sk:2: unknown condition \"fly\""), runner.errorsOf("on load:\n    while fly:\n        stop\n"));
     }
 }

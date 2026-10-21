@@ -51,7 +51,7 @@ class NewEffectsTest {
     void theseEffectsNeedAWorld() {
         runner.game.hasWorld = false;
         runner.run("on load:\n    select slot 1\n");
-        assertEquals(List.of("t.ms:2: no world"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: no world"), runner.game.errors);
     }
 
     @Test

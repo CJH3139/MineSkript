@@ -47,13 +47,13 @@ class OneOffFrameLifetimeTest {
 
     @Test
     void aParkedOneOffFrameIsNotDroppedByASingleFileReloadOfAnotherScript(@TempDir Path root) throws IOException {
-        Files.writeString(root.resolve("a.ms"), "on world join:\n    send \"a\"\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("a.sk"), "on world join:\n    send \"a\"\n", StandardCharsets.UTF_8);
         startIn(root);
         ticks(1);
         game.sneaking = false;
         assertEquals(EffectCommands.Outcome.RAN, effects.run("?wait until player is sneaking"));
         assertEquals(1, dispatcher.parkedSize());
-        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("a.ms").outcome());
+        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("a.sk").outcome());
         assertEquals(1, dispatcher.parkedSize());
         game.sneaking = true;
         ticks(2);
@@ -95,7 +95,7 @@ class OneOffFrameLifetimeTest {
 
     @Test
     void aParkedOneOffFrameIsDiscardedByAFullReload(@TempDir Path root) throws IOException {
-        Files.writeString(root.resolve("a.ms"), "on world join:\n    send \"a\"\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("a.sk"), "on world join:\n    send \"a\"\n", StandardCharsets.UTF_8);
         startIn(root);
         ticks(1);
         game.sneaking = false;
@@ -111,7 +111,7 @@ class OneOffFrameLifetimeTest {
 
     @Test
     void aScheduledOneOffFrameIsDiscardedByAFullReload(@TempDir Path root) throws IOException {
-        Files.writeString(root.resolve("a.ms"), "on world join:\n    send \"a\"\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("a.sk"), "on world join:\n    send \"a\"\n", StandardCharsets.UTF_8);
         startIn(root);
         ticks(1);
         assertEquals(EffectCommands.Outcome.RAN, effects.run("?wait 20 ticks"));

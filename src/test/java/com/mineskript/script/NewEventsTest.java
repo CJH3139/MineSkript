@@ -26,7 +26,7 @@ class NewEventsTest {
     }
 
     private void load(String source) {
-        registry.replace(List.of(parse("t.ms", source)));
+        registry.replace(List.of(parse("t.sk", source)));
     }
 
     private void ticks(int count) {
@@ -101,8 +101,8 @@ class NewEventsTest {
     @Test
     void stopAllScriptsCancelsEveryWaitingTrigger() {
         registry.replace(List.of(
-                parse("a.ms", "on chat:\n    wait 5 ticks\n    send \"a\"\n"),
-                parse("b.ms", "on chat send:\n    stop all scripts\n    send \"unreached\"\n")));
+                parse("a.sk", "on chat:\n    wait 5 ticks\n    send \"a\"\n"),
+                parse("b.sk", "on chat send:\n    stop all scripts\n    send \"unreached\"\n")));
         dispatcher.onChat("x");
         dispatcher.onChatSend("y");
         ticks(10);
@@ -112,9 +112,9 @@ class NewEventsTest {
     @Test
     void stopScriptCancelsOnlyThatFile() {
         registry.replace(List.of(
-                parse("a.ms", "on chat:\n    wait 5 ticks\n    send \"a\"\n"),
-                parse("b.ms", "on chat:\n    wait 5 ticks\n    send \"b\"\n"),
-                parse("c.ms", "on chat send:\n    stop script \"a\"\n    send \"still here\"\n")));
+                parse("a.sk", "on chat:\n    wait 5 ticks\n    send \"a\"\n"),
+                parse("b.sk", "on chat:\n    wait 5 ticks\n    send \"b\"\n"),
+                parse("c.sk", "on chat send:\n    stop script \"a\"\n    send \"still here\"\n")));
         dispatcher.onChat("x");
         dispatcher.onChatSend("y");
         ticks(10);

@@ -68,29 +68,29 @@ class ChangersTest {
 
     @Test
     void refusedModesNameWhatIsAllowed() {
-        assertEquals(List.of("t.ms:2: the yaw can only be set, added to or removed from, not deleted"), errors("delete yaw"));
-        assertEquals(List.of("t.ms:2: the pitch can only be set, added to or removed from, not reset"), errors("reset the pitch"));
-        assertEquals(List.of("t.ms:2: the clipboard can only be set, not added to"), errors("add \"x\" to clipboard"));
-        assertEquals(List.of("t.ms:2: the selected slot can only be set, added to or removed from, not used with remove all"),
+        assertEquals(List.of("t.sk:2: the yaw can only be set, added to or removed from, not deleted"), errors("delete yaw"));
+        assertEquals(List.of("t.sk:2: the pitch can only be set, added to or removed from, not reset"), errors("reset the pitch"));
+        assertEquals(List.of("t.sk:2: the clipboard can only be set, not added to"), errors("add \"x\" to clipboard"));
+        assertEquals(List.of("t.sk:2: the selected slot can only be set, added to or removed from, not used with remove all"),
                 errors("remove all 1 from selected slot"));
-        assertEquals(List.of("t.ms:2: {x} can only be set, added to, removed from, deleted or reset, not used with remove all"),
+        assertEquals(List.of("t.sk:2: {x} can only be set, added to, removed from, deleted or reset, not used with remove all"),
                 errors("remove all 1 from {x}"));
     }
 
     @Test
     void wrongValuesAreParseErrors() {
-        assertEquals(List.of("t.ms:2: cannot add text to the yaw"), errors("add \"x\" to yaw"));
-        assertEquals(List.of("t.ms:2: cannot set the pitch to text"), errors("set pitch to \"up\""));
-        assertEquals(List.of("t.ms:2: cannot remove text from the selected slot"), errors("remove \"x\" from selected slot"));
-        assertEquals(List.of("t.ms:2: only one value can be added to the yaw"), errors("add 1 and 2 to yaw"));
-        assertEquals(List.of("t.ms:2: the clipboard can only be set to one value"), errors("set clipboard to \"a\" and \"b\""));
+        assertEquals(List.of("t.sk:2: cannot add text to the yaw"), errors("add \"x\" to yaw"));
+        assertEquals(List.of("t.sk:2: cannot set the pitch to text"), errors("set pitch to \"up\""));
+        assertEquals(List.of("t.sk:2: cannot remove text from the selected slot"), errors("remove \"x\" from selected slot"));
+        assertEquals(List.of("t.sk:2: only one value can be added to the yaw"), errors("add 1 and 2 to yaw"));
+        assertEquals(List.of("t.sk:2: the clipboard can only be set to one value"), errors("set clipboard to \"a\" and \"b\""));
     }
 
     @Test
     void thingsThatCannotBeChangedKeepTheOldError() {
-        assertEquals(List.of("t.ms:2: can only set variables"), errors("set health of player to 5"));
-        assertEquals(List.of("t.ms:2: can only set variables"), errors("increase health of player by 1"));
-        assertEquals(List.of("t.ms:2: can only set variables"), errors("reset stone"));
+        assertEquals(List.of("t.sk:2: can only set variables"), errors("set health of player to 5"));
+        assertEquals(List.of("t.sk:2: can only set variables"), errors("increase health of player by 1"));
+        assertEquals(List.of("t.sk:2: can only set variables"), errors("reset stone"));
     }
 
     @Test

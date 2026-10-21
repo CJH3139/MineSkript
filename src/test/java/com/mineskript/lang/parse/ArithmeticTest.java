@@ -49,26 +49,26 @@ class ArithmeticTest {
     @Test
     void unsetOperandIsAnError() {
         runner.run("on load:\n    set {r} to {nope} + 1\n");
-        assertEquals(List.of("t.ms:2: variable is not set"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: variable is not set"), runner.game.errors);
     }
 
     @Test
     void textOperandIsAnError() {
         runner.run("on load:\n    set {r} to \"a\" + 1\n");
-        assertEquals(List.of("t.ms:2: cannot apply + to text and number"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: cannot apply + to text and number"), runner.game.errors);
     }
 
     @Test
     void divisionByZeroIsAnError() {
         runner.run("on load:\n    set {r} to 1 / 0\n");
-        assertEquals(List.of("t.ms:2: division by zero"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: division by zero"), runner.game.errors);
     }
 
     @Test
     void operatorsMustBeSeparateTokens() {
         List<String> errors = runner.errorsOf("on load:\n    set {r} to {x} -1\n");
         assertEquals(1, errors.size());
-        assertTrue(errors.get(0).startsWith("t.ms:2: unknown effect"));
+        assertTrue(errors.get(0).startsWith("t.sk:2: unknown effect"));
     }
 
     @Test

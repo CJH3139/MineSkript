@@ -23,7 +23,7 @@ class ScriptCommandTest {
             });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         dispatcher.refreshCommands();
         dispatcher.tick();
@@ -180,20 +180,20 @@ class ScriptCommandTest {
 
     @Test
     void mistakesAreReportedWhenTheScriptLoads() {
-        assertEquals(List.of("t.ms:1: /ms is MineSkript's own command and can't be replaced"),
+        assertEquals(List.of("t.sk:1: /ms is MineSkript's own command and can't be replaced"),
                 load("command /ms:\n    trigger:\n        send \"x\"\n"));
-        assertEquals(List.of("t.ms:1: the command /x has no trigger: put its code under \"trigger:\""),
+        assertEquals(List.of("t.sk:1: the command /x has no trigger: put its code under \"trigger:\""),
                 load("command /x:\n    usage: hi\n"));
-        assertEquals(List.of("t.ms:2: unknown command entry \"colour\"; a command can have aliases, usage, description,"
+        assertEquals(List.of("t.sk:2: unknown command entry \"colour\"; a command can have aliases, usage, description,"
                         + " cooldown, cooldown message and a trigger"),
                 load("command /x:\n    colour: red\n    trigger:\n        send \"x\"\n"));
-        assertEquals(List.of("t.ms:3: /x has more than one argument, so say which one: arg-1, arg-2 and so on"),
+        assertEquals(List.of("t.sk:3: /x has more than one argument, so say which one: arg-1, arg-2 and so on"),
                 load("command /x <number> <number>:\n    trigger:\n        send \"%arg%\"\n"));
-        assertEquals(List.of("t.ms:2: arguments are only available inside a command's trigger"),
+        assertEquals(List.of("t.sk:2: arguments are only available inside a command's trigger"),
                 load("on load:\n    send \"%arg-1%\"\n"));
-        assertEquals(List.of("t.ms:4: /x is defined twice in this script"),
+        assertEquals(List.of("t.sk:4: /x is defined twice in this script"),
                 load("command /x:\n    trigger:\n        send \"a\"\ncommand /x:\n    trigger:\n        send \"b\"\n"));
-        assertEquals(List.of("t.ms:1: the default value \"abc\" is not a number"),
+        assertEquals(List.of("t.sk:1: the default value \"abc\" is not a number"),
                 load("command /x [<number=abc>]:\n    trigger:\n        send \"a\"\n"));
     }
 }

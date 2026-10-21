@@ -22,7 +22,7 @@ public final class ScriptRunner {
     private final Interpreter interpreter = new Interpreter(10_000);
 
     public ParsedScript parse(String source) {
-        return parser.parse("t.ms", source);
+        return parser.parse("t.sk", source);
     }
 
     public List<String> errorsOf(String source) {
@@ -41,7 +41,7 @@ public final class ScriptRunner {
     }
 
     public void runTrigger(Trigger trigger, Map<String, Object> values) {
-        Execution execution = new Execution(trigger, new Context(game, "t.ms", values, variables));
+        Execution execution = new Execution(trigger, new Context(game, "t.sk", values, variables));
         try {
             while (interpreter.run(execution) == Interpreter.Outcome.WAITING) {
                 if (execution.waitCondition() != null) {

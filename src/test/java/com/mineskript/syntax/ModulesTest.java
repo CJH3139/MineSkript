@@ -173,7 +173,7 @@ class ModulesTest {
     }
 
     private static ParseScope scope() {
-        return new ParseScope("t.ms", 1, new Event.Load());
+        return new ParseScope("t.sk", 1, new Event.Load());
     }
 
     private static String effect(SyntaxRegistry registry, String text) {

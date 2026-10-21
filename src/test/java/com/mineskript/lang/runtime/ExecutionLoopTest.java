@@ -49,8 +49,8 @@ class ExecutionLoopTest {
     }
 
     private Execution execution(Statement... statements) {
-        Trigger trigger = new Trigger("t.ms", 1, new Event.Load(), new Block(List.of(statements)));
-        return new Execution(trigger, new Context(game, "t.ms", Map.of()));
+        Trigger trigger = new Trigger("t.sk", 1, new Event.Load(), new Block(List.of(statements)));
+        return new Execution(trigger, new Context(game, "t.sk", Map.of()));
     }
 
     @Test
@@ -63,12 +63,12 @@ class ExecutionLoopTest {
     @Test
     void continueOutsideALoopIsALocatedError() {
         ScriptError error = assertThrows(ScriptError.class, () -> new Interpreter(100).run(execution(flow(3, Flow.NEXT_ITERATION))));
-        assertEquals("t.ms:3: continue outside a loop", error.toString());
+        assertEquals("t.sk:3: continue outside a loop", error.toString());
     }
 
     @Test
     void exitLoopOutsideALoopIsALocatedError() {
         ScriptError error = assertThrows(ScriptError.class, () -> new Interpreter(100).run(execution(flow(5, Flow.EXIT_LOOP))));
-        assertEquals("t.ms:5: exit loop outside a loop", error.toString());
+        assertEquals("t.sk:5: exit loop outside a loop", error.toString());
     }
 }

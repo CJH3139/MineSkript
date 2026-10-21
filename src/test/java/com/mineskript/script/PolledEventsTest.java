@@ -21,7 +21,7 @@ class PolledEventsTest {
     });
 
     private void load(String source) {
-        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", source)));
+        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", source)));
     }
 
     private void ticks(int count) {
@@ -199,10 +199,10 @@ class PolledEventsTest {
 
     @Test
     void anEventValueOutsideItsEventIsAParseError() {
-        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.ms", "on load:\n    send \"%event-damage%\"\n")
+        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.sk", "on load:\n    send \"%event-damage%\"\n")
                 .errors().stream().map(Object::toString).toList();
-        assertEquals(List.of("t.ms:2: event-damage is not available in this event"), errors);
-        List<String> wrongEvent = new Parser(DefaultSyntax.registry()).parse("t.ms", "on heal:\n    send \"%event-damage%\"\n")
+        assertEquals(List.of("t.sk:2: event-damage is not available in this event"), errors);
+        List<String> wrongEvent = new Parser(DefaultSyntax.registry()).parse("t.sk", "on heal:\n    send \"%event-damage%\"\n")
                 .errors().stream().map(Object::toString).toList();
         assertTrue(wrongEvent.get(0).endsWith("event-damage is not available in this event"));
     }

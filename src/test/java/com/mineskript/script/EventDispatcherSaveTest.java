@@ -19,7 +19,7 @@ class EventDispatcherSaveTest {
     private final EventDispatcher dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), new Scheduler(), variables, () -> saves++);
 
     private void load(String source) {
-        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", source)));
+        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", source)));
     }
 
     private void ticks(int count) {

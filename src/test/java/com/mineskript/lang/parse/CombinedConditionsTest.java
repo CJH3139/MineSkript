@@ -77,9 +77,9 @@ class CombinedConditionsTest {
 
     @Test
     void anUnknownAtomFailsTheWholeLine() {
-        assertEquals(List.of("t.ms:2: unknown condition \"player is sneaking and player is nonsense\""),
+        assertEquals(List.of("t.sk:2: unknown condition \"player is sneaking and player is nonsense\""),
                 runner.errorsOf("on load:\n    if player is sneaking and player is nonsense:\n        stop\n"));
-        assertEquals(List.of("t.ms:2: unknown condition \"player is sneaking and\""),
+        assertEquals(List.of("t.sk:2: unknown condition \"player is sneaking and\""),
                 runner.errorsOf("on load:\n    if player is sneaking and:\n        stop\n"));
     }
 
@@ -163,17 +163,17 @@ class CombinedConditionsTest {
 
     @Test
     void sectionErrors() {
-        assertEquals(List.of("t.ms:2: \"if any\" needs at least two conditions"),
+        assertEquals(List.of("t.sk:2: \"if any\" needs at least two conditions"),
                 runner.errorsOf("on load:\n    if any:\n        player is sneaking\n    then:\n        stop\n"));
-        assertEquals(List.of("t.ms:2: \"if all\" must be followed by \"then\""),
+        assertEquals(List.of("t.sk:2: \"if all\" must be followed by \"then\""),
                 runner.errorsOf("on load:\n    if all:\n        player is sneaking\n        player is sprinting\n    send \"x\"\n"));
-        assertEquals(List.of("t.ms:2: \"if all\" must be followed by \"then\""),
+        assertEquals(List.of("t.sk:2: \"if all\" must be followed by \"then\""),
                 runner.errorsOf("on load:\n    if all:\n        player is sneaking\n        player is sprinting\n"));
-        assertEquals(List.of("t.ms:2: \"then\" without \"if all\" or \"if any\""),
+        assertEquals(List.of("t.sk:2: \"then\" without \"if all\" or \"if any\""),
                 runner.errorsOf("on load:\n    then:\n        stop\n"));
-        assertEquals(List.of("t.ms:3: \"if all\" may not contain sections"),
+        assertEquals(List.of("t.sk:3: \"if all\" may not contain sections"),
                 runner.errorsOf("on load:\n    if all:\n        if player is sneaking:\n            stop\n        player is sprinting\n    then:\n        stop\n"));
-        assertEquals(List.of("t.ms:3: unknown condition \"fly\""),
+        assertEquals(List.of("t.sk:3: unknown condition \"fly\""),
                 runner.errorsOf("on load:\n    if any:\n        fly\n        player is sneaking\n    then:\n        stop\n"));
     }
 }

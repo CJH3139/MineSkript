@@ -22,7 +22,7 @@ class ParsePerformanceTest {
     @Test
     void theExpressionsThatOnceHungTheParserStillParseAtOnce() {
         assertTimeoutPreemptively(LIMIT, () -> {
-            ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", SOURCE);
+            ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", SOURCE);
             assertEquals(List.of(), script.errors().stream().map(Object::toString).toList());
             assertEquals(1, script.triggers().size());
         });
@@ -36,7 +36,7 @@ class ParsePerformanceTest {
                     "send \"%minimum of 3 and 8%\"",
                     "send \"%{w} from character 1 to 4%\"",
                     "set {n} to random number between 5 and 10")) {
-                ParsedScript script = parser.parse("t.ms", "on load:\n    " + line + "\n");
+                ParsedScript script = parser.parse("t.sk", "on load:\n    " + line + "\n");
                 assertEquals(List.of(), script.errors().stream().map(Object::toString).toList());
                 assertEquals(1, script.triggers().size());
             }

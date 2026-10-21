@@ -22,7 +22,7 @@ class SignalEventsTest {
     private final EventDispatcher dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), new Scheduler());
 
     private void load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         assertEquals(List.of(), script.errors().stream().map(Object::toString).toList());
         registry.replace(List.of(script));
     }
@@ -98,8 +98,8 @@ class SignalEventsTest {
 
     @Test
     void cancelOutsideChatSendIsAParseError() {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", "on chat:\n    cancel event\n");
-        assertEquals(List.of("t.ms:2: only \"on chat send\" and \"on command send\" can be cancelled"),
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", "on chat:\n    cancel event\n");
+        assertEquals(List.of("t.sk:2: only \"on chat send\" and \"on command send\" can be cancelled"),
                 script.errors().stream().map(Object::toString).toList());
     }
 

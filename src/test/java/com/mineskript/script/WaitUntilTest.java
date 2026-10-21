@@ -20,7 +20,7 @@ class WaitUntilTest {
     });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         return script.errors().stream().map(Object::toString).toList();
     }
@@ -66,7 +66,7 @@ class WaitUntilTest {
         ticks(1);
         ticks(600);
         assertEquals(List.of("before"), game.messages);
-        assertEquals(List.of("t.ms:3: wait until timed out after 30 seconds"), game.errors);
+        assertEquals(List.of("t.sk:3: wait until timed out after 30 seconds"), game.errors);
         game.sneaking = true;
         ticks(5);
         assertEquals(List.of("before"), game.messages);
@@ -130,7 +130,7 @@ class WaitUntilTest {
         ticks(1);
         assertEquals(List.of(), game.messages);
         assertEquals(1, game.errors.size());
-        assertTrue(game.errors.get(0).startsWith("t.ms:2: "));
+        assertTrue(game.errors.get(0).startsWith("t.sk:2: "));
         ticks(5);
         assertEquals(1, game.errors.size());
     }
@@ -145,8 +145,8 @@ class WaitUntilTest {
 
     @Test
     void anUnparsableConditionIsAParseErrorNamingTheLine() {
-        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.ms", "on load:\n    wait until banana\n")
+        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.sk", "on load:\n    wait until banana\n")
                 .errors().stream().map(Object::toString).toList();
-        assertEquals(List.of("t.ms:2: unknown condition \"banana\""), errors);
+        assertEquals(List.of("t.sk:2: unknown condition \"banana\""), errors);
     }
 }

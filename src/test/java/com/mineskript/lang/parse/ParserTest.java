@@ -21,12 +21,12 @@ class ParserTest {
     private final FakeGameBridge game = new FakeGameBridge();
 
     private ParsedScript parse(String source) {
-        return parser.parse("test.ms", source);
+        return parser.parse("test.sk", source);
     }
 
     private void run(Trigger trigger, Map<String, Object> values) {
         Interpreter interpreter = new Interpreter(1000);
-        Execution execution = new Execution(trigger, new Context(game, "test.ms", values));
+        Execution execution = new Execution(trigger, new Context(game, "test.sk", values));
         while (interpreter.run(execution) == Interpreter.Outcome.WAITING) {
             if (execution.waitCondition() != null) {
                 game.calls.add("waitUntil");
@@ -57,7 +57,7 @@ class ParserTest {
         Trigger first = script.triggers().get(0);
         assertEquals(new Event.KeyPress("key.keyboard.r"), first.event());
         assertEquals(1, first.line());
-        assertEquals("test.ms", first.file());
+        assertEquals("test.sk", first.file());
         assertEquals(1, first.body().statements().size());
         IfChain chain = assertInstanceOf(IfChain.class, first.body().statements().get(0));
         assertEquals(2, chain.line());
@@ -140,7 +140,7 @@ class ParserTest {
                 every 2 seconds:
                     send "still here"
                 """);
-        assertEquals(List.of("test.ms:5: unknown effect \"hold attak\""), script.errors().stream().map(Object::toString).toList());
+        assertEquals(List.of("test.sk:5: unknown effect \"hold attak\""), script.errors().stream().map(Object::toString).toList());
         assertEquals(2, script.triggers().size());
         assertEquals(new Event.Load(), script.triggers().get(0).event());
         assertEquals(new Event.Periodic(40), script.triggers().get(1).event());
@@ -148,22 +148,22 @@ class ParserTest {
 
     @Test
     void specificErrorMessages() {
-        assertEquals(List.of("test.ms:1: unknown event \"on sunrise\""), errors("on sunrise:\n    stop\n"));
-        assertEquals(List.of("test.ms:2: unknown condition \"player is nonsense\""), errors("on load:\n    if player is nonsense:\n        stop\n"));
-        assertEquals(List.of("test.ms:2: \"else\" without a matching \"if\""), errors("on load:\n    else:\n        stop\n"));
-        assertEquals(List.of("test.ms:3: \"else\" without a matching \"if\""), errors("on load:\n    stop\n    else if player is sneaking:\n        stop\n"));
-        assertEquals(List.of("test.ms:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""), errors("on load:\n    send message\n"));
-        assertEquals(List.of("test.ms:2: unknown section \"until true\""), errors("on load:\n    until true:\n        stop\n"));
-        assertEquals(List.of("test.ms:2: unterminated string"), errors("on load:\n    send \"oops\n"));
-        assertEquals(List.of("test.ms:1: expected an event section"), errors("send \"x\"\n"));
-        assertEquals(List.of("test.ms:1: unknown key \"banana\""), errors("on key press of \"banana\":\n    stop\n"));
-        assertEquals(List.of("test.ms:2: unknown expression \"the dragon\" in string"), errors("on load:\n    send \"%the dragon%\"\n"));
+        assertEquals(List.of("test.sk:1: unknown event \"on sunrise\""), errors("on sunrise:\n    stop\n"));
+        assertEquals(List.of("test.sk:2: unknown condition \"player is nonsense\""), errors("on load:\n    if player is nonsense:\n        stop\n"));
+        assertEquals(List.of("test.sk:2: \"else\" without a matching \"if\""), errors("on load:\n    else:\n        stop\n"));
+        assertEquals(List.of("test.sk:3: \"else\" without a matching \"if\""), errors("on load:\n    stop\n    else if player is sneaking:\n        stop\n"));
+        assertEquals(List.of("test.sk:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""), errors("on load:\n    send message\n"));
+        assertEquals(List.of("test.sk:2: unknown section \"until true\""), errors("on load:\n    until true:\n        stop\n"));
+        assertEquals(List.of("test.sk:2: unterminated string"), errors("on load:\n    send \"oops\n"));
+        assertEquals(List.of("test.sk:1: expected an event section"), errors("send \"x\"\n"));
+        assertEquals(List.of("test.sk:1: unknown key \"banana\""), errors("on key press of \"banana\":\n    stop\n"));
+        assertEquals(List.of("test.sk:2: unknown expression \"the dragon\" in string"), errors("on load:\n    send \"%the dragon%\"\n"));
     }
 
     @Test
     void lexerErrorsFlowThrough() {
         ParsedScript script = parse("on load:\n send \"a\"\n  send \"b\"\n");
-        assertEquals(List.of("test.ms:3: unexpected indentation"), script.errors().stream().map(Object::toString).toList());
+        assertEquals(List.of("test.sk:3: unexpected indentation"), script.errors().stream().map(Object::toString).toList());
         assertTrue(script.triggers().isEmpty());
     }
 

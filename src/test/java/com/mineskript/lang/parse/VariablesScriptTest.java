@@ -40,17 +40,17 @@ class VariablesScriptTest {
     @Test
     void addingToTextIsARuntimeErrorAtTheRightLine() {
         runner.run("on load:\n    set {x} to \"hi\"\n    add 1 to {x}\n    send \"unreached\"\n");
-        assertEquals(List.of("t.ms:3: cannot add a number to text"), runner.game.errors);
+        assertEquals(List.of("t.sk:3: cannot add a number to text"), runner.game.errors);
         assertEquals(List.of(), runner.game.messages);
     }
 
     @Test
     void addingTextIsARuntimeError() {
         runner.run("on load:\n    add \"hi\" to {x}\n");
-        assertEquals(List.of("t.ms:2: cannot add text to a number"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: cannot add text to a number"), runner.game.errors);
         runner.game.errors.clear();
         runner.run("on load:\n    remove \"hi\" from {x}\n");
-        assertEquals(List.of("t.ms:2: cannot remove text from a number"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: cannot remove text from a number"), runner.game.errors);
     }
 
     @Test
@@ -81,7 +81,7 @@ class VariablesScriptTest {
     @Test
     void unsetInATypedSlotIsARuntimeError() {
         runner.run("on load:\n    wait {nope}\n");
-        assertEquals(List.of("t.ms:2: variable is not set"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: variable is not set"), runner.game.errors);
     }
 
     @Test
@@ -126,14 +126,14 @@ class VariablesScriptTest {
 
     @Test
     void onlyVariablesCanBeChanged() {
-        assertEquals(List.of("t.ms:2: can only set variables"), runner.errorsOf("on load:\n    set health of player to 5\n"));
-        assertEquals(List.of("t.ms:2: can only set variables"), runner.errorsOf("on load:\n    add 1 to health of player\n"));
-        assertEquals(List.of("t.ms:2: can only set variables"), runner.errorsOf("on load:\n    delete stone\n"));
+        assertEquals(List.of("t.sk:2: can only set variables"), runner.errorsOf("on load:\n    set health of player to 5\n"));
+        assertEquals(List.of("t.sk:2: can only set variables"), runner.errorsOf("on load:\n    add 1 to health of player\n"));
+        assertEquals(List.of("t.sk:2: can only set variables"), runner.errorsOf("on load:\n    delete stone\n"));
     }
 
     @Test
     void emptyVariableNameIsAParseError() {
-        assertEquals(List.of("t.ms:2: empty variable name"), runner.errorsOf("on load:\n    set {} to 1\n"));
-        assertEquals(List.of("t.ms:2: empty variable name"), runner.errorsOf("on load:\n    send {_}\n"));
+        assertEquals(List.of("t.sk:2: empty variable name"), runner.errorsOf("on load:\n    set {} to 1\n"));
+        assertEquals(List.of("t.sk:2: empty variable name"), runner.errorsOf("on load:\n    send {_}\n"));
     }
 }

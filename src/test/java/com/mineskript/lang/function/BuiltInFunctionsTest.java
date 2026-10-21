@@ -203,28 +203,28 @@ class BuiltInFunctionsTest {
 
     @Test
     void aScriptCannotDefineAFunctionWithABuiltInName() {
-        assertEquals(List.of("t.ms:1: \"round\" is the name of a built-in function, give your function another name"),
+        assertEquals(List.of("t.sk:1: \"round\" is the name of a built-in function, give your function another name"),
                 runner.errorsOf("function round(n: number) :: number:\n    return 1\n"));
-        assertEquals(List.of("t.ms:1: \"isnan\" is the name of a built-in function, give your function another name"),
+        assertEquals(List.of("t.sk:1: \"isnan\" is the name of a built-in function, give your function another name"),
                 runner.errorsOf("local function isNaN(n: number) :: boolean:\n    return false\n"));
-        assertEquals(List.of("t.ms:1: \"location\" is the name of a built-in function, give your function another"
+        assertEquals(List.of("t.sk:1: \"location\" is the name of a built-in function, give your function another"
                 + " name"), runner.errorsOf("function location(a: text):\n    send {_a}\n"));
         assertEquals(List.of(), runner.errorsOf("function rounded(n: number) :: number:\n    return round({_n})\n"));
     }
 
     @Test
     void wrongArgumentsAreParseErrors() {
-        assertEquals(List.of("t.ms:2: function \"round\" takes 1 to 2 arguments, not 0"),
+        assertEquals(List.of("t.sk:2: function \"round\" takes 1 to 2 arguments, not 0"),
                 runner.errorsOf("on load:\n    set {x} to round()\n"));
-        assertEquals(List.of("t.ms:2: function \"mod\" takes 2 arguments, not 1"),
+        assertEquals(List.of("t.sk:2: function \"mod\" takes 2 arguments, not 1"),
                 runner.errorsOf("on load:\n    set {x} to mod(1)\n"));
-        assertEquals(List.of("t.ms:2: function \"sqrt\" takes 1 argument, not 2"),
+        assertEquals(List.of("t.sk:2: function \"sqrt\" takes 1 argument, not 2"),
                 runner.errorsOf("on load:\n    set {x} to sqrt(1, 2)\n"));
-        assertEquals(List.of("t.ms:2: argument 1 of \"round\" should be number"),
+        assertEquals(List.of("t.sk:2: argument 1 of \"round\" should be number"),
                 runner.errorsOf("on load:\n    set {x} to round(\"a\")\n"));
-        assertEquals(List.of("t.ms:2: argument 1 of \"round\" should be one number, not a list"),
+        assertEquals(List.of("t.sk:2: argument 1 of \"round\" should be one number, not a list"),
                 runner.errorsOf("on load:\n    set {x} to round((1, 2))\n"));
-        assertEquals(List.of("t.ms:2: argument 1 of \"max\" should be number"),
+        assertEquals(List.of("t.sk:2: argument 1 of \"max\" should be number"),
                 runner.errorsOf("on load:\n    set {x} to max(1, \"a\")\n"));
     }
 
@@ -276,7 +276,7 @@ class BuiltInFunctionsTest {
         SyntaxRegistry registry = com.mineskript.api.AddonLoader.load(DefaultSyntax::registry, List.of(addon))
                 .registry();
         assertTrue(registry.function("twice").isPresent());
-        assertEquals(List.of(), new Parser(registry).parse("t.ms", "on load:\n    send \"%twice(4)%\"\n").errors());
+        assertEquals(List.of(), new Parser(registry).parse("t.sk", "on load:\n    send \"%twice(4)%\"\n").errors());
         JsonObject docs = JSONGenerator.generate("test", List.of(addon));
         JsonObject twice = function(docs, "twice");
         assertEquals("Dice", twice.get("addon").getAsString());

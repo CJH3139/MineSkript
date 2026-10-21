@@ -114,7 +114,7 @@ class ConfigReloadTest {
             }
         }), "reenter reload config");
         DefaultSyntax.registerAll(syntax);
-        Files.writeString(root.resolve("a.ms"), "on script load:\n    reenter reload config\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("a.sk"), "on script load:\n    reenter reload config\n", StandardCharsets.UTF_8);
         start(root, syntax);
         assertEquals(List.of("config:BUSY", "full:null", "variables:BUSY"), seen);
         assertEquals(1L, service.lastMillis());

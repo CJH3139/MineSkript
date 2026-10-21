@@ -123,7 +123,7 @@ class RegisteredSpellingsTest {
         FakeGameBridge game = new FakeGameBridge();
         ScriptRegistry registry = new ScriptRegistry();
         EventDispatcher dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), new Scheduler());
-        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", """
+        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", """
                 on stop sprinting:
                     send "stopped sprinting"
                 on hunger change:

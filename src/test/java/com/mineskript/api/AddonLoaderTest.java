@@ -75,14 +75,14 @@ class AddonLoaderTest {
     private final FakeGameBridge game = new FakeGameBridge();
 
     private static List<String> errors(SyntaxRegistry registry, String source) {
-        return new Parser(registry).parse("t.ms", source).errors().stream().map(ParseError::toString).toList();
+        return new Parser(registry).parse("t.sk", source).errors().stream().map(ParseError::toString).toList();
     }
 
     private void run(SyntaxRegistry registry, String source) {
-        ParsedScript script = new Parser(registry).parse("t.ms", source);
+        ParsedScript script = new Parser(registry).parse("t.sk", source);
         assertEquals(List.of(), script.errors().stream().map(ParseError::toString).toList());
         for (Trigger trigger : script.triggers()) {
-            new Interpreter(10_000).run(new Execution(trigger, new Context(game, "t.ms", Map.of())));
+            new Interpreter(10_000).run(new Execution(trigger, new Context(game, "t.sk", Map.of())));
         }
     }
 
@@ -115,7 +115,7 @@ class AddonLoaderTest {
         assertEquals("Broken", result.failures().get(0).addon());
         assertInstanceOf(IllegalStateException.class, result.failures().get(0).error());
         assertEquals(2, built.size());
-        assertEquals(List.of("t.ms:2: unknown effect \"break things\""), errors(result.registry(), "on load:\n    break things\n"));
+        assertEquals(List.of("t.sk:2: unknown effect \"break things\""), errors(result.registry(), "on load:\n    break things\n"));
         run(result.registry(), "on load:\n    first thing\n    second thing\n");
         assertEquals(List.of("First", "Second"), game.messages);
     }
@@ -175,7 +175,7 @@ class AddonLoaderTest {
         SyntaxRegistry syntax = AddonLoader.load(DefaultSyntax::registry, List.of(new ExampleAddon())).registry();
         ScriptRegistry scripts = new ScriptRegistry();
         EventDispatcher dispatcher = new EventDispatcher(scripts, game, new Interpreter(10_000), new Scheduler());
-        ParsedScript script = new Parser(syntax).parse("t.ms", "on ping:\n    shout \"ping %event-ping count%\"\n");
+        ParsedScript script = new Parser(syntax).parse("t.sk", "on ping:\n    shout \"ping %event-ping count%\"\n");
         assertEquals(List.of(), script.errors().stream().map(ParseError::toString).toList());
         scripts.replace(List.of(script));
         dispatcher.onSignal(new GameSignals.Signal("example:ping", Map.of("ping count", 3.0)));
@@ -228,7 +228,7 @@ class AddonLoaderTest {
                 List.of(new Off("Off"), new Named("On", "on thing")));
         assertEquals(List.of("On"), result.addons());
         assertEquals(List.of(), result.failures());
-        assertEquals(List.of("t.ms:2: unknown effect \"off thing\""),
+        assertEquals(List.of("t.sk:2: unknown effect \"off thing\""),
                 errors(result.registry(), "on load:\n    off thing\n"));
     }
 

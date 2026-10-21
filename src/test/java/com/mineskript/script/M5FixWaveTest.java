@@ -63,18 +63,18 @@ class M5FixWaveTest {
 
     @Test
     void aReloadTypedInTheWrongCaseReplacesTheRunningScriptInsteadOfAddingASecondCopy(@TempDir Path root) throws IOException {
-        write(root, "Mining.ms", "on script load:\n    wait 30 ticks\n    send \"old\"\n");
-        Assumptions.assumeTrue(Files.isRegularFile(root.resolve("mining.ms")));
+        write(root, "Mining.sk", "on script load:\n    wait 30 ticks\n    send \"old\"\n");
+        Assumptions.assumeTrue(Files.isRegularFile(root.resolve("mining.sk")));
         start(root);
         assertEquals(1, scheduler.size());
         ticks(10);
-        write(root, "Mining.ms", "on script load:\n    wait 30 ticks\n    send \"new\"\n");
-        FileReload result = service.reloadFile("mining.ms");
+        write(root, "Mining.sk", "on script load:\n    wait 30 ticks\n    send \"new\"\n");
+        FileReload result = service.reloadFile("mining.sk");
         assertEquals(FileReload.Outcome.RELOADED, result.outcome());
-        assertEquals("Mining.ms", result.file());
-        assertEquals(List.of("Mining.ms"), files());
+        assertEquals("Mining.sk", result.file());
+        assertEquals(List.of("Mining.sk"), files());
         assertEquals(1, registry.triggers().size());
-        assertEquals("Mining.ms", registry.triggers().get(0).file());
+        assertEquals("Mining.sk", registry.triggers().get(0).file());
         assertEquals(1, scheduler.size());
         ticks(60);
         assertEquals(List.of("new"), game.messages);
@@ -82,27 +82,27 @@ class M5FixWaveTest {
 
     @Test
     void aBrokenFileReloadedInTheWrongCaseStillKeepsTheVersionAlreadyRunning(@TempDir Path root) throws IOException {
-        write(root, "Mining.ms", "on chat:\n    send \"old\"\n");
-        Assumptions.assumeTrue(Files.isRegularFile(root.resolve("mining.ms")));
+        write(root, "Mining.sk", "on chat:\n    send \"old\"\n");
+        Assumptions.assumeTrue(Files.isRegularFile(root.resolve("mining.sk")));
         start(root);
-        write(root, "Mining.ms", "on chat:\n    fly\n");
-        FileReload result = service.reloadFile("mining.ms");
+        write(root, "Mining.sk", "on chat:\n    fly\n");
+        FileReload result = service.reloadFile("mining.sk");
         assertEquals(FileReload.Outcome.KEPT, result.outcome());
-        assertEquals("Mining.ms", result.file());
-        assertEquals(List.of("Mining.ms"), files());
+        assertEquals("Mining.sk", result.file());
+        assertEquals(List.of("Mining.sk"), files());
         dispatcher.onChat("hi");
         assertEquals(List.of("old"), game.messages);
-        assertEquals(List.of("Mining.ms:2: unknown effect \"fly\""), strings(service.errors()));
+        assertEquals(List.of("Mining.sk:2: unknown effect \"fly\""), strings(service.errors()));
     }
 
     @Test
     void aNameIsResolvedToTheSpellingOnDiskAndNeverOutOfTheFolder(@TempDir Path root) throws IOException {
-        write(root, "Chat.ms", "on chat:\n    send \"a\"\n");
+        write(root, "Chat.sk", "on chat:\n    send \"a\"\n");
         start(root);
-        assertEquals("Chat.ms", service.canonical("Chat.ms"));
-        assertEquals("nope.ms", service.canonical("nope.ms"));
-        assertEquals("../secret.ms", service.canonical("../secret.ms"));
-        assertEquals("..\\secret.ms", service.canonical("..\\secret.ms"));
+        assertEquals("Chat.sk", service.canonical("Chat.sk"));
+        assertEquals("nope.sk", service.canonical("nope.sk"));
+        assertEquals("../secret.sk", service.canonical("../secret.sk"));
+        assertEquals("..\\secret.sk", service.canonical("..\\secret.sk"));
         assertEquals("notes.txt", service.canonical("notes.txt"));
         assertEquals("Chat.MS", service.canonical("Chat.MS"));
         assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("Chat.MS").outcome());
@@ -110,58 +110,58 @@ class M5FixWaveTest {
 
     @Test
     void aDeletedScriptKeepsItsSpellingSoItCanBeUnloadedByName(@TempDir Path root) throws IOException {
-        write(root, "Chat.ms", "on chat:\n    send \"a\"\n");
+        write(root, "Chat.sk", "on chat:\n    send \"a\"\n");
         start(root);
-        Files.delete(root.resolve("Chat.ms"));
-        assertEquals("Chat.ms", service.canonical("chat.ms"));
-        assertEquals(FileReload.Outcome.REMOVED, service.reloadFile("chat.ms").outcome());
+        Files.delete(root.resolve("Chat.sk"));
+        assertEquals("Chat.sk", service.canonical("chat.sk"));
+        assertEquals(FileReload.Outcome.REMOVED, service.reloadFile("chat.sk").outcome());
         assertEquals(List.of(), files());
     }
 
     @Test
     void completionOffersAScriptThatIsStillLoadedAfterItsFileIsDeleted(@TempDir Path root) throws IOException {
-        write(root, "Chat.ms", "on chat:\n    send \"a\"\n");
-        write(root, "mining.ms", "on chat:\n    send \"b\"\n");
+        write(root, "Chat.sk", "on chat:\n    send \"a\"\n");
+        write(root, "mining.sk", "on chat:\n    send \"b\"\n");
         start(root);
-        Files.delete(root.resolve("Chat.ms"));
-        assertEquals(List.of("mining.ms"), ScriptNames.list(root));
-        assertEquals(List.of("Chat.ms", "mining.ms"), ScriptNames.matching(root, service.loadedNames(), ""));
-        assertEquals(List.of("Chat.ms"), ScriptNames.matching(root, service.loadedNames(), "c"));
-        assertEquals(List.of("mining.ms"), ScriptNames.matching(root, ""));
+        Files.delete(root.resolve("Chat.sk"));
+        assertEquals(List.of("mining.sk"), ScriptNames.list(root));
+        assertEquals(List.of("Chat.sk", "mining.sk"), ScriptNames.matching(root, service.loadedNames(), ""));
+        assertEquals(List.of("Chat.sk"), ScriptNames.matching(root, service.loadedNames(), "c"));
+        assertEquals(List.of("mining.sk"), ScriptNames.matching(root, ""));
     }
 
     @Test
     void aFullReloadDoesNotPutTheExampleBackWhenEveryScriptIsDeleted(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
         start(root);
-        assertEquals(List.of("a.ms"), files());
-        Files.delete(root.resolve("a.ms"));
+        assertEquals(List.of("a.sk"), files());
+        Files.delete(root.resolve("a.sk"));
         LoadReport report = service.reload();
         assertEquals(0, report.scriptCount());
         assertEquals(List.of(), files());
-        assertFalse(Files.exists(root.resolve("example.ms")));
+        assertFalse(Files.exists(root.resolve("example.sk")));
     }
 
     @Test
     void theExampleIsWrittenOnlyWhenTheModFirstCreatesTheFolder(@TempDir Path root) throws IOException {
         Path dir = root.resolve("mineskript");
         assertTrue(ScriptLoader.createFolder(dir));
-        assertTrue(Files.exists(dir.resolve("example.ms")));
-        Files.delete(dir.resolve("example.ms"));
+        assertTrue(Files.exists(dir.resolve("example.sk")));
+        Files.delete(dir.resolve("example.sk"));
         assertFalse(ScriptLoader.createFolder(dir));
-        assertFalse(Files.exists(dir.resolve("example.ms")));
+        assertFalse(Files.exists(dir.resolve("example.sk")));
     }
 
     @Test
     void theFirstStartOnAMissingFolderStillGetsTheExample(@TempDir Path root) {
         Path dir = root.resolve("mineskript");
         start(dir);
-        assertEquals(List.of("example.ms"), files());
+        assertEquals(List.of("example.sk"), files());
     }
 
     @Test
     void aVariablesReloadThatCouldNotReadTheFileSaysSoInsteadOfClaimingSuccess(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
         new VariableStore().save(root.resolve("variables.json"), Map.of("count", 5.0));
         start(root);
         assertEquals(VariablesReload.RELOADED, service.reloadVariables());
@@ -173,52 +173,52 @@ class M5FixWaveTest {
 
     @Test
     void listReportsTheErrorsTheErrorCommandReportsAfterAKeptReload(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\non load:\n    send \"b\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\non load:\n    send \"b\"\n");
         start(root);
-        assertEquals(List.of("INFO a.ms, 2 triggers"), text(Messages.list(root, registry.scripts(), service.errors())).subList(1, 2));
-        write(root, "a.ms", "on chat:\n    fly\n");
-        assertEquals(FileReload.Outcome.KEPT, service.reloadFile("a.ms").outcome());
-        assertEquals(List.of("a.ms:2: unknown effect \"fly\""), strings(service.errors()));
+        assertEquals(List.of("INFO a.sk, 2 triggers"), text(Messages.list(root, registry.scripts(), service.errors())).subList(1, 2));
+        write(root, "a.sk", "on chat:\n    fly\n");
+        assertEquals(FileReload.Outcome.KEPT, service.reloadFile("a.sk").outcome());
+        assertEquals(List.of("a.sk:2: unknown effect \"fly\""), strings(service.errors()));
         assertEquals(List.of(
                 "SUCCESS 1 script loaded from " + root,
-                "WARNING a.ms, 2 triggers, 1 error"), text(Messages.list(root, registry.scripts(), service.errors())));
+                "WARNING a.sk, 2 triggers, 1 error"), text(Messages.list(root, registry.scripts(), service.errors())));
     }
 
     @Test
     void anErrorCarriesTheSourceLineItWasParsedFromNotTheLineThereNow(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    fly\n");
+        write(root, "a.sk", "on chat:\n    fly\n");
         start(root);
-        assertEquals(List.of("a.ms:2: unknown effect \"fly\""), strings(service.errors()));
-        write(root, "a.ms", "on chat:\n    send \"repaired but not reloaded\"\n");
-        assertEquals("fly", service.sources().line("a.ms", 2));
+        assertEquals(List.of("a.sk:2: unknown effect \"fly\""), strings(service.errors()));
+        write(root, "a.sk", "on chat:\n    send \"repaired but not reloaded\"\n");
+        assertEquals("fly", service.sources().line("a.sk", 2));
         assertEquals(List.of(
                 "ERROR 1 error from the last load",
-                "ERROR a.ms:2: unknown effect \"fly\"",
+                "ERROR a.sk:2: unknown effect \"fly\"",
                 "DETAIL     fly"), text(Messages.errors("the last load", service.errors(), service.sources())));
-        Files.delete(root.resolve("a.ms"));
-        assertEquals("fly", service.sources().line("a.ms", 2));
+        Files.delete(root.resolve("a.sk"));
+        assertEquals("fly", service.sources().line("a.sk", 2));
     }
 
     @Test
     void aKeptReloadShowsTheSourceLineOfTheTextThatFailedToParse(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"old\"\n");
+        write(root, "a.sk", "on chat:\n    send \"old\"\n");
         start(root);
-        write(root, "a.ms", "on chat:\n    hold attak\n");
-        FileReload result = service.reloadFile("a.ms");
+        write(root, "a.sk", "on chat:\n    hold attak\n");
+        FileReload result = service.reloadFile("a.sk");
         assertEquals(FileReload.Outcome.KEPT, result.outcome());
         assertEquals(List.of(
-                "ERROR 1 error from a.ms",
-                "ERROR a.ms:2: unknown effect \"hold attak\"",
+                "ERROR 1 error from a.sk",
+                "ERROR a.sk:2: unknown effect \"hold attak\"",
                 "DETAIL     hold attak"), text(Messages.errors(result.file(), result.errors(), service.sources())));
     }
 
     @Test
     void theErrorListIsSortedByFileWhicheverCommandAsksForIt(@TempDir Path root) throws IOException {
-        write(root, "b.ms", "on chat:\n    fly\n");
+        write(root, "b.sk", "on chat:\n    fly\n");
         start(root);
-        write(root, "a.ms", "on chat:\n    fly\n");
-        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("a.ms").outcome());
-        assertEquals(List.of("a.ms:2: unknown effect \"fly\"", "b.ms:2: unknown effect \"fly\""), strings(service.errors()));
+        write(root, "a.sk", "on chat:\n    fly\n");
+        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("a.sk").outcome());
+        assertEquals(List.of("a.sk:2: unknown effect \"fly\"", "b.sk:2: unknown effect \"fly\""), strings(service.errors()));
         LoadReport report = service.reload();
         assertEquals(strings(report.errors()), strings(service.errors()));
     }

@@ -38,7 +38,7 @@ class QuoteEscapeTest {
 
     @Test
     void lexerKeepsTheWholeLineAroundEscapedQuotes() {
-        LexResult result = Lexer.lex("t.ms", "on load:\n    send \"a\"\"#\"\"b\"  # c\n");
+        LexResult result = Lexer.lex("t.sk", "on load:\n    send \"a\"\"#\"\"b\"  # c\n");
         assertEquals("send \"a\"\"#\"\"b\"", result.nodes().get(0).children().get(0).text());
     }
 

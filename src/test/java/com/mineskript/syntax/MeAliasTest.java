@@ -98,7 +98,7 @@ class MeAliasTest {
 
     @Test
     void theMessageExpressionIsUntouchedByTheNewWords() {
-        assertEquals(List.of("t.ms:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""),
+        assertEquals(List.of("t.sk:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""),
                 runner.errorsOf("on load:\n    send message\n"));
     }
 

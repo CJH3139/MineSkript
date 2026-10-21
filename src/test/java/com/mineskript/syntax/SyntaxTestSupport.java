@@ -43,11 +43,11 @@ public final class SyntaxTestSupport {
     }
 
     public static ParseScope scope(Event event) {
-        return new ParseScope("t.ms", 1, event);
+        return new ParseScope("t.sk", 1, event);
     }
 
     public static Context context(FakeGameBridge game, Map<String, Object> values) {
-        return new Context(game, "t.ms", values);
+        return new Context(game, "t.sk", values);
     }
 
     public static Expression expr(String text, SkType type, Event event) {

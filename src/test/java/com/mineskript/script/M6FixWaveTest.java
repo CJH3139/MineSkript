@@ -38,7 +38,7 @@ class M6FixWaveTest {
     }
 
     private void load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         assertEquals(List.of(), script.errors().stream().map(Object::toString).toList());
         registry.replace(List.of(script));
     }

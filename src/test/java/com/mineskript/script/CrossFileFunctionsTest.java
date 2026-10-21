@@ -45,8 +45,8 @@ class CrossFileFunctionsTest {
 
     @Test
     void aFunctionInOneFileIsCallableFromAnEarlierFile(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send shout(\"hi\")\n");
-        write(root, "b.ms", "function shout(t: text) :: text:\n    return uppercase {_t}\n");
+        write(root, "a.sk", "on chat:\n    send shout(\"hi\")\n");
+        write(root, "b.sk", "function shout(t: text) :: text:\n    return uppercase {_t}\n");
         start(root);
         assertEquals(List.of(), errors());
         dispatcher.onChat("x");
@@ -55,35 +55,35 @@ class CrossFileFunctionsTest {
 
     @Test
     void reloadingTheDefiningFileChangesWhatCallersRun(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send shout(\"hi\")\n");
-        write(root, "b.ms", "function shout(t: text) :: text:\n    return uppercase {_t}\n");
+        write(root, "a.sk", "on chat:\n    send shout(\"hi\")\n");
+        write(root, "b.sk", "function shout(t: text) :: text:\n    return uppercase {_t}\n");
         start(root);
-        write(root, "b.ms", "function shout(t: text) :: text:\n    return \"%{_t}%!\"\n");
-        service.reloadFile("b.ms");
+        write(root, "b.sk", "function shout(t: text) :: text:\n    return \"%{_t}%!\"\n");
+        service.reloadFile("b.sk");
         dispatcher.onChat("x");
         assertEquals(List.of("hi!"), game.messages);
     }
 
     @Test
     void aLocalFunctionIsInvisibleToOtherFiles(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    helper()\n");
-        write(root, "b.ms", "local function helper():\n    send \"b\"\n");
+        write(root, "a.sk", "on chat:\n    helper()\n");
+        write(root, "b.sk", "local function helper():\n    send \"b\"\n");
         start(root);
-        assertEquals(List.of("a.ms:2: unknown function \"helper\""), errors());
+        assertEquals(List.of("a.sk:2: unknown function \"helper\""), errors());
     }
 
     @Test
     void theSameGlobalNameInTwoFilesIsAnErrorInTheLaterOne(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "function twin():\n    send \"a\"\n");
-        write(root, "b.ms", "function twin():\n    send \"b\"\n");
+        write(root, "a.sk", "function twin():\n    send \"a\"\n");
+        write(root, "b.sk", "function twin():\n    send \"b\"\n");
         start(root);
-        assertEquals(List.of("b.ms:1: function \"twin\" is already defined in a.ms"), errors());
+        assertEquals(List.of("b.sk:1: function \"twin\" is already defined in a.sk"), errors());
     }
 
     @Test
     void localFunctionsWithTheSameNameLiveSideBySide(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "local function me() :: text:\n    return \"a\"\non chat:\n    send me()\n");
-        write(root, "b.ms", "local function me() :: text:\n    return \"b\"\non chat:\n    send me()\n");
+        write(root, "a.sk", "local function me() :: text:\n    return \"a\"\non chat:\n    send me()\n");
+        write(root, "b.sk", "local function me() :: text:\n    return \"b\"\non chat:\n    send me()\n");
         start(root);
         assertEquals(List.of(), errors());
         dispatcher.onChat("x");

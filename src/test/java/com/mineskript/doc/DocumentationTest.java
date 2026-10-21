@@ -54,7 +54,7 @@ class DocumentationTest {
                 int n = 0;
                 for (String script : scripts(element.getAsJsonArray("examples"))) {
                     checked++;
-                    ParsedScript parsed = new Parser(DefaultSyntax.registry()).parse("example.ms", script);
+                    ParsedScript parsed = new Parser(DefaultSyntax.registry()).parse("example.sk", script);
                     String where = element.get("id").getAsString() + " example " + (++n);
                     for (ParseError error : parsed.errors()) {
                         failures.add(where + ": " + error);

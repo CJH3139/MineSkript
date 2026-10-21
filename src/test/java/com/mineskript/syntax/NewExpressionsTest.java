@@ -85,7 +85,7 @@ class NewExpressionsTest {
         assertEquals(List.of("<none>", "<none>"), runner.game.messages);
         runner.game.messages.clear();
         runner.run("on load:\n    send \"%name of nearest entity%\"\n");
-        assertEquals(List.of("t.ms:2: there is no entity"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: there is no entity"), runner.game.errors);
     }
 
     @Test

@@ -54,7 +54,7 @@ class LocationsTest {
 
     @Test
     void aLocationPrintsItsCoordinatesAndDimension() {
-        Context context = new Context(game, "t.ms", Map.of());
+        Context context = new Context(game, "t.sk", Map.of());
         assertEquals("x: 1, y: 64.5, z: -3 in minecraft:overworld",
                 Converters.toText(new Location(1, 64.5, -3, OVERWORLD), context));
         assertEquals(List.of("x: 1, y: 2.25, z: 3 in minecraft:the_nether"),
@@ -234,7 +234,7 @@ class LocationsTest {
         runner.run("on load:\n    look at location(1, 64, -3, \"the_nether\")\n    send \"after\"\n");
         assertEquals(List.of(), game.calls);
         assertEquals(List.of(), game.messages);
-        assertEquals(List.of("t.ms:2: that location is in minecraft:the_nether, but you are in minecraft:overworld"),
+        assertEquals(List.of("t.sk:2: that location is in minecraft:the_nether, but you are in minecraft:overworld"),
                 game.errors);
     }
 
@@ -256,8 +256,8 @@ class LocationsTest {
         runner.run("on load:\n    show a \"red\" beam at player\n    show beam at location(5.5, 70, -0.2)\n"
                 + "    remove beam at location(5, 70.9, -1)\n    spawn a hologram \"x\" at 2 above player\n"
                 + "    move client entity last spawned client entity to location(1, 2, 3)\n");
-        assertEquals(List.of(new FakeGameBridge.Beam(0, 64, -4, 0xB02E26, "t.ms")), game.beams);
-        assertEquals(new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "x", 1, 2, 3, "t.ms"),
+        assertEquals(List.of(new FakeGameBridge.Beam(0, 64, -4, 0xB02E26, "t.sk")), game.beams);
+        assertEquals(new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "x", 1, 2, 3, "t.sk"),
                 game.clientEntities.get(1));
         assertEquals(List.of(), game.errors);
     }
@@ -270,8 +270,8 @@ class LocationsTest {
         assertEquals(1, game.beams.size());
         assertTrue(game.clientEntities.isEmpty());
         assertEquals(List.of(
-                "t.ms:4: that location is in minecraft:the_end, but you are in minecraft:overworld",
-                "t.ms:2: that location is in minecraft:the_end, but you are in minecraft:overworld"), game.errors);
+                "t.sk:4: that location is in minecraft:the_end, but you are in minecraft:overworld",
+                "t.sk:2: that location is in minecraft:the_end, but you are in minecraft:overworld"), game.errors);
     }
 
     @Test

@@ -112,7 +112,7 @@ class ClientEnvironmentTest {
     @Test
     void targetBlockCoordinatesErrorWithNoTarget() {
         runner.run("on load:\n    send \"%x coordinate of target block%\"\n");
-        assertEquals(List.of("t.ms:2: there is no target block"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: there is no target block"), runner.game.errors);
     }
 
     @Test

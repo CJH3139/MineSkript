@@ -25,92 +25,92 @@ class MessagesTest {
 
     @Test
     void aCleanFullReloadIsOneSuccessLineWithTheTime() {
-        LoadReport report = new LoadReport(List.of(parse("a.ms", "on load:\n    send \"a\"\n")));
+        LoadReport report = new LoadReport(List.of(parse("a.sk", "on load:\n    send \"a\"\n")));
         assertEquals(List.of("SUCCESS loaded 1 script, 1 trigger (7 ms)"), text(Messages.reloaded(report, 7)));
     }
 
     @Test
     void aFullReloadWithErrorsIsOneWarningLineWithTheCount() {
-        LoadReport report = new LoadReport(List.of(parse("a.ms", "on load:\n    fly\n")));
+        LoadReport report = new LoadReport(List.of(parse("a.sk", "on load:\n    fly\n")));
         assertEquals(List.of("WARNING loaded 1 script, 0 triggers, 1 error (7 ms)"), text(Messages.reloaded(report, 7)));
     }
 
     @Test
     void eachSingleFileOutcomeHasItsOwnWording(@TempDir Path dir) {
-        ParseError error = new ParseError("Chat.ms", 2, "unknown effect \"fly\"");
-        assertEquals(List.of("SUCCESS reloaded Chat.ms, 3 triggers (4 ms)"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.RELOADED, List.of(), 3, 4), dir)));
-        assertEquals(List.of("SUCCESS added Chat.ms, 1 trigger (4 ms)"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.ADDED, List.of(), 1, 4), dir)));
-        assertEquals(List.of("WARNING added Chat.ms, 0 triggers, 1 error (4 ms)"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.ADDED, List.of(error), 0, 4), dir)));
+        ParseError error = new ParseError("Chat.sk", 2, "unknown effect \"fly\"");
+        assertEquals(List.of("SUCCESS reloaded Chat.sk, 3 triggers (4 ms)"),
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.RELOADED, List.of(), 3, 4), dir)));
+        assertEquals(List.of("SUCCESS added Chat.sk, 1 trigger (4 ms)"),
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.ADDED, List.of(), 1, 4), dir)));
+        assertEquals(List.of("WARNING added Chat.sk, 0 triggers, 1 error (4 ms)"),
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.ADDED, List.of(error), 0, 4), dir)));
         assertEquals(List.of(
-                        "ERROR did not reload Chat.ms, 1 error (4 ms)",
+                        "ERROR did not reload Chat.sk, 1 error (4 ms)",
                         "WARNING the version already running is unchanged, 3 triggers"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.KEPT, List.of(error), 3, 4), dir)));
-        assertEquals(List.of("SUCCESS unloaded Chat.ms, it is no longer in the folder (4 ms)"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.REMOVED, List.of(), 0, 4), dir)));
-        assertEquals(List.of("ERROR no script named Chat.ms in " + dir + " (4 ms)"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.MISSING, List.of(), 0, 4), dir)));
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.KEPT, List.of(error), 3, 4), dir)));
+        assertEquals(List.of("SUCCESS unloaded Chat.sk, it is no longer in the folder (4 ms)"),
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.REMOVED, List.of(), 0, 4), dir)));
+        assertEquals(List.of("ERROR no script named Chat.sk in " + dir + " (4 ms)"),
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.MISSING, List.of(), 0, 4), dir)));
         assertEquals(List.of("WARNING a reload is already running, ignored"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.BUSY, List.of(), 0, 0), dir)));
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.BUSY, List.of(), 0, 0), dir)));
     }
 
     @Test
     void aNameTheGuardTurnedAwaySaysItWasRefusedAndWhy(@TempDir Path dir) {
-        assertEquals(List.of("ERROR refused the name ../secret.ms, a reload only reads .ms files inside " + dir + " (4 ms)"),
-                text(Messages.fileReload(new FileReload("../secret.ms", FileReload.Outcome.REFUSED, List.of(), 0, 4), dir)));
-        assertEquals(List.of("ERROR refused the name notes.txt, a reload only reads .ms files inside " + dir + " (4 ms)"),
+        assertEquals(List.of("ERROR refused the name ../secret.sk, a reload only reads .sk files inside " + dir + " (4 ms)"),
+                text(Messages.fileReload(new FileReload("../secret.sk", FileReload.Outcome.REFUSED, List.of(), 0, 4), dir)));
+        assertEquals(List.of("ERROR refused the name notes.txt, a reload only reads .sk files inside " + dir + " (4 ms)"),
                 text(Messages.fileReload(new FileReload("notes.txt", FileReload.Outcome.REFUSED, List.of(), 0, 4), dir)));
-        assertEquals(List.of("ERROR no script named nope.ms in " + dir + " (4 ms)"),
-                text(Messages.fileReload(new FileReload("nope.ms", FileReload.Outcome.MISSING, List.of(), 0, 4), dir)));
+        assertEquals(List.of("ERROR no script named nope.sk in " + dir + " (4 ms)"),
+                text(Messages.fileReload(new FileReload("nope.sk", FileReload.Outcome.MISSING, List.of(), 0, 4), dir)));
     }
 
     @Test
     void aKeptFileWithNoTriggersSaysNothingIsRunningInsteadOfUnchanged(@TempDir Path dir) {
-        ParseError error = new ParseError("Chat.ms", 2, "unknown effect \"fly\"");
+        ParseError error = new ParseError("Chat.sk", 2, "unknown effect \"fly\"");
         assertEquals(List.of(
-                        "ERROR did not reload Chat.ms, 1 error (4 ms)",
-                        "WARNING nothing from Chat.ms is running, it has no triggers"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.KEPT, List.of(error), 0, 4), dir)));
+                        "ERROR did not reload Chat.sk, 1 error (4 ms)",
+                        "WARNING nothing from Chat.sk is running, it has no triggers"),
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.KEPT, List.of(error), 0, 4), dir)));
         assertEquals(List.of(
-                        "ERROR did not reload Chat.ms, 1 error (4 ms)",
+                        "ERROR did not reload Chat.sk, 1 error (4 ms)",
                         "WARNING the version already running is unchanged, 1 trigger"),
-                text(Messages.fileReload(new FileReload("Chat.ms", FileReload.Outcome.KEPT, List.of(error), 1, 4), dir)));
+                text(Messages.fileReload(new FileReload("Chat.sk", FileReload.Outcome.KEPT, List.of(error), 1, 4), dir)));
     }
 
     @Test
     void anErrorCarriesItsSourceLineIndentedUnderIt(@TempDir Path dir) throws IOException {
-        Files.writeString(dir.resolve("a.ms"), "on load:\n    fly\n", StandardCharsets.UTF_8);
+        Files.writeString(dir.resolve("a.sk"), "on load:\n    fly\n", StandardCharsets.UTF_8);
         List<ParseError> errors = List.of(
-                new ParseError("a.ms", 2, "unknown effect \"fly\""),
-                new ParseError("gone.ms", 9, "nothing there"));
+                new ParseError("a.sk", 2, "unknown effect \"fly\""),
+                new ParseError("gone.sk", 9, "nothing there"));
         assertEquals(List.of(
                 "ERROR 2 errors from the last load",
-                "ERROR a.ms:2: unknown effect \"fly\"",
+                "ERROR a.sk:2: unknown effect \"fly\"",
                 "DETAIL     fly",
-                "ERROR gone.ms:9: nothing there"), text(Messages.errors("the last load", errors, new ScriptSources(dir))));
+                "ERROR gone.sk:9: nothing there"), text(Messages.errors("the last load", errors, new ScriptSources(dir))));
         assertEquals(List.of(
-                "ERROR 1 error from a.ms",
-                "ERROR a.ms:2: unknown effect \"fly\"",
-                "DETAIL     fly"), text(Messages.errors("a.ms", errors.subList(0, 1), new ScriptSources(dir))));
+                "ERROR 1 error from a.sk",
+                "ERROR a.sk:2: unknown effect \"fly\"",
+                "DETAIL     fly"), text(Messages.errors("a.sk", errors.subList(0, 1), new ScriptSources(dir))));
     }
 
     @Test
     void noErrorsIsItsOwnLine(@TempDir Path dir) {
         assertEquals(List.of("SUCCESS no errors from the last load"), text(Messages.errors("the last load", List.of(), new ScriptSources(dir))));
-        assertEquals(List.of("SUCCESS no errors from a.ms"), text(Messages.errors("a.ms", List.of(), new ScriptSources(dir))));
+        assertEquals(List.of("SUCCESS no errors from a.sk"), text(Messages.errors("a.sk", List.of(), new ScriptSources(dir))));
     }
 
     @Test
     void listNamesTheFolderWhenEmptyAndOneLinePerScriptOtherwise(@TempDir Path dir) {
         assertEquals(List.of("WARNING no scripts loaded from " + dir), text(Messages.list(dir, List.of(), List.of())));
-        ParsedScript clean = parse("a.ms", "on load:\n    send \"a\"\non chat:\n    send \"c\"\n");
-        ParsedScript broken = parse("b.ms", "on load:\n    fly\n");
+        ParsedScript clean = parse("a.sk", "on load:\n    send \"a\"\non chat:\n    send \"c\"\n");
+        ParsedScript broken = parse("b.sk", "on load:\n    fly\n");
         assertEquals(List.of(
                 "SUCCESS 2 scripts loaded from " + dir,
-                "INFO a.ms, 2 triggers",
-                "WARNING b.ms, 0 triggers, 1 error"), text(Messages.list(dir, List.of(clean, broken), broken.errors())));
+                "INFO a.sk, 2 triggers",
+                "WARNING b.sk, 0 triggers, 1 error"), text(Messages.list(dir, List.of(clean, broken), broken.errors())));
     }
 
     @Test
@@ -137,7 +137,7 @@ class MessagesTest {
         List<String> lines = text(Messages.help());
         assertEquals(11, lines.size());
         assertEquals("SUCCESS the command tree, /mineskript or /ms", lines.get(0));
-        assertEquals("INFO /ms reload <file.ms>, reload one script", lines.get(4));
+        assertEquals("INFO /ms reload <file.sk>, reload one script", lines.get(4));
         assertEquals("INFO /ms reload config, re-read config.txt", lines.get(7));
         assertEquals("INFO /ms info, version, folder, counts and ticks since the last full reload", lines.get(10));
     }
@@ -148,7 +148,7 @@ class MessagesTest {
         assertEquals(List.of("INFO reloading the config, variables and every script"), text(Messages.startingEverything()));
         assertEquals(List.of("INFO reloading config.txt"), text(Messages.startingConfig(dir.resolve("config.txt"))));
         assertEquals(List.of("INFO reloading variables.json"), text(Messages.startingVariables(dir.resolve("variables.json"))));
-        assertEquals(List.of("INFO reloading Chat.ms"), text(Messages.startingFile("Chat.ms")));
+        assertEquals(List.of("INFO reloading Chat.sk"), text(Messages.startingFile("Chat.sk")));
     }
 
     @Test

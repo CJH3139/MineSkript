@@ -15,7 +15,7 @@ class ContextTest {
     private final Variables variables = new Variables();
 
     private Context context() {
-        return new Context(game, "t.ms", Map.of(), variables);
+        return new Context(game, "t.sk", Map.of(), variables);
     }
 
     @Test
@@ -66,7 +66,7 @@ class ContextTest {
 
     @Test
     void threeArgConstructorStillWorksWithItsOwnVariables() {
-        Context context = new Context(game, "t.ms", Map.of());
+        Context context = new Context(game, "t.sk", Map.of());
         context.setVariable(VariableScope.GLOBAL, "g", 5.0);
         assertEquals(5.0, context.getVariable(VariableScope.GLOBAL, "g"));
         assertSame(None.NONE, context().getVariable(VariableScope.GLOBAL, "g"));

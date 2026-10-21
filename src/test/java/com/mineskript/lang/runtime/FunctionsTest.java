@@ -93,36 +93,36 @@ class FunctionsTest {
 
     @Test
     void wrongArgumentCountIsAParseError() {
-        assertEquals(List.of("t.ms:5: function \"one\" takes 1 argument, not 2"),
+        assertEquals(List.of("t.sk:5: function \"one\" takes 1 argument, not 2"),
                 runner.errorsOf("function one(a: number) :: number:\n    return {_a}\n\non load:\n    send \"%one(1, 2)%\"\n"));
     }
 
     @Test
     void usingAFunctionWithoutAReturnTypeAsAValueIsAParseError() {
-        assertEquals(List.of("t.ms:5: function \"noop\" doesn't return anything, so it can't be used as a value"),
+        assertEquals(List.of("t.sk:5: function \"noop\" doesn't return anything, so it can't be used as a value"),
                 runner.errorsOf("function noop():\n    stop\n\non load:\n    send noop()\n"));
     }
 
     @Test
     void returnOutsideAFunctionIsAParseError() {
-        assertEquals(List.of("t.ms:2: return is only available inside a function"), runner.errorsOf("on load:\n    return 1\n"));
+        assertEquals(List.of("t.sk:2: return is only available inside a function"), runner.errorsOf("on load:\n    return 1\n"));
     }
 
     @Test
     void unknownFunctionIsNamed() {
-        assertEquals(List.of("t.ms:2: unknown function \"nope\""), runner.errorsOf("on load:\n    nope(1)\n"));
+        assertEquals(List.of("t.sk:2: unknown function \"nope\""), runner.errorsOf("on load:\n    nope(1)\n"));
     }
 
     @Test
     void duplicateFunctionsAndBadHeadersAreParseErrors() {
-        assertEquals(List.of("t.ms:3: function \"a\" is already defined on line 1"),
+        assertEquals(List.of("t.sk:3: function \"a\" is already defined on line 1"),
                 runner.errorsOf("function a():\n    stop\nfunction a():\n    stop\n"));
-        assertEquals(List.of("t.ms:1: unknown type \"banana\""), runner.errorsOf("function a(x: banana):\n    stop\n"));
+        assertEquals(List.of("t.sk:1: unknown type \"banana\""), runner.errorsOf("function a(x: banana):\n    stop\n"));
     }
 
     @Test
     void anErrorInsideAFunctionNamesTheFunctionsLine() {
         runner.run("function bad():\n    add \"x\" to {n}\n\non load:\n    bad()\n");
-        assertEquals(List.of("t.ms:2: cannot add text to a number"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: cannot add text to a number"), runner.game.errors);
     }
 }

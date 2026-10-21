@@ -28,10 +28,10 @@ class ScriptTests {
         Path root = root();
         List<Path> files;
         try (Stream<Path> walk = Files.walk(root)) {
-            files = walk.filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".ms")).sorted().toList();
+            files = walk.filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".sk")).sorted().toList();
         }
         if (files.isEmpty()) {
-            throw new AssertionError("no .ms files under " + root);
+            throw new AssertionError("no .sk files under " + root);
         }
         List<DynamicNode> nodes = new ArrayList<>();
         for (Path file : files) {

@@ -20,7 +20,7 @@ class ScriptTestHarnessTest {
     private final ScriptTestHarness harness = new ScriptTestHarness();
 
     private List<String> run(String source) {
-        ParsedScript script = harness.parse("t.ms", source);
+        ParsedScript script = harness.parse("t.sk", source);
         assertEquals(List.of(), script.errors().stream().map(ParseError::toString).toList());
         List<Trigger> tests = ScriptTestHarness.tests(script);
         assertEquals(1, tests.size());
@@ -29,13 +29,13 @@ class ScriptTestHarnessTest {
 
     @Test
     void aFailingAssertReportsTheFileLineAndMessage() {
-        assertEquals(List.of("t.ms:3: one is not two", "t.ms:4: assertion failed"),
+        assertEquals(List.of("t.sk:3: one is not two", "t.sk:4: assertion failed"),
                 run("test \"x\":\n\tassert 1 is 1 with \"fine\"\n\tassert 1 is 2 with \"one is not two\"\n\tassert 1 is 3\n"));
     }
 
     @Test
     void theMessageCanUseValues() {
-        assertEquals(List.of("t.ms:3: x was 5"), run("test:\n\tset {_x} to 5\n\tassert {_x} is 6 with \"x was %{_x}%\"\n"));
+        assertEquals(List.of("t.sk:3: x was 5"), run("test:\n\tset {_x} to 5\n\tassert {_x} is 6 with \"x was %{_x}%\"\n"));
     }
 
     @Test
@@ -45,7 +45,7 @@ class ScriptTestHarnessTest {
 
     @Test
     void anUncaughtScriptErrorFailsTheTest() {
-        assertEquals(List.of("t.ms:2: division by zero"), run("test:\n\tset {_x} to 1 / 0\n\tassert true\n"));
+        assertEquals(List.of("t.sk:2: division by zero"), run("test:\n\tset {_x} to 1 / 0\n\tassert true\n"));
     }
 
     @Test
@@ -69,13 +69,13 @@ class ScriptTestHarnessTest {
 
     @Test
     void waitUntilTimesOutLikeInGame() {
-        assertEquals(List.of("t.ms:2: wait until timed out after 30 seconds"),
+        assertEquals(List.of("t.sk:2: wait until timed out after 30 seconds"),
                 run("test:\n\twait until {never} is set\n\tassert false with \"ran after the timeout\"\n"));
     }
 
     @Test
     void eachTestGetsFreshVariables() {
-        ParsedScript script = harness.parse("t.ms", "test \"a\":\n\tset {x} to 1\n\ntest \"b\":\n"
+        ParsedScript script = harness.parse("t.sk", "test \"a\":\n\tset {x} to 1\n\ntest \"b\":\n"
                 + "\tassert {x} is not set with \"x leaked\"\n");
         List<Trigger> tests = ScriptTestHarness.tests(script);
         assertEquals(List.of("a (line 1)", "b (line 4)"), tests.stream().map(ScriptTestHarness::label).toList());
@@ -85,16 +85,16 @@ class ScriptTestHarnessTest {
 
     @Test
     void aTestNameMustBePlainText() {
-        ParsedScript script = harness.parse("t.ms", "test \"%{x}%\":\n\tassert true\n");
-        assertEquals(List.of("t.ms:1: a test name must be plain text like \"adding\""),
+        ParsedScript script = harness.parse("t.sk", "test \"%{x}%\":\n\tassert true\n");
+        assertEquals(List.of("t.sk:1: a test name must be plain text like \"adding\""),
                 script.errors().stream().map(ParseError::toString).toList());
     }
 
     @Test
     void theShippedSyntaxHasNoTestEventOrAssert() {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms",
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk",
                 "test:\n\tsend \"x\"\n\non load:\n\tassert 1 is 1 with \"x\"\n");
-        assertEquals(List.of("t.ms:1: unknown event \"test\"", "t.ms:5: unknown effect \"assert 1 is 1 with \"x\"\""),
+        assertEquals(List.of("t.sk:1: unknown event \"test\"", "t.sk:5: unknown effect \"assert 1 is 1 with \"x\"\""),
                 script.errors().stream().map(ParseError::toString).toList());
     }
 

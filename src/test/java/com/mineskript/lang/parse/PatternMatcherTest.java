@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class PatternMatcherTest {
-    private static final ParseScope SCOPE = new ParseScope("t.ms", 1, null);
+    private static final ParseScope SCOPE = new ParseScope("t.sk", 1, null);
 
     private static final SlotResolver RESOLVER = (tokens, types, scope) -> {
         String joined = String.join(" ", tokens.stream().map(Token::text).toList());

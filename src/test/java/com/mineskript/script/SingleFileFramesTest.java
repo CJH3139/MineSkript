@@ -41,11 +41,11 @@ class SingleFileFramesTest {
     @Test
     void aScheduledFrameOfTheReloadedFileIsDroppedAndTheOtherFileKeepsItsResumeTick() {
         registry.replace(List.of(
-                parse("a.ms", "on world join:\n    wait 5 ticks\n    send \"a\"\n"),
-                parse("b.ms", "on world join:\n    wait 5 ticks\n    send \"b\"\n")));
+                parse("a.sk", "on world join:\n    wait 5 ticks\n    send \"a\"\n"),
+                parse("b.sk", "on world join:\n    wait 5 ticks\n    send \"b\"\n")));
         ticks(1);
         assertEquals(2, scheduler.size());
-        dispatcher.dropFrames("a.ms");
+        dispatcher.dropFrames("a.sk");
         assertEquals(1, scheduler.size());
         ticks(4);
         assertEquals(List.of(), game.messages);
@@ -58,10 +58,10 @@ class SingleFileFramesTest {
     @Test
     void aParkedFrameOfTheReloadedFileIsDroppedAndAnotherFilesParkedFrameStillResumes() {
         registry.replace(List.of(
-                parse("a.ms", "on world join:\n    wait until player is sneaking\n    send \"a\"\n"),
-                parse("b.ms", "on world join:\n    wait until player is sneaking\n    send \"b\"\n")));
+                parse("a.sk", "on world join:\n    wait until player is sneaking\n    send \"a\"\n"),
+                parse("b.sk", "on world join:\n    wait until player is sneaking\n    send \"b\"\n")));
         ticks(1);
-        dispatcher.dropFrames("a.ms");
+        dispatcher.dropFrames("a.sk");
         game.sneaking = true;
         ticks(2);
         assertEquals(List.of("b"), game.messages);
@@ -78,7 +78,7 @@ class SingleFileFramesTest {
 
             @Override
             public Flow execute(Context context) {
-                dispatcher.dropFrames("a.ms");
+                dispatcher.dropFrames("a.sk");
                 return Flow.CONTINUE;
             }
         };
@@ -105,8 +105,8 @@ class SingleFileFramesTest {
                 return Flow.CONTINUE;
             }
         };
-        Trigger trigger = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(drop, pause, after)));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(trigger), List.of())));
+        Trigger trigger = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(drop, pause, after)));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(trigger), List.of())));
         dispatcher.onLoad();
         assertEquals(0, scheduler.size());
         ticks(10);
@@ -117,35 +117,35 @@ class SingleFileFramesTest {
     @Test
     void onLoadForOneFileFiresOnlyThatFilesLoadTriggers() {
         registry.replace(List.of(
-                parse("a.ms", "on load:\n    send \"a\"\n"),
-                parse("b.ms", "on load:\n    send \"b\"\n")));
-        dispatcher.onLoad("b.ms");
+                parse("a.sk", "on load:\n    send \"a\"\n"),
+                parse("b.sk", "on load:\n    send \"b\"\n")));
+        dispatcher.onLoad("b.sk");
         assertEquals(List.of("b"), game.messages);
     }
 
     @Test
     void replacingOneScriptKeepsTheOrderOfTheRestAndAddingOneSortsItIn() {
         registry.replace(List.of(
-                parse("a.ms", "on load:\n    send \"a\"\n"),
-                parse("c.ms", "on load:\n    send \"c\"\n")));
-        registry.replaceScript(parse("a.ms", "on load:\n    send \"a2\"\non chat:\n    send \"chat\"\n"));
-        assertEquals(List.of("a.ms", "c.ms"), registry.scripts().stream().map(ParsedScript::file).toList());
+                parse("a.sk", "on load:\n    send \"a\"\n"),
+                parse("c.sk", "on load:\n    send \"c\"\n")));
+        registry.replaceScript(parse("a.sk", "on load:\n    send \"a2\"\non chat:\n    send \"chat\"\n"));
+        assertEquals(List.of("a.sk", "c.sk"), registry.scripts().stream().map(ParsedScript::file).toList());
         assertEquals(3, registry.triggers().size());
-        registry.replaceScript(parse("b.ms", "on load:\n    send \"b\"\n"));
-        assertEquals(List.of("a.ms", "b.ms", "c.ms"), registry.scripts().stream().map(ParsedScript::file).toList());
-        registry.removeScript("a.ms");
-        assertEquals(List.of("b.ms", "c.ms"), registry.scripts().stream().map(ParsedScript::file).toList());
+        registry.replaceScript(parse("b.sk", "on load:\n    send \"b\"\n"));
+        assertEquals(List.of("a.sk", "b.sk", "c.sk"), registry.scripts().stream().map(ParsedScript::file).toList());
+        registry.removeScript("a.sk");
+        assertEquals(List.of("b.sk", "c.sk"), registry.scripts().stream().map(ParsedScript::file).toList());
         assertEquals(2, registry.triggers().size());
     }
 
     @Test
     void everyPerFileChangeBumpsTheGenerationAndScriptLooksUpByName() {
         int before = registry.generation();
-        registry.replaceScript(parse("a.ms", "on load:\n    send \"a\"\n"));
-        assertEquals("a.ms", registry.script("a.ms").file());
-        assertNull(registry.script("b.ms"));
-        registry.removeScript("a.ms");
+        registry.replaceScript(parse("a.sk", "on load:\n    send \"a\"\n"));
+        assertEquals("a.sk", registry.script("a.sk").file());
+        assertNull(registry.script("b.sk"));
+        registry.removeScript("a.sk");
         assertEquals(before + 2, registry.generation());
-        assertNull(registry.script("a.ms"));
+        assertNull(registry.script("a.sk"));
     }
 }

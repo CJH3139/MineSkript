@@ -355,9 +355,9 @@ class SkriptTypesTest {
 
     @Test
     void specificErrorsSurviveSkippingPatternsThatCannotMatch() {
-        assertEquals(List.of("t.ms:2: loop-index is only available inside a loop"),
+        assertEquals(List.of("t.sk:2: loop-index is only available inside a loop"),
                 runner.errorsOf("on load:\n    send \"%loop-index above location(1, 2, 3)%\"\n"));
-        assertEquals(List.of("t.ms:2: event-block is not available in this event"),
+        assertEquals(List.of("t.sk:2: event-block is not available in this event"),
                 runner.errorsOf("on load:\n    send \"%event-block's amount%\"\n"));
     }
 

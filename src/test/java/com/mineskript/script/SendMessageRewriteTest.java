@@ -21,7 +21,7 @@ class SendMessageRewriteTest {
     });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         dispatcher.tick();
         return script.errors().stream().map(Object::toString).toList();
@@ -87,8 +87,8 @@ class SendMessageRewriteTest {
 
     @Test
     void theReceivedMessageCannotBeChanged() {
-        assertEquals(List.of("t.ms:2: the received message cannot be changed"), load("on chat:\n    set message to \"x\"\n"));
-        assertEquals(List.of("t.ms:2: the message can only be set, not deleted"), load("on chat send:\n    delete message\n"));
-        assertEquals(List.of("t.ms:2: the message can only be set, not added to"), load("on command send:\n    add \"x\" to message\n"));
+        assertEquals(List.of("t.sk:2: the received message cannot be changed"), load("on chat:\n    set message to \"x\"\n"));
+        assertEquals(List.of("t.sk:2: the message can only be set, not deleted"), load("on chat send:\n    delete message\n"));
+        assertEquals(List.of("t.sk:2: the message can only be set, not added to"), load("on command send:\n    add \"x\" to message\n"));
     }
 }

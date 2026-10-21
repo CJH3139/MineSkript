@@ -103,16 +103,16 @@ class EffectLineTest {
     void oneParserGivesEachScopeItsOwnAnswerHoweverTheTwoAreInterleaved() {
         String first = error("send \"%event-damage%\"");
         assertEquals("effect command: event-damage needs an event, and an effect command typed in chat has none", first);
-        assertEquals("t.ms:2: event-damage is not available in this event",
-                parser.parse("t.ms", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
+        assertEquals("t.sk:2: event-damage is not available in this event",
+                parser.parse("t.sk", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
         assertEquals(first, error("send \"%event-damage%\""));
-        assertEquals("t.ms:2: event-damage is not available in this event",
-                parser.parse("t.ms", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
+        assertEquals("t.sk:2: event-damage is not available in this event",
+                parser.parse("t.sk", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
     }
 
     @Test
     void anEventValueStillGivesItsOriginalWordingInsideARealEvent() {
-        assertEquals("t.ms:2: event-damage is not available in this event",
-                parser.parse("t.ms", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
+        assertEquals("t.sk:2: event-damage is not available in this event",
+                parser.parse("t.sk", "on load:\n    send \"%event-damage%\"\n").errors().get(0).toString());
     }
 }

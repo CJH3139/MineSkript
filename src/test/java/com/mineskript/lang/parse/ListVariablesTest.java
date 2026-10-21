@@ -169,9 +169,9 @@ class ListVariablesTest {
 
     @Test
     void unknownExpressionInAVariableNameIsAParseError() {
-        assertEquals(List.of("t.ms:2: unknown expression \"+\" in variable name"),
+        assertEquals(List.of("t.sk:2: unknown expression \"+\" in variable name"),
                 runner.errorsOf("on load:\n    set {x::%+%} to 1\n"));
-        assertEquals(List.of("t.ms:2: loop-value is only available inside a loop"),
+        assertEquals(List.of("t.sk:2: loop-value is only available inside a loop"),
                 runner.errorsOf("on load:\n    set {x::%loop-value%} to 1\n"));
     }
 
@@ -199,8 +199,8 @@ class ListVariablesTest {
 
     @Test
     void loopIndexOutsideALoopOrInWhileIsAParseError() {
-        assertEquals(List.of("t.ms:2: loop-index is only available inside a loop"), runner.errorsOf("on load:\n    send loop-index\n"));
-        assertEquals(List.of("t.ms:3: loop-index is not available inside while"),
+        assertEquals(List.of("t.sk:2: loop-index is only available inside a loop"), runner.errorsOf("on load:\n    send loop-index\n"));
+        assertEquals(List.of("t.sk:3: loop-index is not available inside while"),
                 runner.errorsOf("on load:\n    while 1 is 2:\n        send loop-index\n"));
     }
 

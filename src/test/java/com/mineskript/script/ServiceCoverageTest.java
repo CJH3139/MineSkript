@@ -58,46 +58,46 @@ class ServiceCoverageTest {
     @Test
     void aSingleFileReloadRefusesAForwardSlashNameThatEscapesTheScriptsFolder(@TempDir Path root) throws IOException {
         Path scripts = Files.createDirectories(root.resolve("scripts"));
-        write(root, "secret.ms", "on chat:\n    send \"secret\"\n");
-        write(scripts, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "secret.sk", "on chat:\n    send \"secret\"\n");
+        write(scripts, "a.sk", "on chat:\n    send \"a\"\n");
         start(scripts);
-        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("../secret.ms").outcome());
-        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub/../../secret.ms").outcome());
-        assertEquals(List.of("a.ms"), files());
+        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("../secret.sk").outcome());
+        assertEquals(FileReload.Outcome.REFUSED, service.reloadFile("sub/../../secret.sk").outcome());
+        assertEquals(List.of("a.sk"), files());
         dispatcher.onChat("hi");
         assertEquals(List.of("a"), game.messages);
     }
 
     @Test
     void aFileThatIsFixedAndReloadedStopsReportingItsOldErrors(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    fly\n");
+        write(root, "a.sk", "on chat:\n    fly\n");
         start(root);
-        assertEquals(List.of("a.ms:2: unknown effect \"fly\""), errorText());
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
-        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("a.ms").outcome());
+        assertEquals(List.of("a.sk:2: unknown effect \"fly\""), errorText());
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
+        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("a.sk").outcome());
         assertEquals(List.of(), service.errors());
     }
 
     @Test
     void aBrokenFileAddedByASingleFileReloadReachesTheErrorList(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
         start(root);
         assertEquals(List.of(), service.errors());
-        write(root, "b.ms", "on chat:\n    fly\n");
-        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("b.ms").outcome());
-        assertEquals(List.of("b.ms:2: unknown effect \"fly\""), errorText());
+        write(root, "b.sk", "on chat:\n    fly\n");
+        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("b.sk").outcome());
+        assertEquals(List.of("b.sk:2: unknown effect \"fly\""), errorText());
     }
 
     @Test
     void aFullReloadStopsTheFramesOfTheVersionItReplaces(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on script load:\n    wait 50 ticks\n    send \"a old\"\n");
-        write(root, "b.ms", "on script load:\n    wait 70 ticks\n    send \"b old\"\n");
+        write(root, "a.sk", "on script load:\n    wait 50 ticks\n    send \"a old\"\n");
+        write(root, "b.sk", "on script load:\n    wait 70 ticks\n    send \"b old\"\n");
         start(root);
         assertEquals(2, scheduler.size());
         ticks(10);
         assertEquals(List.of(), game.messages);
-        write(root, "a.ms", "on script load:\n    wait 20 ticks\n    send \"a new\"\n");
-        write(root, "b.ms", "on script load:\n    wait 40 ticks\n    send \"b new\"\n");
+        write(root, "a.sk", "on script load:\n    wait 20 ticks\n    send \"a new\"\n");
+        write(root, "b.sk", "on script load:\n    wait 40 ticks\n    send \"b new\"\n");
         service.reload();
         assertEquals(2, scheduler.size());
         assertEquals(0L, dispatcher.ticks());
@@ -113,7 +113,7 @@ class ServiceCoverageTest {
     @Test
     void savedGlobalsAreRestoredAtStartupAndByBothVariableReloads(@TempDir Path root) throws IOException {
         new VariableStore().save(root.resolve("variables.json"), Map.of("count", 5.0));
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
         start(root);
         assertEquals(Map.of("count", 5.0), variables.global());
         variables.global().put("count", 99.0);
@@ -126,40 +126,40 @@ class ServiceCoverageTest {
 
     @Test
     void theRememberedReportIsTheOneTheLastFullLoadReturned(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
         start(root);
         assertEquals(1, service.lastReport().scriptCount());
-        write(root, "b.ms", "on chat:\n    send \"b\"\n");
+        write(root, "b.sk", "on chat:\n    send \"b\"\n");
         LoadReport report = service.reloadAll();
         assertSame(report, service.lastReport());
         assertEquals(2, service.lastReport().scriptCount());
-        write(root, "c.ms", "on chat:\n    send \"c\"\n");
-        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("c.ms").outcome());
+        write(root, "c.sk", "on chat:\n    send \"c\"\n");
+        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("c.sk").outcome());
         assertSame(report, service.lastReport());
     }
 
     @Test
     void aFullReloadForgetsTheErrorsOfAFileThatIsGone(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
-        write(root, "b.ms", "on chat:\n    fly\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
+        write(root, "b.sk", "on chat:\n    fly\n");
         start(root);
-        assertEquals(List.of("b.ms:2: unknown effect \"fly\""), errorText());
-        Files.delete(root.resolve("b.ms"));
+        assertEquals(List.of("b.sk:2: unknown effect \"fly\""), errorText());
+        Files.delete(root.resolve("b.sk"));
         service.reload();
         assertEquals(List.of(), service.errors());
-        assertEquals(List.of("a.ms"), files());
+        assertEquals(List.of("a.sk"), files());
     }
 
     @Test
     void aFailedParseLeavesTheRunningVersionsFramesAndLoadEventAlone(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on script load:\n    send \"a loaded\"\n    wait 50 ticks\n    send \"a done\"\n");
-        write(root, "b.ms", "on script load:\n    wait 70 ticks\n    send \"b\"\n");
+        write(root, "a.sk", "on script load:\n    send \"a loaded\"\n    wait 50 ticks\n    send \"a done\"\n");
+        write(root, "b.sk", "on script load:\n    wait 70 ticks\n    send \"b\"\n");
         start(root);
         assertEquals(List.of("a loaded"), game.messages);
         assertEquals(2, scheduler.size());
         ticks(10);
-        write(root, "a.ms", "on script load:\n    fly\n");
-        FileReload result = service.reloadFile("a.ms");
+        write(root, "a.sk", "on script load:\n    fly\n");
+        FileReload result = service.reloadFile("a.sk");
         assertEquals(FileReload.Outcome.KEPT, result.outcome());
         assertEquals(1, result.triggerCount());
         assertEquals(2, scheduler.size());
@@ -173,51 +173,51 @@ class ServiceCoverageTest {
 
     @Test
     void theErrorListIsSortedByFileWhateverOrderTheFilesArrivedIn(@TempDir Path root) throws IOException {
-        write(root, "b.ms", "on chat:\n    fly\n");
-        write(root, "c.ms", "on chat:\n    fly\n");
+        write(root, "b.sk", "on chat:\n    fly\n");
+        write(root, "c.sk", "on chat:\n    fly\n");
         start(root);
         assertEquals(List.of(
-                "b.ms:2: unknown effect \"fly\"",
-                "c.ms:2: unknown effect \"fly\""), errorText());
-        write(root, "a.ms", "on chat:\n    fly\n");
-        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("a.ms").outcome());
+                "b.sk:2: unknown effect \"fly\"",
+                "c.sk:2: unknown effect \"fly\""), errorText());
+        write(root, "a.sk", "on chat:\n    fly\n");
+        assertEquals(FileReload.Outcome.ADDED, service.reloadFile("a.sk").outcome());
         assertEquals(List.of(
-                "a.ms:2: unknown effect \"fly\"",
-                "b.ms:2: unknown effect \"fly\"",
-                "c.ms:2: unknown effect \"fly\""), errorText());
+                "a.sk:2: unknown effect \"fly\"",
+                "b.sk:2: unknown effect \"fly\"",
+                "c.sk:2: unknown effect \"fly\""), errorText());
     }
 
     @Test
     void aDirectoryNamedLikeAScriptIsNotAScript(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
-        Files.createDirectories(root.resolve("folder.ms"));
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
+        Files.createDirectories(root.resolve("folder.sk"));
         start(root);
-        assertEquals(List.of("a.ms"), files());
-        assertEquals(FileReload.Outcome.MISSING, service.reloadFile("folder.ms").outcome());
-        assertEquals(List.of("a.ms"), files());
+        assertEquals(List.of("a.sk"), files());
+        assertEquals(FileReload.Outcome.MISSING, service.reloadFile("folder.sk").outcome());
+        assertEquals(List.of("a.sk"), files());
         assertEquals(List.of(), service.errors());
     }
 
     @Test
     void everyOutcomeThatChangesNothingStillReportsTheElapsedTime(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
-        write(root, "b.ms", "on chat:\n    send \"b\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
+        write(root, "b.sk", "on chat:\n    send \"b\"\n");
         start(root);
-        FileReload missing = service.reloadFile("nope.ms");
+        FileReload missing = service.reloadFile("nope.sk");
         assertEquals(FileReload.Outcome.MISSING, missing.outcome());
         assertEquals(1L, missing.millis());
         assertEquals(2L, service.lastMillis());
-        FileReload refused = service.reloadFile("../a.ms");
+        FileReload refused = service.reloadFile("../a.sk");
         assertEquals(FileReload.Outcome.REFUSED, refused.outcome());
         assertEquals(1L, refused.millis());
         assertEquals(2L, service.lastMillis());
-        write(root, "a.ms", "on chat:\n    fly\n");
-        FileReload kept = service.reloadFile("a.ms");
+        write(root, "a.sk", "on chat:\n    fly\n");
+        FileReload kept = service.reloadFile("a.sk");
         assertEquals(FileReload.Outcome.KEPT, kept.outcome());
         assertEquals(1L, kept.millis());
         assertEquals(2L, service.lastMillis());
-        Files.delete(root.resolve("b.ms"));
-        FileReload removed = service.reloadFile("b.ms");
+        Files.delete(root.resolve("b.sk"));
+        FileReload removed = service.reloadFile("b.sk");
         assertEquals(FileReload.Outcome.REMOVED, removed.outcome());
         assertEquals(1L, removed.millis());
         assertEquals(2L, service.lastMillis());

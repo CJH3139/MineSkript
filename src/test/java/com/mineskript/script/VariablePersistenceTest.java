@@ -46,7 +46,7 @@ class VariablePersistenceTest {
         persistence.load();
         assertFalse(persistence.save());
         assertFalse(Files.exists(dir.resolve("variables.json")));
-        Context context = new Context(game, "t.ms", Map.of(), variables);
+        Context context = new Context(game, "t.sk", Map.of(), variables);
         context.setVariable(VariableScope.GLOBAL, "count", 1.0);
         assertTrue(persistence.dirty());
         assertTrue(persistence.save());
@@ -62,7 +62,7 @@ class VariablePersistenceTest {
         game.name = "Alex";
         VariablePersistence persistence = persistence(dir);
         persistence.load();
-        Context context = new Context(game, "t.ms", Map.of(), variables);
+        Context context = new Context(game, "t.sk", Map.of(), variables);
         context.setVariable(VariableScope.GLOBAL, "block", new BlockValue("minecraft:stone"));
         context.setVariable(VariableScope.GLOBAL, "who", PlayerRef.LOCAL);
         context.setVariable(VariableScope.GLOBAL, "gone", None.NONE);

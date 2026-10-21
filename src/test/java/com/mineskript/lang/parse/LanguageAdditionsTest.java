@@ -17,7 +17,7 @@ class LanguageAdditionsTest {
 
     @Test
     void anUnknownOptionIsAParseError() {
-        assertEquals(List.of("t.ms:2: unknown option \"nope\""), runner.errorsOf("on load:\n    send \"{@nope}\"\n"));
+        assertEquals(List.of("t.sk:2: unknown option \"nope\""), runner.errorsOf("on load:\n    send \"{@nope}\"\n"));
     }
 
     @Test

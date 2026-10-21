@@ -18,30 +18,31 @@ class ScriptNamesTest {
     }
 
     @Test
-    void listsOnlyMsFilesInNameOrder(@TempDir Path dir) throws IOException {
-        write(dir, "b.ms");
-        write(dir, "a.ms");
+    void listsOnlySkFilesInNameOrder(@TempDir Path dir) throws IOException {
+        write(dir, "b.sk");
+        write(dir, "a.sk");
         write(dir, "notes.txt");
-        assertEquals(List.of("a.ms", "b.ms"), ScriptNames.list(dir));
+        write(dir, "old.ms");
+        assertEquals(List.of("a.sk", "b.sk"), ScriptNames.list(dir));
     }
 
     @Test
     void matchingIsCaseInsensitiveOnThePrefix(@TempDir Path dir) throws IOException {
-        write(dir, "Chat.ms");
-        write(dir, "combat.ms");
-        write(dir, "mining.ms");
-        assertEquals(List.of("Chat.ms", "combat.ms"), ScriptNames.matching(dir, "c"));
-        assertEquals(List.of("Chat.ms"), ScriptNames.matching(dir, "CHA"));
-        assertEquals(List.of("Chat.ms", "combat.ms", "mining.ms"), ScriptNames.matching(dir, ""));
+        write(dir, "Chat.sk");
+        write(dir, "combat.sk");
+        write(dir, "mining.sk");
+        assertEquals(List.of("Chat.sk", "combat.sk"), ScriptNames.matching(dir, "c"));
+        assertEquals(List.of("Chat.sk"), ScriptNames.matching(dir, "CHA"));
+        assertEquals(List.of("Chat.sk", "combat.sk", "mining.sk"), ScriptNames.matching(dir, ""));
         assertEquals(List.of(), ScriptNames.matching(dir, "z"));
     }
 
     @Test
     void namesWithSpacesAreSuggestedToo(@TempDir Path dir) throws IOException {
-        write(dir, "ok.ms");
-        write(dir, "two words.ms");
-        assertEquals(List.of("ok.ms", "two words.ms"), ScriptNames.list(dir));
-        assertEquals(List.of("ok.ms", "two words.ms"), ScriptNames.matching(dir, ""));
+        write(dir, "ok.sk");
+        write(dir, "two words.sk");
+        assertEquals(List.of("ok.sk", "two words.sk"), ScriptNames.list(dir));
+        assertEquals(List.of("ok.sk", "two words.sk"), ScriptNames.matching(dir, ""));
     }
 
     @Test
@@ -53,47 +54,48 @@ class ScriptNamesTest {
     @Test
     void scriptsInFoldersAreListedByTheirPathWithForwardSlashes(@TempDir Path dir) throws IOException {
         Files.createDirectories(dir.resolve("pvp/kits"));
-        write(dir.resolve("pvp"), "combat.ms");
-        write(dir.resolve("pvp/kits"), "archer.ms");
-        write(dir, "top.ms");
-        assertEquals(List.of("pvp/combat.ms", "pvp/kits/archer.ms", "top.ms"), ScriptNames.list(dir));
-        assertEquals(List.of("pvp/combat.ms", "pvp/kits/archer.ms"), ScriptNames.matching(dir, "pvp"));
-        assertEquals(List.of("pvp/kits/archer.ms"), ScriptNames.matching(dir, "PVP\\K"));
-        assertEquals(java.util.Optional.of("pvp/combat.ms"), ScriptNames.onDisk(dir, "pvp\\Combat.ms"));
+        write(dir.resolve("pvp"), "combat.sk");
+        write(dir.resolve("pvp/kits"), "archer.sk");
+        write(dir, "top.sk");
+        assertEquals(List.of("pvp/combat.sk", "pvp/kits/archer.sk", "top.sk"), ScriptNames.list(dir));
+        assertEquals(List.of("pvp/combat.sk", "pvp/kits/archer.sk"), ScriptNames.matching(dir, "pvp"));
+        assertEquals(List.of("pvp/kits/archer.sk"), ScriptNames.matching(dir, "PVP\\K"));
+        assertEquals(java.util.Optional.of("pvp/combat.sk"), ScriptNames.onDisk(dir, "pvp\\Combat.sk"));
     }
 
     @Test
     void aDashDisablesAScriptOrAWholeFolderLikeSkript(@TempDir Path dir) throws IOException {
         Files.createDirectories(dir.resolve("-old"));
         Files.createDirectories(dir.resolve("new"));
-        write(dir.resolve("-old"), "a.ms");
-        write(dir.resolve("new"), "-b.ms");
-        write(dir.resolve("new"), "c.ms");
-        write(dir, "-d.ms");
-        assertEquals(List.of("new/c.ms"), ScriptNames.list(dir));
+        write(dir.resolve("-old"), "a.sk");
+        write(dir.resolve("new"), "-b.sk");
+        write(dir.resolve("new"), "c.sk");
+        write(dir, "-d.sk");
+        assertEquals(List.of("new/c.sk"), ScriptNames.list(dir));
     }
 
     @Test
     void onlyNamesThatStayInsideTheFolderAreScriptNames(@TempDir Path dir) {
-        assertTrue(ScriptNames.isScriptName("a.ms"));
-        assertTrue(ScriptNames.isScriptName("pvp/combat.ms"));
-        assertTrue(ScriptNames.isScriptName("pvp\\combat.ms"));
-        assertFalse(ScriptNames.isScriptName("../a.ms"));
-        assertFalse(ScriptNames.isScriptName("pvp/../../a.ms"));
-        assertFalse(ScriptNames.isScriptName("/a.ms"));
-        assertFalse(ScriptNames.isScriptName("C:/a.ms"));
-        assertFalse(ScriptNames.isScriptName("pvp//a.ms"));
-        assertFalse(ScriptNames.isScriptName("-old/a.ms"));
+        assertTrue(ScriptNames.isScriptName("a.sk"));
+        assertTrue(ScriptNames.isScriptName("pvp/combat.sk"));
+        assertTrue(ScriptNames.isScriptName("pvp\\combat.sk"));
+        assertFalse(ScriptNames.isScriptName("../a.sk"));
+        assertFalse(ScriptNames.isScriptName("pvp/../../a.sk"));
+        assertFalse(ScriptNames.isScriptName("/a.sk"));
+        assertFalse(ScriptNames.isScriptName("C:/a.sk"));
+        assertFalse(ScriptNames.isScriptName("pvp//a.sk"));
+        assertFalse(ScriptNames.isScriptName("-old/a.sk"));
         assertFalse(ScriptNames.isScriptName("pvp/notes.txt"));
-        assertEquals(java.util.Optional.empty(), ScriptNames.resolve(dir, "../a.ms"));
-        assertEquals(java.util.Optional.of(dir.toAbsolutePath().normalize().resolve("pvp/a.ms")),
-                ScriptNames.resolve(dir, "pvp\\a.ms"));
+        assertFalse(ScriptNames.isScriptName("old.ms"));
+        assertEquals(java.util.Optional.empty(), ScriptNames.resolve(dir, "../a.sk"));
+        assertEquals(java.util.Optional.of(dir.toAbsolutePath().normalize().resolve("pvp/a.sk")),
+                ScriptNames.resolve(dir, "pvp\\a.sk"));
     }
 
     @Test
     void aFileInPlaceOfTheFolderIsAnEmptyList(@TempDir Path dir) throws IOException {
-        write(dir, "a.ms");
-        assertEquals(List.of(), ScriptNames.list(dir.resolve("a.ms")));
-        assertEquals(List.of(), ScriptNames.matching(dir.resolve("a.ms"), ""));
+        write(dir, "a.sk");
+        assertEquals(List.of(), ScriptNames.list(dir.resolve("a.sk")));
+        assertEquals(List.of(), ScriptNames.matching(dir.resolve("a.sk"), ""));
     }
 }

@@ -32,7 +32,7 @@ class ClientVisualsTest {
                 + "    set {h} to last spawned client entity\n");
         assertEquals(1.0, runner.global("h"));
         FakeGameBridge.ClientEntity hologram = game.clientEntities.get(1);
-        assertEquals(new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "§6home", 0.5, 66, 0.5, "t.ms"), hologram);
+        assertEquals(new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "§6home", 0.5, 66, 0.5, "t.sk"), hologram);
     }
 
     @Test
@@ -49,10 +49,10 @@ class ClientVisualsTest {
                 + "    spawn a block display of gold block at location(7, 8, 9)\n"
                 + "    spawn hologram \"plain\" at location(0, 0, 0)\n");
         assertEquals(List.of(
-                new FakeGameBridge.ClientEntity(ClientEntityKind.ITEM, "minecraft:diamond", 1, 2, 3, "t.ms"),
-                new FakeGameBridge.ClientEntity(ClientEntityKind.ITEM, "minecraft:diamond", 4, 5, 6, "t.ms"),
-                new FakeGameBridge.ClientEntity(ClientEntityKind.BLOCK, "minecraft:gold_block", 7, 8, 9, "t.ms"),
-                new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "plain", 0, 0, 0, "t.ms")),
+                new FakeGameBridge.ClientEntity(ClientEntityKind.ITEM, "minecraft:diamond", 1, 2, 3, "t.sk"),
+                new FakeGameBridge.ClientEntity(ClientEntityKind.ITEM, "minecraft:diamond", 4, 5, 6, "t.sk"),
+                new FakeGameBridge.ClientEntity(ClientEntityKind.BLOCK, "minecraft:gold_block", 7, 8, 9, "t.sk"),
+                new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "plain", 0, 0, 0, "t.sk")),
                 List.copyOf(game.clientEntities.values()));
     }
 
@@ -75,7 +75,7 @@ class ClientVisualsTest {
                 + "    move hologram 99 to location(1, 1, 1)\n");
         assertEquals(List.of(), game.errors);
         assertEquals(1, game.clientEntities.size());
-        assertEquals(new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "§cnew", 1, 2, 3, "t.ms"),
+        assertEquals(new FakeGameBridge.ClientEntity(ClientEntityKind.HOLOGRAM, "§cnew", 1, 2, 3, "t.sk"),
                 game.clientEntities.get(1));
         runner.run("on load:\n    remove all client entities\n");
         assertTrue(game.clientEntities.isEmpty());
@@ -101,9 +101,9 @@ class ClientVisualsTest {
         runner.run("on load:\n    show beam at location(1.7, 64, -2.2)\n    show a \"light blue\" beam at location(5, 70, 5)\n"
                 + "    show a \"#FF8800\" beam at location(5, 70, 5)\n    show \"grey\" beam at location(0, 0, 0)\n");
         assertEquals(List.of(
-                new FakeGameBridge.Beam(1, 64, -3, 0xF9FFFE, "t.ms"),
-                new FakeGameBridge.Beam(5, 70, 5, 0xFF8800, "t.ms"),
-                new FakeGameBridge.Beam(0, 0, 0, 0x474F52, "t.ms")), game.beams);
+                new FakeGameBridge.Beam(1, 64, -3, 0xF9FFFE, "t.sk"),
+                new FakeGameBridge.Beam(5, 70, 5, 0xFF8800, "t.sk"),
+                new FakeGameBridge.Beam(0, 0, 0, 0x474F52, "t.sk")), game.beams);
         runner.run("on load:\n    remove beam at location(5.5, 70, 5)\n    hide the beam at location(9, 9, 9)\n");
         assertEquals(2, game.beams.size());
         runner.run("on load:\n    remove all beams\n");
@@ -133,15 +133,15 @@ class ClientVisualsTest {
         ScriptRegistry registry = new ScriptRegistry();
         EventDispatcher dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), new Scheduler());
         Parser parser = new Parser(DefaultSyntax.registry());
-        ParsedScript first = parser.parse("a.ms", "on load:\n    spawn a hologram \"a\" at location(0, 0, 0)\n    show beam at location(0, 0, 0)\n");
-        ParsedScript second = parser.parse("b.ms", "on load:\n    spawn a hologram \"b\" at location(0, 0, 0)\n    show beam at location(1, 0, 0)\n");
+        ParsedScript first = parser.parse("a.sk", "on load:\n    spawn a hologram \"a\" at location(0, 0, 0)\n    show beam at location(0, 0, 0)\n");
+        ParsedScript second = parser.parse("b.sk", "on load:\n    spawn a hologram \"b\" at location(0, 0, 0)\n    show beam at location(1, 0, 0)\n");
         registry.replace(List.of(first, second));
         dispatcher.onLoad();
         assertEquals(2, game.clientEntities.size());
         assertEquals(2, game.beams.size());
-        dispatcher.unloadScript("a.ms");
+        dispatcher.unloadScript("a.sk");
         assertEquals(List.of("b"), game.clientEntities.values().stream().map(FakeGameBridge.ClientEntity::content).toList());
-        assertEquals(List.of(new FakeGameBridge.Beam(1, 0, 0, 0xF9FFFE, "b.ms")), game.beams);
+        assertEquals(List.of(new FakeGameBridge.Beam(1, 0, 0, 0xF9FFFE, "b.sk")), game.beams);
         dispatcher.onDisconnect();
         assertTrue(game.clientEntities.isEmpty());
         assertTrue(game.beams.isEmpty());

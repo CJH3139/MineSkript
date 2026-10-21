@@ -65,7 +65,7 @@ class EventContextSupplyTest {
             eventAtLine.put(line, info.name());
             line += 2;
         }
-        ParsedScript script = new Parser(syntax).parse("t.ms", source.toString());
+        ParsedScript script = new Parser(syntax).parse("t.sk", source.toString());
         assertEquals(List.of(), script.errors());
         registry.replace(List.of(script));
     }

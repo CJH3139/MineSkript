@@ -19,7 +19,7 @@ class EventDispatcherTest {
     private final EventDispatcher dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), scheduler);
 
     private void load(String source) {
-        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", source)));
+        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", source)));
     }
 
     private void ticks(int count) {
@@ -104,9 +104,9 @@ class EventDispatcherTest {
         load("every tick:\n    send \"a\"\n    wait 1 tick\n    send \"b\"\n");
         ticks(1);
         game.hasWorld = false;
-        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", "on load:\n    click attack\n")));
+        registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", "on load:\n    click attack\n")));
         dispatcher.onLoad();
-        assertEquals(List.of("t.ms:2: no world"), game.errors);
+        assertEquals(List.of("t.sk:2: no world"), game.errors);
     }
 
     @Test

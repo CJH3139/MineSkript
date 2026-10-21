@@ -1,6 +1,6 @@
 # MineSkript script tests
 
-Every `.ms` file in this folder is a script test. `./gradlew test` runs them all through
+Every `.sk` file in this folder is a script test. `./gradlew test` runs them all through
 `com.mineskript.scripttest.ScriptTests`, the same way skript-parser runs its test scripts. Each file shows up as its
 own group in the test report, with one JUnit test for each `test` trigger in it, so a failure names the file, the test
 and the line.
@@ -8,10 +8,10 @@ and the line.
 ## Where a test goes
 
 * `effects/`, `expressions/`, `conditions/` and `events/` hold tests for one syntax class each, and the file is named
-  after that class: the test for `ExprLength.java` is `expressions/ExprLength.ms`. A file may also cover close
-  relatives of its class (`ExprFloor.ms` also tests `ExprAbsoluteValue`); say so in the comment at the top.
+  after that class: the test for `ExprLength.java` is `expressions/ExprLength.sk`. A file may also cover close
+  relatives of its class (`ExprFloor.sk` also tests `ExprAbsoluteValue`); say so in the comment at the top.
 * `functions/` holds tests for the built-in functions, one file per class that registers them: the functions of
-  `MathFunctions.java` are tested in `functions/MathFunctions.ms`.
+  `MathFunctions.java` are tested in `functions/MathFunctions.sk`.
 * `general/` holds everything that is not one syntax class: sections, functions written in scripts, options,
   variable names, text, arithmetic.
 * When you change a syntax element, change its test to cover the new behaviour.

@@ -51,7 +51,7 @@ public final class ScriptLoader {
             Files.createDirectories(dir);
             List<Path> files = listScripts(dir);
             if (files.isEmpty() && seedExample) {
-                Files.writeString(dir.resolve("example.ms"), EXAMPLE, StandardCharsets.UTF_8);
+                Files.writeString(dir.resolve("example.sk"), EXAMPLE, StandardCharsets.UTF_8);
                 files = listScripts(dir);
             }
             Map<Path, Source> texts = new LinkedHashMap<>();
@@ -80,7 +80,7 @@ public final class ScriptLoader {
                 return false;
             }
             Files.createDirectories(dir);
-            Files.writeString(dir.resolve("example.ms"), EXAMPLE, StandardCharsets.UTF_8);
+            Files.writeString(dir.resolve("example.sk"), EXAMPLE, StandardCharsets.UTF_8);
             return true;
         } catch (IOException error) {
             return false;

@@ -20,7 +20,7 @@ class ConsumeAndBreakTest {
     });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         return script.errors().stream().map(Object::toString).toList();
     }
@@ -193,8 +193,8 @@ class ConsumeAndBreakTest {
 
     @Test
     void theEventValuesOfTheseEventsAreScoped() {
-        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.ms", "on load:\n    send \"%event-xp change%\"\n")
+        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.sk", "on load:\n    send \"%event-xp change%\"\n")
                 .errors().stream().map(Object::toString).toList();
-        assertEquals(List.of("t.ms:2: event-xp change is not available in this event"), errors);
+        assertEquals(List.of("t.sk:2: event-xp change is not available in this event"), errors);
     }
 }

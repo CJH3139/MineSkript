@@ -395,7 +395,7 @@ class SpellingCoverageTest {
         runner.game.hasWorld = false;
         runner.run("on load:\n    send \"%biome%\"\n");
         assertEquals(List.of(), runner.game.messages);
-        assertEquals(List.of("t.ms:2: no world"), runner.game.errors);
+        assertEquals(List.of("t.sk:2: no world"), runner.game.errors);
     }
 
     @Test

@@ -48,10 +48,10 @@ class AddonHooksTest {
             }
         });
         String source = "import:\n    java.lang.System\n    Foo.Bar as FB\non load:\n    send \"hi\"\n";
-        ParsedScript script = new Parser(registry).parse("t.ms", source);
+        ParsedScript script = new Parser(registry).parse("t.sk", source);
         assertEquals(List.of(), script.errors());
         assertEquals(1, script.triggers().size());
-        assertEquals(List.of("script t.ms " + source.length(), "header import at 1", "2 java.lang.System",
+        assertEquals(List.of("script t.sk " + source.length(), "header import at 1", "2 java.lang.System",
                 "3 Foo.Bar as FB"), seen);
     }
 
@@ -60,8 +60,8 @@ class AddonHooksTest {
         registry.addStructure("import", structure -> {
             throw new SyntaxException("not allowed");
         });
-        ParsedScript script = new Parser(registry).parse("t.ms", "on load:\n    send \"a\"\nimport:\n    x\n");
-        assertEquals(List.of("t.ms:3: not allowed"), script.errors().stream().map(Object::toString).toList());
+        ParsedScript script = new Parser(registry).parse("t.sk", "on load:\n    send \"a\"\nimport:\n    x\n");
+        assertEquals(List.of("t.sk:3: not allowed"), script.errors().stream().map(Object::toString).toList());
     }
 
     @Test
@@ -91,13 +91,13 @@ class AddonHooksTest {
                         return Flow.CONTINUE;
                     }
                 }) : Optional.empty());
-        ParsedScript script = new Parser(registry).parse("t.ms",
+        ParsedScript script = new Parser(registry).parse("t.sk",
                 "on load:\n    send \"%Magic.Value + 1%\"\n    Do.Thing\n    send \"%magic.value%\"\n");
-        assertEquals(List.of("t.ms:4: unknown expression \"magic.value\" in string"),
+        assertEquals(List.of("t.sk:4: unknown expression \"magic.value\" in string"),
                 script.errors().stream().map(Object::toString).toList());
         FakeGameBridge game = new FakeGameBridge();
-        script = new Parser(registry).parse("t.ms", "on load:\n    send \"%Magic.Value + 1%\"\n    Do.Thing\n");
-        new Interpreter(1000).run(new Execution(script.triggers().get(0), new Context(game, "t.ms", Map.of())));
+        script = new Parser(registry).parse("t.sk", "on load:\n    send \"%Magic.Value + 1%\"\n    Do.Thing\n");
+        new Interpreter(1000).run(new Execution(script.triggers().get(0), new Context(game, "t.sk", Map.of())));
         assertEquals(List.of("43", "did Do.Thing"), game.messages);
     }
 }

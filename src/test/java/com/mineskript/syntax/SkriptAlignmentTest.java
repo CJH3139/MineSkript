@@ -30,7 +30,7 @@ class SkriptAlignmentTest {
             });
 
     private void load(String source) {
-        scripts.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", source)));
+        scripts.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", source)));
     }
 
     private void ticks(int count) {

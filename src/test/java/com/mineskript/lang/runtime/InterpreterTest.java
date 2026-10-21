@@ -67,8 +67,8 @@ class InterpreterTest {
     }
 
     private Execution execution(Statement... statements) {
-        Trigger trigger = new Trigger("t.ms", 1, new Event.Load(), new Block(List.of(statements)));
-        return new Execution(trigger, new Context(game, "t.ms", Map.of()));
+        Trigger trigger = new Trigger("t.sk", 1, new Event.Load(), new Block(List.of(statements)));
+        return new Execution(trigger, new Context(game, "t.sk", Map.of()));
     }
 
     @Test
@@ -141,7 +141,7 @@ class InterpreterTest {
             many[i] = say("s" + i);
         }
         ScriptError error = assertThrows(ScriptError.class, () -> new Interpreter(10).run(execution(many)));
-        assertEquals("t.ms:1: step limit exceeded", error.toString());
+        assertEquals("t.sk:1: step limit exceeded", error.toString());
     }
 
     @Test
@@ -159,12 +159,12 @@ class InterpreterTest {
     @Test
     void unlocatedScriptErrorsGainTheStatementLine() {
         ScriptError error = assertThrows(ScriptError.class, () -> new Interpreter(10).run(execution(failing(7, new ScriptError("no world")))));
-        assertEquals("t.ms:7: no world", error.toString());
+        assertEquals("t.sk:7: no world", error.toString());
     }
 
     @Test
     void otherRuntimeExceptionsBecomeLocatedScriptErrors() {
         ScriptError error = assertThrows(ScriptError.class, () -> new Interpreter(10).run(execution(failing(4, new IllegalStateException("boom")))));
-        assertEquals("t.ms:4: boom", error.toString());
+        assertEquals("t.sk:4: boom", error.toString());
     }
 }

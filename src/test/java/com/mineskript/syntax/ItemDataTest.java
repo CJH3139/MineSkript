@@ -114,7 +114,7 @@ class ItemDataTest {
 
         ScriptRegistry registry = new ScriptRegistry();
         EventDispatcher dispatcher = new EventDispatcher(registry, game, new Interpreter(10_000), new Scheduler());
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", "on inventory change:\n    send \"changed\"\n");
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", "on inventory change:\n    send \"changed\"\n");
         registry.replace(List.of(script));
         game.setSlot(2, plain);
         dispatcher.tick();

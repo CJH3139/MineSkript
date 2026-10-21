@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class LexerTest {
     private static LexResult lex(String source) {
-        return Lexer.lex("test.ms", source);
+        return Lexer.lex("test.sk", source);
     }
 
     @Test
@@ -64,7 +64,7 @@ class LexerTest {
     void reportsMixedIndentationAndDropsTheTrigger() {
         LexResult result = lex("on load:\n \tsend \"x\"\non chat:\n    stop\n");
         assertEquals(1, result.errors().size());
-        assertEquals("test.ms:2: mixed tabs and spaces in indentation", result.errors().get(0).toString());
+        assertEquals("test.sk:2: mixed tabs and spaces in indentation", result.errors().get(0).toString());
         assertEquals(1, result.nodes().size());
         assertEquals("on chat", result.nodes().get(0).text());
     }
@@ -73,21 +73,21 @@ class LexerTest {
     void reportsDanglingIndent() {
         LexResult result = lex("on load:\n    send \"x\"\n        send \"y\"\n");
         assertEquals(1, result.errors().size());
-        assertEquals("test.ms:3: unexpected indentation", result.errors().get(0).toString());
+        assertEquals("test.sk:3: unexpected indentation", result.errors().get(0).toString());
         assertTrue(result.nodes().isEmpty());
     }
 
     @Test
     void reportsIndentedTopLevelLine() {
         LexResult result = lex("    send \"x\"\non load:\n    stop\n");
-        assertEquals("test.ms:1: unexpected indentation", result.errors().get(0).toString());
+        assertEquals("test.sk:1: unexpected indentation", result.errors().get(0).toString());
         assertEquals(1, result.nodes().size());
     }
 
     @Test
     void reportsEmptySection() {
         LexResult result = lex("on load:\non chat:\n    stop\n");
-        assertEquals("test.ms:1: empty section", result.errors().get(0).toString());
+        assertEquals("test.sk:1: empty section", result.errors().get(0).toString());
         assertEquals(1, result.nodes().size());
         assertEquals("on chat", result.nodes().get(0).text());
     }
@@ -95,14 +95,14 @@ class LexerTest {
     @Test
     void reportsEmptyNestedSection() {
         LexResult result = lex("on load:\n    if 1 is 1:\n    stop\n");
-        assertEquals("test.ms:2: empty section", result.errors().get(0).toString());
+        assertEquals("test.sk:2: empty section", result.errors().get(0).toString());
         assertTrue(result.nodes().isEmpty());
     }
 
     @Test
     void reportsIndentNotMultipleOfUnit() {
         LexResult result = lex("on load:\n    stop\non chat:\n  stop\n");
-        assertEquals("test.ms:4: unexpected indentation", result.errors().get(0).toString());
+        assertEquals("test.sk:4: unexpected indentation", result.errors().get(0).toString());
         assertEquals(1, result.nodes().size());
     }
 

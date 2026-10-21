@@ -39,7 +39,7 @@ public final class ScriptNames {
         try (Stream<Path> entries = Files.walk(dir)) {
             return entries
                     .filter(path -> Files.isRegularFile(path) && enabled(dir, path)
-                            && path.getFileName().toString().endsWith(".ms"))
+                            && path.getFileName().toString().endsWith(".sk"))
                     .sorted(Comparator.comparing(path -> nameOf(dir, path)))
                     .toList();
         }
@@ -59,7 +59,7 @@ public final class ScriptNames {
 
     public static boolean isScriptName(String name) {
         String normal = normalize(name);
-        if (!normal.endsWith(".ms") || normal.contains(":")) {
+        if (!normal.endsWith(".sk") || normal.contains(":")) {
             return false;
         }
         for (String part : normal.split("/", -1)) {
@@ -96,7 +96,7 @@ public final class ScriptNames {
         String needle = normalize(typed).toLowerCase(Locale.ROOT);
         TreeSet<String> everyName = new TreeSet<>(list(dir));
         for (String name : loaded) {
-            if (name.endsWith(".ms")) {
+            if (name.endsWith(".sk")) {
                 everyName.add(name);
             }
         }

@@ -49,7 +49,7 @@ class EffectCommandsTest {
     private final EffectCommands effects = new EffectCommands(new Parser(DefaultSyntax.registry()), dispatcher, config, game);
 
     private void load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         assertEquals(List.of(), script.errors().stream().map(Object::toString).toList());
         registry.replace(List.of(script));
     }
@@ -286,7 +286,7 @@ class EffectCommandsTest {
 
     @Test
     void anEffectCommandThatReachesAReloadWhileOneIsRunningIsRefusedByTheSameGuard(@TempDir Path root) throws IOException {
-        Files.writeString(root.resolve("a.ms"),
+        Files.writeString(root.resolve("a.sk"),
                 "on script load:\n    set {-command} to \"/ms reload config\"\n    make player say \"?execute command {-command}\"\n",
                 StandardCharsets.UTF_8);
         Reload reload = new Reload(root);
@@ -296,7 +296,7 @@ class EffectCommandsTest {
 
     @Test
     void anEffectCommandThatReachesAReloadWithNothingRunningIsAllowed(@TempDir Path root) throws IOException {
-        Files.writeString(root.resolve("a.ms"), "on load:\n    send \"loaded\"\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("a.sk"), "on load:\n    send \"loaded\"\n", StandardCharsets.UTF_8);
         Reload reload = new Reload(root);
         reload.start();
         reload.seen.clear();

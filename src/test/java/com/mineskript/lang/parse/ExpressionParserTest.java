@@ -20,7 +20,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class ExpressionParserTest {
-    private static final ParseScope SCOPE = new ParseScope("t.ms", 1, null);
+    private static final ParseScope SCOPE = new ParseScope("t.sk", 1, null);
 
     private static SyntaxRegistry registry() {
         SyntaxRegistry registry = new SyntaxRegistry();
@@ -31,7 +31,7 @@ class ExpressionParserTest {
     }
 
     private final ExpressionParser parser = new ExpressionParser(registry());
-    private final Context context = new Context(new FakeGameBridge(), "t.ms", Map.of());
+    private final Context context = new Context(new FakeGameBridge(), "t.sk", Map.of());
 
     private Expression parse(String text, SkType type) {
         return parser.parse(text, type, SCOPE).orElseThrow(() -> new AssertionError("did not parse: " + text));

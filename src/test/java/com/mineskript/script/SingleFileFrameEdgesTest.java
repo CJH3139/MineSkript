@@ -79,9 +79,9 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void aFrameAlreadyDrainedInThisBatchIsSkippedWhenAnEarlierFrameReloadsItsFile() {
-        Trigger first = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(pause(1), drop("a.ms"))));
-        Trigger second = new Trigger("a.ms", 2, new Event.Load(), new Block(List.of(pause(1), say("late"))));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(first, second), List.of())));
+        Trigger first = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(pause(1), drop("a.sk"))));
+        Trigger second = new Trigger("a.sk", 2, new Event.Load(), new Block(List.of(pause(1), say("late"))));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(first, second), List.of())));
         dispatcher.onLoad();
         assertEquals(2, scheduler.size());
         ticks(1);
@@ -93,11 +93,11 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void twoReloadsOfTheSameFileInOneTickDropItAndLeaveTheOtherFilesResumeTickExact() {
-        Trigger reloader = new Trigger("a.ms", 1, new Event.Load(),
-                new Block(List.of(drop("a.ms"), drop("a.ms"), pause(2), say("resumed"))));
+        Trigger reloader = new Trigger("a.sk", 1, new Event.Load(),
+                new Block(List.of(drop("a.sk"), drop("a.sk"), pause(2), say("resumed"))));
         registry.replace(List.of(
-                parse("b.ms", "on load:\n    wait 5 ticks\n    send \"b\"\n"),
-                new ParsedScript("a.ms", List.of(reloader), List.of())));
+                parse("b.sk", "on load:\n    wait 5 ticks\n    send \"b\"\n"),
+                new ParsedScript("a.sk", List.of(reloader), List.of())));
         dispatcher.onLoad();
         assertEquals(1, scheduler.size());
         ticks(4);
@@ -111,11 +111,11 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void aSecondReloadOfAFileDropsAFrameThatWasCreatedAfterTheFirstReload() {
-        Trigger first = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(pause(1), drop("a.ms"))));
-        Trigger second = new Trigger("a.ms", 2, new Event.Load(), new Block(List.of(pause(1), say("late"))));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(first, second), List.of())));
-        dispatcher.dropFrames("a.ms");
-        dispatcher.onLoad("a.ms");
+        Trigger first = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(pause(1), drop("a.sk"))));
+        Trigger second = new Trigger("a.sk", 2, new Event.Load(), new Block(List.of(pause(1), say("late"))));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(first, second), List.of())));
+        dispatcher.dropFrames("a.sk");
+        dispatcher.onLoad("a.sk");
         assertEquals(2, scheduler.size());
         ticks(1);
         assertEquals(List.of(), game.messages);
@@ -126,8 +126,8 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void aTimedWaitLeavesNoSchedulerBookkeepingBehindOnceItHasResumed() {
-        Trigger waiter = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(pause(1), say("done"))));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(waiter), List.of())));
+        Trigger waiter = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(pause(1), say("done"))));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(waiter), List.of())));
         dispatcher.onLoad();
         assertEquals(1, scheduler.size());
         assertEquals(1, dispatcher.scheduledSize());
@@ -142,14 +142,14 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void reloadingAFileAndLosingTheWorldBothClearTheSchedulerBookkeeping() {
-        Trigger waiter = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(pause(50), say("a"))));
-        Trigger other = new Trigger("b.ms", 1, new Event.Load(), new Block(List.of(pause(50), say("b"))));
+        Trigger waiter = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(pause(50), say("a"))));
+        Trigger other = new Trigger("b.sk", 1, new Event.Load(), new Block(List.of(pause(50), say("b"))));
         registry.replace(List.of(
-                new ParsedScript("a.ms", List.of(waiter), List.of()),
-                new ParsedScript("b.ms", List.of(other), List.of())));
+                new ParsedScript("a.sk", List.of(waiter), List.of()),
+                new ParsedScript("b.sk", List.of(other), List.of())));
         dispatcher.onLoad();
         assertEquals(2, dispatcher.scheduledSize());
-        dispatcher.dropFrames("a.ms");
+        dispatcher.dropFrames("a.sk");
         assertEquals(1, dispatcher.scheduledSize());
         assertEquals(1, scheduler.size());
         dispatcher.onDisconnect();
@@ -162,9 +162,9 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void aFrameThatRepacksDuringTheResumePassIsStillDroppedByALaterReloadInThatPass() {
-        Trigger repacker = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(park(), park(), say("x"))));
-        Trigger reloader = new Trigger("a.ms", 2, new Event.Load(), new Block(List.of(park(), drop("a.ms"))));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(repacker, reloader), List.of())));
+        Trigger repacker = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(park(), park(), say("x"))));
+        Trigger reloader = new Trigger("a.sk", 2, new Event.Load(), new Block(List.of(park(), drop("a.sk"))));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(repacker, reloader), List.of())));
         dispatcher.onLoad();
         ticks(20);
         assertEquals(List.of(), game.messages);
@@ -173,11 +173,11 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void reloadingOneFileFromInsideAResumePassLeavesAnotherFilesParkedFrameAlive() {
-        Trigger reloader = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(park(), drop("a.ms"))));
-        Trigger other = new Trigger("b.ms", 1, new Event.Load(), new Block(List.of(park(), say("b"))));
+        Trigger reloader = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(park(), drop("a.sk"))));
+        Trigger other = new Trigger("b.sk", 1, new Event.Load(), new Block(List.of(park(), say("b"))));
         registry.replace(List.of(
-                new ParsedScript("a.ms", List.of(reloader), List.of()),
-                new ParsedScript("b.ms", List.of(other), List.of())));
+                new ParsedScript("a.sk", List.of(reloader), List.of()),
+                new ParsedScript("b.sk", List.of(other), List.of())));
         dispatcher.onLoad();
         ticks(2);
         assertEquals(List.of("b"), game.messages);
@@ -186,9 +186,9 @@ class SingleFileFrameEdgesTest {
 
     @Test
     void aLaterParkedFrameOfTheReloadedFileIsSkippedWhenAnEarlierFrameInThePassReloadsIt() {
-        Trigger reloader = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(park(), drop("a.ms"))));
-        Trigger victim = new Trigger("a.ms", 2, new Event.Load(), new Block(List.of(park(), say("victim"))));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(reloader, victim), List.of())));
+        Trigger reloader = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(park(), drop("a.sk"))));
+        Trigger victim = new Trigger("a.sk", 2, new Event.Load(), new Block(List.of(park(), say("victim"))));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(reloader, victim), List.of())));
         dispatcher.onLoad();
         ticks(20);
         assertEquals(List.of(), game.messages);
@@ -199,9 +199,9 @@ class SingleFileFrameEdgesTest {
     void aSurvivingParkedFrameOfTheReloadedFileIsNotPutBackWhenThePassReloadsItsFile() {
         Condition sneaking = context -> game.sneaking;
         Statement waitForSneak = statement(5, context -> new Flow.Park(sneaking, 1000));
-        Trigger survivor = new Trigger("a.ms", 1, new Event.Load(), new Block(List.of(waitForSneak, say("survivor"))));
-        Trigger reloader = new Trigger("a.ms", 2, new Event.Load(), new Block(List.of(park(), drop("a.ms"))));
-        registry.replace(List.of(new ParsedScript("a.ms", List.of(survivor, reloader), List.of())));
+        Trigger survivor = new Trigger("a.sk", 1, new Event.Load(), new Block(List.of(waitForSneak, say("survivor"))));
+        Trigger reloader = new Trigger("a.sk", 2, new Event.Load(), new Block(List.of(park(), drop("a.sk"))));
+        registry.replace(List.of(new ParsedScript("a.sk", List.of(survivor, reloader), List.of())));
         dispatcher.onLoad();
         ticks(1);
         game.sneaking = true;

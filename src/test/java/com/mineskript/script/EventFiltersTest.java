@@ -28,7 +28,7 @@ class EventFiltersTest {
             });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         return script.errors().stream().map(Object::toString).toList();
     }
@@ -40,7 +40,7 @@ class EventFiltersTest {
     }
 
     private static Event.State state(String header) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", header + ":\n    stop\n");
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", header + ":\n    stop\n");
         assertEquals(List.of(), script.errors(), header);
         return (Event.State) script.triggers().get(0).event();
     }

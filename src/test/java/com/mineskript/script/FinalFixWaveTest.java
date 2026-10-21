@@ -29,7 +29,7 @@ class FinalFixWaveTest {
     });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         return script.errors().stream().map(Object::toString).toList();
     }
@@ -149,7 +149,7 @@ class FinalFixWaveTest {
 
     @Test
     void aScriptThatReloadsItselfDoesNotRecurse(@TempDir Path dir) throws IOException {
-        Files.writeString(dir.resolve("self.ms"), "on script load:\n    send command \"/mineskript reload\"\n");
+        Files.writeString(dir.resolve("self.sk"), "on script load:\n    send command \"/mineskript reload\"\n");
         Reentrant world = new Reentrant((bridge, command) -> bridge.service.reload());
         world.serve(dir);
         LoadReport report = world.service.reload();
@@ -225,7 +225,7 @@ class FinalFixWaveTest {
         }
 
         private List<String> load(String source) {
-            ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+            ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
             registry.replace(List.of(script));
             return script.errors().stream().map(Object::toString).toList();
         }

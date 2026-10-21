@@ -36,7 +36,7 @@ class EventContextTest {
     @Test
     void aValueTheEventDoesNotDeclareIsAParseError() {
         ParsedScript script = new Parser(DefaultSyntax.registry())
-                .parse("t.ms", "on damage:\n    send \"%event-healed%\"\non move:\n    send \"%event-item%\"\n");
+                .parse("t.sk", "on damage:\n    send \"%event-healed%\"\non move:\n    send \"%event-item%\"\n");
         assertEquals(2, script.errors().size());
         assertTrue(script.errors().get(0).toString().contains("event-healed is not available in this event"));
         assertTrue(script.errors().get(1).toString().contains("event-item is not available in this event"));

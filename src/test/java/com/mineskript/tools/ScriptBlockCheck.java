@@ -71,7 +71,7 @@ public final class ScriptBlockCheck {
     }
 
     private static void check(String where, String source, List<String> failures) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("example.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("example.sk", source);
         for (ParseError error : script.errors()) {
             failures.add(where + ": " + error);
         }

@@ -80,6 +80,6 @@ class StandaloneConditionTest {
 
     @Test
     void aLineThatIsNeitherIsStillAnUnknownEffect() {
-        assertEquals(List.of("t.ms:2: unknown effect \"fly away\""), runner.errorsOf("on load:\n    fly away\n"));
+        assertEquals(List.of("t.sk:2: unknown effect \"fly away\""), runner.errorsOf("on load:\n    fly away\n"));
     }
 }

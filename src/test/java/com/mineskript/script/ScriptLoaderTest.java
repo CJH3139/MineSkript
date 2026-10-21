@@ -19,7 +19,7 @@ class ScriptLoaderTest {
     void createsTheFolderAndExampleWhenMissing(@TempDir Path root) {
         Path dir = root.resolve("mineskript");
         LoadReport report = loader.load(dir);
-        assertTrue(Files.exists(dir.resolve("example.ms")));
+        assertTrue(Files.exists(dir.resolve("example.sk")));
         assertEquals(1, report.scriptCount());
         assertEquals(2, report.triggerCount());
         assertEquals(List.of(), report.errors());
@@ -28,27 +28,27 @@ class ScriptLoaderTest {
 
     @Test
     void loadsEveryMsFileInNameOrderAndSkipsOtherFiles(@TempDir Path dir) throws IOException {
-        Files.writeString(dir.resolve("b.ms"), "on load:\n    send \"b\"\n");
-        Files.writeString(dir.resolve("a.ms"), "on load:\n    send \"a\"\non chat:\n    stop\n");
+        Files.writeString(dir.resolve("b.sk"), "on load:\n    send \"b\"\n");
+        Files.writeString(dir.resolve("a.sk"), "on load:\n    send \"a\"\non chat:\n    stop\n");
         Files.writeString(dir.resolve("notes.txt"), "on load:\n    stop\n");
         LoadReport report = loader.load(dir);
-        assertEquals(List.of("a.ms", "b.ms"), report.scripts().stream().map(script -> script.file()).toList());
+        assertEquals(List.of("a.sk", "b.sk"), report.scripts().stream().map(script -> script.file()).toList());
         assertEquals(3, report.triggerCount());
         assertEquals("Loaded 2 scripts, 3 triggers, 0 errors", report.summary());
     }
 
     @Test
     void reportsParseErrorsPerFile(@TempDir Path dir) throws IOException {
-        Files.writeString(dir.resolve("bad.ms"), "on load:\n    fly\n");
+        Files.writeString(dir.resolve("bad.sk"), "on load:\n    fly\n");
         LoadReport report = loader.load(dir);
-        assertEquals(List.of("bad.ms:2: unknown effect \"fly\""), report.errors().stream().map(Object::toString).toList());
+        assertEquals(List.of("bad.sk:2: unknown effect \"fly\""), report.errors().stream().map(Object::toString).toList());
         assertEquals("Loaded 1 script, 0 triggers, 1 error", report.summary());
     }
 
     @Test
     void anExistingEmptyFolderStillGetsTheExample(@TempDir Path dir) {
         LoadReport report = loader.load(dir);
-        assertTrue(Files.exists(dir.resolve("example.ms")));
+        assertTrue(Files.exists(dir.resolve("example.sk")));
         assertEquals(1, report.scriptCount());
     }
 }

@@ -64,30 +64,30 @@ class ClosingRoundTest {
 
     @Test
     void aCaseOnlyRenameOnDiskReloadsTheScriptInsteadOfRegisteringASecondCopy(@TempDir Path root) throws IOException {
-        write(root, "Mining.ms", "on chat:\n    send \"old\"\n");
+        write(root, "Mining.sk", "on chat:\n    send \"old\"\n");
         start(root);
-        assertEquals(List.of("Mining.ms"), files());
-        rename(root, "Mining.ms", "mining.ms", "on chat:\n    send \"new\"\n");
-        assertEquals(List.of("mining.ms"), ScriptNames.list(root));
-        FileReload result = service.reloadFile("mining.ms");
+        assertEquals(List.of("Mining.sk"), files());
+        rename(root, "Mining.sk", "mining.sk", "on chat:\n    send \"new\"\n");
+        assertEquals(List.of("mining.sk"), ScriptNames.list(root));
+        FileReload result = service.reloadFile("mining.sk");
         assertEquals(FileReload.Outcome.RELOADED, result.outcome());
-        assertEquals("mining.ms", result.file());
-        assertEquals(List.of("mining.ms"), files());
+        assertEquals("mining.sk", result.file());
+        assertEquals(List.of("mining.sk"), files());
         assertEquals(1, registry.triggers().size());
-        assertEquals("mining.ms", registry.triggers().get(0).file());
+        assertEquals("mining.sk", registry.triggers().get(0).file());
         dispatcher.onChat("hi");
         assertEquals(List.of("new"), game.messages);
     }
 
     @Test
     void aCaseOnlyRenameDropsTheWaitingFramesOfTheVersionItReplaces(@TempDir Path root) throws IOException {
-        write(root, "Mining.ms", "on chat:\n    wait 30 ticks\n    send \"old\"\n");
+        write(root, "Mining.sk", "on chat:\n    wait 30 ticks\n    send \"old\"\n");
         start(root);
         dispatcher.onChat("hi");
         ticks(10);
         assertEquals(1, scheduler.size());
-        rename(root, "Mining.ms", "mining.ms", "on chat:\n    send \"new\"\n");
-        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("mining.ms").outcome());
+        rename(root, "Mining.sk", "mining.sk", "on chat:\n    send \"new\"\n");
+        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("mining.sk").outcome());
         assertEquals(0, scheduler.size());
         ticks(60);
         assertEquals(List.of(), game.messages);
@@ -97,50 +97,50 @@ class ClosingRoundTest {
 
     @Test
     void aCaseOnlyRenameClearsTheErrorsFiledUnderTheOldSpelling(@TempDir Path root) throws IOException {
-        write(root, "Mining.ms", "on chat:\n    fly\n");
+        write(root, "Mining.sk", "on chat:\n    fly\n");
         start(root);
-        assertEquals(List.of("Mining.ms:2: unknown effect \"fly\""), strings(service.errors()));
-        rename(root, "Mining.ms", "mining.ms", "on chat:\n    send \"new\"\n");
-        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("mining.ms").outcome());
+        assertEquals(List.of("Mining.sk:2: unknown effect \"fly\""), strings(service.errors()));
+        rename(root, "Mining.sk", "mining.sk", "on chat:\n    send \"new\"\n");
+        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("mining.sk").outcome());
         assertEquals(List.of(), strings(service.errors()));
     }
 
     @Test
     void aWrongCaseReloadFilesItsErrorsUnderTheNameTheNextReloadClears(@TempDir Path root) throws IOException {
-        write(root, "Mining.ms", "on chat:\n    send \"old\"\n");
+        write(root, "Mining.sk", "on chat:\n    send \"old\"\n");
         start(root);
-        write(root, "Mining.ms", "on chat:\n    fly\n");
-        FileReload kept = service.reloadFile("mining.ms");
+        write(root, "Mining.sk", "on chat:\n    fly\n");
+        FileReload kept = service.reloadFile("mining.sk");
         assertEquals(FileReload.Outcome.KEPT, kept.outcome());
-        assertEquals("Mining.ms", kept.file());
-        assertEquals(List.of("Mining.ms:2: unknown effect \"fly\""), strings(service.errors()));
-        write(root, "Mining.ms", "on chat:\n    send \"new\"\n");
-        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("mining.ms").outcome());
+        assertEquals("Mining.sk", kept.file());
+        assertEquals(List.of("Mining.sk:2: unknown effect \"fly\""), strings(service.errors()));
+        write(root, "Mining.sk", "on chat:\n    send \"new\"\n");
+        assertEquals(FileReload.Outcome.RELOADED, service.reloadFile("mining.sk").outcome());
         assertEquals(List.of(), strings(service.errors()));
     }
 
     @Test
     void anExactNameWinsOverACaseDifferingOneWhenAFolderHoldsBoth(@TempDir Path root) throws IOException {
-        List<String> both = List.of("Mining.ms", "mining.ms");
-        assertEquals(Optional.of("mining.ms"), ScriptNames.pick(both, "mining.ms"));
-        assertEquals(Optional.of("Mining.ms"), ScriptNames.pick(both, "Mining.ms"));
-        assertEquals(Optional.of("Mining.ms"), ScriptNames.pick(List.of("Mining.ms"), "MINING.ms"));
-        assertEquals(Optional.empty(), ScriptNames.pick(both, "chat.ms"));
-        write(root, "Chat.ms", "on chat:\n    send \"a\"\n");
-        assertEquals(Optional.of("Chat.ms"), ScriptNames.onDisk(root, "chat.ms"));
-        assertEquals(Optional.of("Chat.ms"), ScriptNames.onDisk(root, "Chat.ms"));
+        List<String> both = List.of("Mining.sk", "mining.sk");
+        assertEquals(Optional.of("mining.sk"), ScriptNames.pick(both, "mining.sk"));
+        assertEquals(Optional.of("Mining.sk"), ScriptNames.pick(both, "Mining.sk"));
+        assertEquals(Optional.of("Mining.sk"), ScriptNames.pick(List.of("Mining.sk"), "MINING.sk"));
+        assertEquals(Optional.empty(), ScriptNames.pick(both, "chat.sk"));
+        write(root, "Chat.sk", "on chat:\n    send \"a\"\n");
+        assertEquals(Optional.of("Chat.sk"), ScriptNames.onDisk(root, "chat.sk"));
+        assertEquals(Optional.of("Chat.sk"), ScriptNames.onDisk(root, "Chat.sk"));
     }
 
     @Test
     void aNameOnlyTheFilesystemCanResolveIsMissingRatherThanASecondCopy(@TempDir Path root) throws IOException {
-        write(root, "my-mining-script.ms", "on chat:\n    send \"a\"\n");
+        write(root, "my-mining-script.sk", "on chat:\n    send \"a\"\n");
         start(root);
-        String alias = "my-min~1.ms";
+        String alias = "my-min~1.sk";
         Assumptions.assumeTrue(Files.isRegularFile(root.resolve(alias)));
-        assertEquals(List.of("my-mining-script.ms"), ScriptNames.list(root));
+        assertEquals(List.of("my-mining-script.sk"), ScriptNames.list(root));
         FileReload result = service.reloadFile(alias);
         assertEquals(FileReload.Outcome.MISSING, result.outcome());
-        assertEquals(List.of("my-mining-script.ms"), files());
+        assertEquals(List.of("my-mining-script.sk"), files());
         assertEquals(1, registry.triggers().size());
         dispatcher.onChat("hi");
         assertEquals(List.of("a"), game.messages);
@@ -152,24 +152,24 @@ class ClosingRoundTest {
         ScriptNames.Listing none = ScriptNames.listing(empty);
         assertTrue(none.readable());
         assertEquals(List.of(), none.names());
-        write(root, "a.ms", "on chat:\n    send \"a\"\n");
+        write(root, "a.sk", "on chat:\n    send \"a\"\n");
         ScriptNames.Listing one = ScriptNames.listing(root);
         assertTrue(one.readable());
-        assertEquals(List.of("a.ms"), one.names());
+        assertEquals(List.of("a.sk"), one.names());
         ScriptNames.Listing gone = ScriptNames.listing(root.resolve("nope"));
         assertFalse(gone.readable());
         assertEquals(List.of(), gone.names());
-        assertFalse(ScriptNames.listing(root.resolve("a.ms")).readable());
+        assertFalse(ScriptNames.listing(root.resolve("a.sk")).readable());
     }
 
     @Test
     void aFullLoadForgetsTheSourceLinesOfScriptsThatAreGone(@TempDir Path root) throws IOException {
-        write(root, "a.ms", "on chat:\n    fly\n");
+        write(root, "a.sk", "on chat:\n    fly\n");
         start(root);
-        assertEquals("fly", service.sources().line("a.ms", 2));
-        Files.delete(root.resolve("a.ms"));
+        assertEquals("fly", service.sources().line("a.sk", 2));
+        Files.delete(root.resolve("a.sk"));
         service.reload();
         assertEquals(List.of(), files());
-        assertEquals("", service.sources().line("a.ms", 2));
+        assertEquals("", service.sources().line("a.sk", 2));
     }
 }

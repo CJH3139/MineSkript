@@ -43,7 +43,7 @@ Grab the latest jar from [Releases](../../releases), or build it yourself with t
 
 ## Getting started
 Drop the jar and Fabric API in your `mods` folder and launch once. MineSkript creates `.minecraft/mineskript/` and
-writes an `example.ms` into it. Scripts are plain text files ending in `.ms`; edit one and run `/ms reload` to see the
+writes an `example.sk` into it. Scripts are plain text files ending in `.sk`; edit one and run `/ms reload` to see the
 change without leaving the world.
 
 ```
@@ -189,7 +189,7 @@ the server unless you switch the feature off.
 ## Commands
 ```
 /ms reload                 every script
-/ms reload <file.ms>       just that one, the others keep running (pvp/combat.ms for one in a folder)
+/ms reload <file.sk>       just that one, the others keep running (pvp/combat.sk for one in a folder)
 /ms reload config          re-read config.txt
 /ms reload variables       re-read saved variables
 /ms reload all             the config, variables and every script

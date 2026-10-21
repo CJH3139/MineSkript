@@ -24,7 +24,7 @@ class SendMessageEventsTest {
     });
 
     private List<String> load(String source) {
-        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.ms", source);
+        ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", source);
         registry.replace(List.of(script));
         return script.errors().stream().map(Object::toString).toList();
     }
@@ -76,9 +76,9 @@ class SendMessageEventsTest {
 
     @Test
     void messageOutsideAnyChatEventIsStillAParseError() {
-        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.ms", "on load:\n    send message\n")
+        List<String> errors = new Parser(DefaultSyntax.registry()).parse("t.sk", "on load:\n    send message\n")
                 .errors().stream().map(Object::toString).toList();
-        assertEquals(List.of("t.ms:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""), errors);
+        assertEquals(List.of("t.sk:2: \"message\" is only available inside \"on chat\", \"on chat send\" and \"on command send\""), errors);
     }
 
     @Test
@@ -141,7 +141,7 @@ class SendMessageEventsTest {
         }
 
         private void load(String source) {
-            registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.ms", source)));
+            registry.replace(List.of(new Parser(DefaultSyntax.registry()).parse("t.sk", source)));
         }
     }
 
