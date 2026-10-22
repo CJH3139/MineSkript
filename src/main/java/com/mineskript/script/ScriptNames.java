@@ -45,6 +45,22 @@ public final class ScriptNames {
         }
     }
 
+    public static List<String> oldScripts(Path dir) {
+        if (!Files.isDirectory(dir)) {
+            return List.of();
+        }
+        try (Stream<Path> entries = Files.walk(dir)) {
+            return entries
+                    .filter(path -> Files.isRegularFile(path) && enabled(dir, path)
+                            && path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".ms"))
+                    .map(path -> nameOf(dir, path))
+                    .sorted()
+                    .toList();
+        } catch (IOException | UncheckedIOException error) {
+            return List.of();
+        }
+    }
+
     public static String nameOf(Path dir, Path file) {
         List<String> parts = new ArrayList<>();
         for (Path part : dir.relativize(file)) {

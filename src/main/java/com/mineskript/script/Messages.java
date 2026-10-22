@@ -71,12 +71,19 @@ public final class Messages {
         String scripts = LoadReport.plural(report.scriptCount(), "script");
         String triggers = LoadReport.plural(report.triggerCount(), "trigger");
         int errors = report.errors().size();
+        List<MessageLine> lines = new ArrayList<>();
         if (errors == 0) {
-            return List.of(new MessageLine(MessageLine.Kind.SUCCESS,
+            lines.add(new MessageLine(MessageLine.Kind.SUCCESS,
                     Language.format("command.reloaded", scripts, triggers, millis)));
+        } else {
+            lines.add(new MessageLine(MessageLine.Kind.WARNING, Language.format("command.reloaded-with-errors",
+                    scripts, triggers, LoadReport.plural(errors, "error"), millis)));
         }
-        return List.of(new MessageLine(MessageLine.Kind.WARNING, Language.format("command.reloaded-with-errors",
-                scripts, triggers, LoadReport.plural(errors, "error"), millis)));
+        String old = report.oldScriptsWarning();
+        if (old != null) {
+            lines.add(new MessageLine(MessageLine.Kind.WARNING, old));
+        }
+        return List.copyOf(lines);
     }
 
     public static List<MessageLine> fileReload(FileReload result, Path dir) {

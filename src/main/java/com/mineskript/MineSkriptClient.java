@@ -71,6 +71,7 @@ public final class MineSkriptClient implements ClientModInitializer {
         EventDispatcher dispatcher = new EventDispatcher(registry, bridge, new Interpreter(STEP_BUDGET), new Scheduler(), variables, persistence::save, () -> {
             persistence.flushWarning();
             config.flushTo(bridge);
+            service.flushOldScripts(bridge);
         });
         AddonLoader.Result syntax = loadSyntax();
         service = new ScriptService(dir, new ScriptLoader(new Parser(syntax.registry(), functions)), registry, dispatcher, persistence, config);
@@ -180,6 +181,9 @@ public final class MineSkriptClient implements ClientModInitializer {
 
     private static void logReport(LoadReport report) {
         LOGGER.info(report.summary());
+        if (report.oldScriptsWarning() != null) {
+            LOGGER.warn(report.oldScriptsWarning());
+        }
         for (ParseError error : report.errors()) {
             LOGGER.warn(error.toString());
         }

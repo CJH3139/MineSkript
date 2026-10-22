@@ -71,7 +71,7 @@ public final class ScriptLoader {
         } finally {
             parser.functions().forgetDeclared();
         }
-        return new LoadReport(List.copyOf(scripts));
+        return new LoadReport(scripts, ScriptNames.oldScripts(dir));
     }
 
     public static boolean createFolder(Path dir) {

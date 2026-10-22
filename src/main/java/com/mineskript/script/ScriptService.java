@@ -1,5 +1,6 @@
 package com.mineskript.script;
 
+import com.mineskript.game.GameBridge;
 import com.mineskript.lang.ParseError;
 import com.mineskript.lang.parse.ParsedScript;
 import java.nio.file.Path;
@@ -23,6 +24,7 @@ public final class ScriptService {
     private LoadReport lastReport = new LoadReport(List.of());
     private long lastMillis;
     private boolean reloading;
+    private String pendingOldScripts;
 
     public ScriptService(Path dir, ScriptLoader loader, ScriptRegistry registry, EventDispatcher dispatcher, VariablePersistence persistence, ConfigFile config) {
         this(dir, loader, registry, dispatcher, persistence, config, System::nanoTime);
@@ -44,7 +46,16 @@ public final class ScriptService {
         config.create();
         config.load();
         persistence.load();
-        return reload();
+        LoadReport report = reload();
+        pendingOldScripts = report == null ? null : report.oldScriptsWarning();
+        return report;
+    }
+
+    public void flushOldScripts(GameBridge game) {
+        if (pendingOldScripts != null && game.hasWorld()) {
+            game.showWarning(pendingOldScripts);
+            pendingOldScripts = null;
+        }
     }
 
     public LoadReport reload() {
