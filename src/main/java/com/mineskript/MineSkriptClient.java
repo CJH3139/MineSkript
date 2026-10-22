@@ -44,6 +44,8 @@ import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +56,19 @@ public final class MineSkriptClient implements ClientModInitializer {
     public static final String ADDON_ENTRYPOINT = "mineskript";
 
     private static ScriptService service;
+    private static MinecraftBridge clickBridge;
+    private static EventDispatcher clickDispatcher;
 
     public static ScriptService service() {
         return service;
+    }
+
+    public static boolean allowInventoryClick(Slot slot, int button, ContainerInput input) {
+        if (clickDispatcher == null || !clickDispatcher.listens("inventory click")) {
+            return true;
+        }
+        Map<String, Object> values = clickBridge.clickValues(slot, button, input);
+        return values == null || clickDispatcher.onInventoryClick(values);
     }
 
     @Override
@@ -73,6 +85,8 @@ public final class MineSkriptClient implements ClientModInitializer {
             config.flushTo(bridge);
             service.flushOldScripts(bridge);
         });
+        clickBridge = bridge;
+        clickDispatcher = dispatcher;
         AddonLoader.Result syntax = loadSyntax();
         service = new ScriptService(dir, new ScriptLoader(new Parser(syntax.registry(), functions)), registry, dispatcher, persistence, config);
         EffectCommands effects = new EffectCommands(new Parser(syntax.registry(), functions), dispatcher, config, bridge);

@@ -3,6 +3,7 @@ package com.mineskript.game;
 import com.mineskript.MineSkriptClient;
 import com.mineskript.MineSkriptMessages;
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.script.MessageLine;
@@ -28,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
@@ -44,6 +46,9 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -323,6 +328,114 @@ public final class MinecraftBridge implements GameBridge {
             }
         }
         return count;
+    }
+
+    @Override
+    public List<ItemValue> openInventoryItems() {
+        LocalPlayer player = minecraft().player;
+        Inventory own = player.getInventory();
+        List<ItemValue> items = new ArrayList<>();
+        for (Slot slot : player.containerMenu.slots) {
+            if (slot.container != own) {
+                items.add(item(slot.getItem()));
+            }
+        }
+        return items;
+    }
+
+    @Override
+    public boolean inventoryScreenOpen() {
+        return minecraft().gui.screen() instanceof AbstractContainerScreen<?>;
+    }
+
+    @Override
+    public boolean clickSlot(InventoryRef inventory, int slot, InventoryClick click) {
+        LocalPlayer player = minecraft().player;
+        AbstractContainerMenu menu = player.containerMenu;
+        int index = menuIndex(menu, player.getInventory(), inventory, slot);
+        if (index < 0) {
+            return false;
+        }
+        minecraft().gameMode.handleContainerInput(menu.containerId, index, click.button(), input(click.kind()), player);
+        return true;
+    }
+
+    private static int menuIndex(AbstractContainerMenu menu, Inventory own, InventoryRef inventory, int number) {
+        int open = 0;
+        for (Slot slot : menu.slots) {
+            if (inventory == InventoryRef.LOCAL) {
+                if (slot.container == own && slot.getContainerSlot() == number) {
+                    return slot.index;
+                }
+            } else if (slot.container != own) {
+                if (open == number) {
+                    return slot.index;
+                }
+                open++;
+            }
+        }
+        return -1;
+    }
+
+    private static ContainerInput input(InventoryClick.Kind kind) {
+        return switch (kind) {
+            case PICKUP -> ContainerInput.PICKUP;
+            case QUICK_MOVE -> ContainerInput.QUICK_MOVE;
+            case SWAP -> ContainerInput.SWAP;
+            case CLONE -> ContainerInput.CLONE;
+            case THROW -> ContainerInput.THROW;
+            case PICKUP_ALL -> ContainerInput.PICKUP_ALL;
+        };
+    }
+
+    public Map<String, Object> clickValues(Slot slot, int button, ContainerInput input) {
+        InventoryClick.Kind kind = switch (input) {
+            case PICKUP -> InventoryClick.Kind.PICKUP;
+            case QUICK_MOVE -> InventoryClick.Kind.QUICK_MOVE;
+            case SWAP -> InventoryClick.Kind.SWAP;
+            case CLONE -> InventoryClick.Kind.CLONE;
+            case THROW -> InventoryClick.Kind.THROW;
+            case PICKUP_ALL -> InventoryClick.Kind.PICKUP_ALL;
+            case QUICK_CRAFT -> null;
+        };
+        if (kind == null) {
+            return null;
+        }
+        LocalPlayer player = minecraft().player;
+        String type = new InventoryClick(kind, button).typeName(slot == null);
+        if (slot == null) {
+            return Map.of("slot", -1.0, "item", ItemValue.empty(), "click type", type, "inventory", InventoryRef.OPEN);
+        }
+        Inventory own = player.getInventory();
+        if (slot.container == own) {
+            return Map.of("slot", (double) slot.getContainerSlot(), "item", item(slot.getItem()), "click type", type,
+                    "inventory", InventoryRef.LOCAL);
+        }
+        int number = 0;
+        for (Slot other : player.containerMenu.slots) {
+            if (other == slot) {
+                break;
+            }
+            if (other.container != own) {
+                number++;
+            }
+        }
+        return Map.of("slot", (double) number, "item", item(slot.getItem()), "click type", type,
+                "inventory", InventoryRef.OPEN);
+    }
+
+    @Override
+    public ItemValue cursorItem() {
+        return item(minecraft().player.containerMenu.getCarried());
+    }
+
+    @Override
+    public int maxStackSize(String id) {
+        Identifier key = Identifier.tryParse(id);
+        if (key == null) {
+            return 64;
+        }
+        return BuiltInRegistries.ITEM.getOptional(key).map(Item::getDefaultMaxStackSize).orElse(64);
     }
 
     @Override

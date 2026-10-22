@@ -45,7 +45,9 @@ public final class Converters {
             case ItemValue item -> item.count() > 1 ? item.count() + " " + item.name() : item.name();
             case EntityValue entity -> entity.name();
             case Location location -> locationText(location);
-            case InventoryRef ignored -> "inventory of " + context.world().playerName();
+            case InventoryRef inventory -> inventory == InventoryRef.OPEN
+                    ? "current inventory of " + context.world().playerName()
+                    : "inventory of " + context.world().playerName();
             case List<?> list -> joinList(list, context);
             default -> value.toString();
         };

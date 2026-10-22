@@ -90,7 +90,7 @@ public final class EventValues {
         add(registry, "fall distance", SkType.NUMBER,
                 "How far you fell before landing, in blocks.");
         add(registry, "item", SkType.ITEM,
-                "The item involved in the event. For held item change it is the item in the newly selected slot, for inventory change the new content of the changed slot (air if emptied), for start and stop using item the main hand item, and for consume, item break and durability below the item that was eaten, broke or wore down.");
+                "The item involved in the event. For held item change it is the item in the newly selected slot, for inventory change the new content of the changed slot (air if emptied), for start and stop using item the main hand item, for consume, item break and durability below the item that was eaten, broke or wore down, and for inventory click the item in the clicked slot before the click.");
         add(registry, "previous item", SkType.ITEM,
                 "The item in the hotbar slot you switched away from.");
         add(registry, "gamemode", SkType.GAMEMODE,
@@ -116,6 +116,12 @@ public final class EventValues {
         }
         add(registry, "location", SkType.LOCATION,
                 "Where the event happened, in the dimension you are in: the corner of the broken or placed block (the same numbers as event-block x, y and z), or the exact position of the sound or particles (event-x, event-y and event-z).");
+        add(registry, "slot", SkType.NUMBER,
+                "The number of the clicked slot in its inventory, the same number slot %number% of an inventory uses: 0 to 40 in your own inventory, from 0 in the open one. -1 for a click outside the window.");
+        add(registry, "click type", SkType.TEXT,
+                "How the slot was clicked, in Skript's words: left mouse button, right mouse button, left mouse button with shift, right mouse button with shift, middle mouse button, number key, swap offhand, drop key, drop key with control, double click, or window border using left mouse button (or right) for a click outside the window.");
+        add(registry, "inventory", SkType.INVENTORY,
+                "The inventory the event is about: for a click, your inventory or the current inventory, whichever holds the clicked slot; for opening and closing, the current inventory.");
     }
 
     private static void add(SyntaxRegistry registry, String name, SkType type, String description) {

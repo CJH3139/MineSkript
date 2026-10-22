@@ -88,10 +88,10 @@ class EventContextTest {
                 assertTrue(cancel(event).isPresent(), info.name());
             } else {
                 SyntaxException error = assertThrows(SyntaxException.class, () -> cancel(event), info.name());
-                assertEquals("only \"on chat send\" and \"on command send\" can be cancelled", error.getMessage());
+                assertEquals("only \"on chat send\", \"on command send\" and \"on inventory click\" can be cancelled", error.getMessage());
             }
         }
-        assertEquals(List.of("Chat Send", "Command Send"), cancellable);
+        assertEquals(List.of("Inventory Click", "Chat Send", "Command Send"), cancellable);
     }
 
     @Test

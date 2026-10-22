@@ -1,6 +1,7 @@
 package com.mineskript.game;
 
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemDetails;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.script.OwnChatGuard;
@@ -154,6 +155,111 @@ public final class FakeGameBridge implements GameBridge {
 
     public void setSlot(int slot, ItemValue item) {
         slots[slot] = item;
+    }
+
+    public final List<ItemValue> container = new ArrayList<>();
+    public boolean inventoryScreen;
+    public boolean chestOpen;
+    public ItemValue cursor = ItemValue.empty();
+    public final Map<String, Integer> maxStacks = new HashMap<>(Map.of("minecraft:ender_pearl", 16,
+            "minecraft:diamond_sword", 1));
+
+    @Override
+    public List<ItemValue> openInventoryItems() {
+        List<ItemValue> items = new ArrayList<>();
+        for (ItemValue item : container) {
+            items.add(item == null ? ItemValue.empty() : item);
+        }
+        return items;
+    }
+
+    @Override
+    public boolean inventoryScreenOpen() {
+        return inventoryScreen;
+    }
+
+    @Override
+    public boolean clickSlot(InventoryRef inventory, int slot, InventoryClick click) {
+        int last = inventory == InventoryRef.OPEN ? container.size() - 1 : chestOpen ? MAIN_SLOTS - 1 : OFFHAND_SLOT;
+        if (slot < 0 || slot > last) {
+            return false;
+        }
+        calls.add("click:" + inventory + ":" + slot + ":" + click.kind() + ":" + click.button());
+        ItemValue item = clickedItem(inventory, slot);
+        switch (click.kind()) {
+            case PICKUP -> {
+                if (click.button() == 0) {
+                    leftClick(inventory, slot, item);
+                }
+            }
+            case QUICK_MOVE -> quickMove(inventory, slot, item);
+            case THROW -> putClicked(inventory, slot, click.button() == 1 || item.count() <= 1 ? ItemValue.empty()
+                    : withCount(item, item.count() - 1));
+            default -> {
+            }
+        }
+        return true;
+    }
+
+    private ItemValue clickedItem(InventoryRef inventory, int slot) {
+        return inventory == InventoryRef.OPEN ? openInventoryItems().get(slot) : slot(slot);
+    }
+
+    private void putClicked(InventoryRef inventory, int slot, ItemValue item) {
+        if (inventory == InventoryRef.OPEN) {
+            container.set(slot, item);
+        } else {
+            slots[slot] = item;
+        }
+    }
+
+    private void leftClick(InventoryRef inventory, int slot, ItemValue item) {
+        if (!cursor.isEmpty() && !item.isEmpty() && cursor.id().equals(item.id())) {
+            int stack = maxStackSize(item.id());
+            int moved = Math.min(cursor.count(), stack - item.count());
+            putClicked(inventory, slot, withCount(item, item.count() + moved));
+            cursor = cursor.count() - moved <= 0 ? ItemValue.empty() : withCount(cursor, cursor.count() - moved);
+            return;
+        }
+        putClicked(inventory, slot, cursor);
+        cursor = item;
+    }
+
+    private void quickMove(InventoryRef inventory, int slot, ItemValue item) {
+        if (item.isEmpty()) {
+            return;
+        }
+        if (inventory == InventoryRef.OPEN) {
+            for (int target = 0; target < MAIN_SLOTS; target++) {
+                if (slot(target).isEmpty()) {
+                    slots[target] = item;
+                    container.set(slot, ItemValue.empty());
+                    return;
+                }
+            }
+        } else if (chestOpen) {
+            for (int target = 0; target < container.size(); target++) {
+                if (openInventoryItems().get(target).isEmpty()) {
+                    container.set(target, item);
+                    slots[slot] = ItemValue.empty();
+                    return;
+                }
+            }
+        }
+    }
+
+    private static ItemValue withCount(ItemValue item, int count) {
+        return new ItemValue(item.id(), item.name(), count, item.damage(), item.maxDamage(), item.details());
+    }
+
+    @Override
+    public ItemValue cursorItem() {
+        return cursor;
+    }
+
+    @Override
+    public int maxStackSize(String id) {
+        return maxStacks.getOrDefault(id, 64);
     }
 
     private ItemValue slot(int index) {
@@ -559,7 +665,7 @@ public final class FakeGameBridge implements GameBridge {
                 return true;
             }
         }
-        return false;
+        return openInventoryItems().stream().anyMatch(item -> item.id().equals(id));
     }
 
     public static String blockKey(double x, double y, double z) {

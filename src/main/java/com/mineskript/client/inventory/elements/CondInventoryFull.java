@@ -6,13 +6,17 @@ import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
 import com.mineskript.game.GameBridge;
 import com.mineskript.lang.ast.Condition;
+import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.InventoryRef;
+import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.parse.Match;
 import com.mineskript.lang.parse.SyntaxRegistry;
 import com.mineskript.lang.runtime.Context;
+import java.util.List;
 import java.util.Optional;
 
 @Name("Inventory Is Full / Empty")
-@Description("Checks whether your main inventory is full (no free slot) or empty (every slot free). Only the 36 main slots count, the hotbar included; armour and the offhand are ignored, so the inventory can be empty while you wear armour. A slot with a partly filled stack is not free, so full does not mean every stack is at its maximum. It can also be written player's inventory is full or inventory of player is empty.")
+@Description("Checks whether your main inventory is full (no free slot) or empty (every slot free). Only the 36 main slots count, the hotbar included; armour and the offhand are ignored, so the inventory can be empty while you wear armour. A slot with a partly filled stack is not free, so full does not mean every stack is at its maximum. It can also be written player's inventory is full or inventory of player is empty. current inventory is full checks the open screen instead, such as a chest, where every slot counts.")
 @Examples({
         "on inventory change:",
         "	if inventory is full:",
@@ -32,14 +36,16 @@ import java.util.Optional;
         "	if player's inventory is full:",
         "		send \"no room left\""
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.17"})
 public final class CondInventoryFull implements Condition {
     private static final String STATES = "(full:full|empty:empty)";
 
+    private final Expression inventory;
     private final boolean full;
     private final boolean negate;
 
-    private CondInventoryFull(boolean full, boolean negate) {
+    private CondInventoryFull(Expression inventory, boolean full, boolean negate) {
+        this.inventory = inventory;
         this.full = full;
         this.negate = negate;
     }
@@ -56,12 +62,19 @@ public final class CondInventoryFull implements Condition {
         if (match.patternIndex() >= 2 && !Inventories.isInventory(match.slot(0))) {
             return Optional.empty();
         }
-        return Optional.of(new CondInventoryFull(match.has("full"), negate));
+        return Optional.of(new CondInventoryFull(match.patternIndex() >= 2 ? match.slot(0) : null, match.has("full"), negate));
     }
 
     @Override
     public boolean test(Context context) {
         GameBridge game = context.world();
+        if (Inventories.inventory(inventory, context) == InventoryRef.OPEN) {
+            List<ItemValue> items = game.openInventoryItems();
+            boolean result = full
+                    ? items.stream().noneMatch(ItemValue::isEmpty)
+                    : items.stream().allMatch(ItemValue::isEmpty);
+            return negate != result;
+        }
         boolean result;
         if (full) {
             result = game.freeSlots() == 0;

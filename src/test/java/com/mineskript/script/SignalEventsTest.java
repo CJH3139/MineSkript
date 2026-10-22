@@ -99,7 +99,7 @@ class SignalEventsTest {
     @Test
     void cancelOutsideChatSendIsAParseError() {
         ParsedScript script = new Parser(DefaultSyntax.registry()).parse("t.sk", "on chat:\n    cancel event\n");
-        assertEquals(List.of("t.sk:2: only \"on chat send\" and \"on command send\" can be cancelled"),
+        assertEquals(List.of("t.sk:2: only \"on chat send\", \"on command send\" and \"on inventory click\" can be cancelled"),
                 script.errors().stream().map(Object::toString).toList());
     }
 

@@ -12,7 +12,7 @@ import com.mineskript.lang.runtime.Context;
 import java.util.Optional;
 
 @Name("Cancel Event")
-@Description({"Stops the message or command that triggered the event from being sent. Only allowed inside on chat send and on command send; anywhere else it is an error when the script loads. Written cancel event, cancel the message or cancel the command, which all do the same thing.",
+@Description({"Stops the message or command that triggered the event from being sent, or the inventory click from happening. Only allowed inside on chat send, on command send and on inventory click; anywhere else it is an error when the script loads. Written cancel event, cancel the message or cancel the command, which all do the same thing.",
         "The decision is made when the trigger first pauses or finishes, so cancel event has to run before any wait in the trigger. If several triggers handle the same message, any one of them cancelling is enough."})
 @Examples({"on chat send:",
         "	if message contains \"password\":",
@@ -23,7 +23,7 @@ import java.util.Optional;
         "	if message starts with \"op \":",
         "		cancel the command",
         "		show action bar \"blocked /op\""})
-@Since("1.0.0-alpha.6")
+@Since({"1.0.0-alpha.6", "1.0.0-alpha.17"})
 public final class EffCancelEvent implements Statement {
     private final int line;
 
@@ -34,7 +34,7 @@ public final class EffCancelEvent implements Statement {
     public static void register(SyntaxRegistry registry) {
         registry.addEffect((match, scope) -> {
             if (scope.event() == null || !scope.event().context().cancellable()) {
-                throw new SyntaxException("only \"on chat send\" and \"on command send\" can be cancelled");
+                throw new SyntaxException("only \"on chat send\", \"on command send\" and \"on inventory click\" can be cancelled");
             }
             return Optional.of(new EffCancelEvent(scope.line()));
         }, "cancel [the] (event|message|command)");

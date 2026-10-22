@@ -8,6 +8,7 @@ import com.mineskript.lang.ast.EnchantmentType;
 import com.mineskript.lang.ast.EntityType;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.GameMode;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.NamedValues;
@@ -71,6 +72,9 @@ public final class Comparators {
         }
         if (left instanceof Boolean x && right instanceof Boolean y) {
             return x.equals(y) ? 0 : 1;
+        }
+        if (left instanceof InventoryRef x && right instanceof InventoryRef y) {
+            return x == y ? 0 : 1;
         }
         if (left instanceof Location x && right instanceof Location y) {
             return x.equals(y) ? 0 : 1;

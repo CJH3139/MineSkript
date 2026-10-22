@@ -1,6 +1,7 @@
 package com.mineskript.game;
 
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemValue;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,16 @@ public interface GameBridge {
     int freeSlots();
 
     int countItem(String id);
+
+    List<ItemValue> openInventoryItems();
+
+    boolean inventoryScreenOpen();
+
+    boolean clickSlot(InventoryRef inventory, int slot, InventoryClick click);
+
+    ItemValue cursorItem();
+
+    int maxStackSize(String id);
 
     String gamemode();
 

@@ -11,6 +11,7 @@ import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.GameMode;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Location;
 import com.mineskript.lang.ast.PotionEffectType;
@@ -113,6 +114,7 @@ public final class EventDispatcher {
     private long lastChangeTick;
     private boolean pendingSave;
     private boolean chatSending;
+    private boolean inventoryScreenWasOpen;
     private boolean commandSending;
     private Rewrite chatRewrite;
     private Rewrite commandRewrite;
@@ -174,6 +176,7 @@ public final class EventDispatcher {
         diff(previous, current);
         previous = current;
         if (!game.hasWorld()) {
+            inventoryScreenWasOpen = false;
             dropParked();
             return;
         }
@@ -207,6 +210,10 @@ public final class EventDispatcher {
         if (!game.hasWorld()) {
             return;
         }
+        trackInventoryScreen();
+        if (!game.hasWorld()) {
+            return;
+        }
         if (eventNames.contains("client tick")) {
             fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("client tick"), Map.of());
             if (!game.hasWorld()) {
@@ -236,6 +243,50 @@ public final class EventDispatcher {
         } finally {
             chatSending = false;
         }
+    }
+
+    private void trackInventoryScreen() {
+        boolean open = game.inventoryScreenOpen();
+        if (open == inventoryScreenWasOpen) {
+            return;
+        }
+        inventoryScreenWasOpen = open;
+        if (open) {
+            fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("inventory open"),
+                    Map.of("inventory", InventoryRef.OPEN, "screen title", game.screenTitle()));
+        } else {
+            fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("inventory close"),
+                    Map.of("inventory", InventoryRef.OPEN));
+        }
+    }
+
+    public boolean listens(String event) {
+        return eventNames.contains(event);
+    }
+
+    public boolean onInventoryClick(Map<String, Object> values) {
+        if (!game.hasWorld()) {
+            return true;
+        }
+        boolean allowed = true;
+        boolean outer = worldExpected;
+        worldExpected = true;
+        try {
+            for (Trigger trigger : List.copyOf(registry.triggers())) {
+                if (worldEnded()) {
+                    return allowed;
+                }
+                if (trigger.event() instanceof Event.State state && state.name().equals("inventory click")
+                        && state.accepts(values)) {
+                    Context context = context(trigger, values);
+                    runSafely(new Execution(trigger, context));
+                    allowed &= !context.cancelled();
+                }
+            }
+        } finally {
+            worldExpected = outer;
+        }
+        return allowed;
     }
 
     public boolean onCommandSend(String command) {

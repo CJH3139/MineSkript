@@ -94,7 +94,10 @@ quotes: `if player's gamemode is creative`, `if player has potion speed`, `tier 
 `if player's target is zombie`, `if event-weather is rain`. Text still matches them, so `gamemode is "creative"` keeps
 working. Items are item types (Skript's name for what MineSkript used to call block types) and take amounts:
 `player has 3 diamonds`, `player's inventory contains 64 of stone`, `amount of diamond in player's inventory` and
-`slot 0 of player's inventory`.
+`slot 0 of player's inventory`. The open screen is `current inventory`, so `slot 4 of current inventory`, `if current
+inventory has diamond` and `rows of current inventory` work on chests too. A client can't set items, so scripts move
+them with real clicks: `click slot 5`, `shift click slot 0 of current inventory`, `move the stack in slot 9 to slot 0`,
+`quick move all diamonds in the current inventory`, and `on inventory click` with `clicked slot` and `cancel event`.
 
 The player's values have Skript's names and property forms too: `player's level`, `level progress of player`,
 `player's remaining air` (a time, such as `15 seconds`), `food level of player`, `player's saturation`,

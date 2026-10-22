@@ -60,7 +60,7 @@ class JSONGeneratorTest {
     }
 
     @Test
-    void onlyChatSendAndCommandSendAreCancellable() {
+    void onlyChatSendCommandSendAndInventoryClickAreCancellable() {
         List<String> cancellable = new ArrayList<>();
         for (JsonElement element : docs.getAsJsonArray("events")) {
             JsonObject event = element.getAsJsonObject();
@@ -68,7 +68,7 @@ class JSONGeneratorTest {
                 cancellable.add(event.get("name").getAsString());
             }
         }
-        assertEquals(List.of("Chat Send", "Command Send"), cancellable);
+        assertEquals(List.of("Inventory Click", "Chat Send", "Command Send"), cancellable);
         assertFalse(event("Chat").get("cancellable").getAsBoolean());
     }
 
@@ -100,7 +100,7 @@ class JSONGeneratorTest {
         assertEquals("item", item.get("type").getAsString());
         assertEquals(List.of("event-held-item-change", "event-inventory-change", "event-start-using-item",
                         "event-stop-using-item", "event-consume", "event-item-break", "event-item-tooltip",
-                        "event-durability-below"),
+                        "event-inventory-click", "event-durability-below"),
                 strings(item.getAsJsonArray("events"), null));
     }
 }

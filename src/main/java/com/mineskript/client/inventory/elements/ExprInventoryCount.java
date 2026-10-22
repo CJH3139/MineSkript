@@ -6,6 +6,7 @@ import com.mineskript.doc.Name;
 import com.mineskript.doc.Since;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.SkType;
 import com.mineskript.lang.parse.Priority;
 import com.mineskript.lang.parse.SyntaxRegistry;
@@ -17,7 +18,7 @@ import java.util.Optional;
 @Name("Item Count In Inventory")
 @Description({
         "The total number of a given item across your whole inventory, adding up every stack. The item is written as a plain name such as stone, diamond or oak log (words become an id like minecraft:oak_log). Counts the hotbar, storage, armor and offhand slots, and returns 0 when you have none. Needs a world: outside a world the line stops with a \"no world\" error.",
-        "Like Skript it can be written amount of stone in player's inventory or number of diamonds of inventory of player; with several items (diamond and emerald) their counts are added up. The name must match the item id, so use the id form (for example oak_planks, not planks); a name ending in s is also tried without it, so diamonds counts diamond. Different enchantments or names on the same item still count together."
+        "Like Skript it can be written amount of stone in player's inventory or number of diamonds of inventory of player; with several items (diamond and emerald) their counts are added up. The name must match the item id, so use the id form (for example oak_planks, not planks); a name ending in s is also tried without it, so diamonds counts diamond. Different enchantments or names on the same item still count together. amount of diamond in current inventory counts the open screen instead, such as a chest."
 })
 @Examples({
         "on key press of \"c\":",
@@ -30,17 +31,19 @@ import java.util.Optional;
         "on key press of \"c\":",
         "	send \"%amount of iron ingot in player's inventory% iron\""
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.17"})
 public final class ExprInventoryCount implements Expression {
     private final Expression type;
+    private final Expression inventory;
 
-    private ExprInventoryCount(Expression type) {
+    private ExprInventoryCount(Expression type, Expression inventory) {
         this.type = type;
+        this.inventory = inventory;
     }
 
     public static void register(SyntaxRegistry registry) {
         registry.addExpression(SkType.NUMBER, Tier.COMBINED, Priority.before(Priority.SIMPLE),
-                (match, scope) -> Optional.of(new ExprInventoryCount(match.slot(0))),
+                (match, scope) -> Optional.of(new ExprInventoryCount(match.slot(0), match.patternIndex() == 1 ? match.slot(1) : null)),
                 "[the] number of %itemtype% in [the] inventory",
                 "[the] (amount|number) of %itemtypes% (in|of) %inventories%");
     }
@@ -54,9 +57,10 @@ public final class ExprInventoryCount implements Expression {
     public Object evaluate(Context context) {
         Object value = type.evaluate(context);
         List<?> types = value instanceof List<?> list ? list : List.of(value);
+        InventoryRef where = Inventories.inventory(inventory, context);
         int total = 0;
         for (Object item : types) {
-            total += Inventories.count(context.world(), (BlockType) item);
+            total += Inventories.count(context.world(), where, (BlockType) item);
         }
         return (double) total;
     }

@@ -1,0 +1,17 @@
+# Tests for ExprOpenedInventory with nothing open. Also covers ExprInventoryInfo, ExprFirstEmptySlot, ExprItemsIn
+# and ExprCursorItem. The fake game has an empty inventory and an empty current inventory.
+
+test "the current inventory with nothing open":
+	assert "%current inventory of player%" is "current inventory of Steve" with "the current inventory printed as %current inventory of player%"
+	assert "%player's open inventory%" is "current inventory of Steve" with "the possessive form printed differently"
+	assert amount of slots of top inventory is 0 with "an empty current inventory had slots"
+	assert slot 0 of the opened inventory is air with "a missing slot was not air"
+	assert current inventory is not player's inventory with "the current inventory was your own inventory"
+
+test "your own inventory":
+	assert rows of player's inventory is 4 with "your inventory did not have 4 rows"
+	assert player's inventory's amount of slots is 41 with "your inventory did not have 41 slots"
+	assert first empty slot of player's inventory is 0 with "the first empty slot was not 0"
+	assert size of all items in player's inventory is 0 with "an empty inventory had items"
+	assert cursor slot of player is air with "the cursor was not empty"
+	assert the cursor item is air with "the cursor item was not air"

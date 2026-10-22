@@ -1,0 +1,13 @@
+# Tests for CondCanHold. The fake inventory is empty, so everything fits in your own inventory, and the
+# current inventory has no slots, so nothing fits there.
+
+test "an empty inventory can hold things":
+	assert player can hold diamond with "an empty inventory could not hold a diamond"
+	assert player can hold 64 of stone with "an empty inventory could not hold 64 stone"
+	assert player's inventory has space for 2304 stone with "36 empty slots did not fit 2304 stone"
+	assert player cannot hold 2305 stone with "36 empty slots fit 2305 stone"
+	assert player has enough space to hold diamond and stone with "an and list did not fit"
+
+test "a current inventory without slots holds nothing":
+	assert current inventory can't hold diamond with "a current inventory without slots held a diamond"
+	assert current inventory doesn't have space for stone or dirt with "an or list fit without slots"

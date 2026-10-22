@@ -7,6 +7,7 @@ import com.mineskript.doc.Since;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.Condition;
 import com.mineskript.lang.ast.Expression;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.parse.ConstantExpression;
 import com.mineskript.lang.parse.ListExpression;
 import com.mineskript.lang.parse.Match;
@@ -20,7 +21,7 @@ import java.util.Set;
 
 @Name("Has Item")
 @Description({
-        "Checks whether your inventory holds an item, anywhere: hotbar, main inventory, armour slots and offhand. Items are written as item type words like diamond, golden apple or minecraft:ender_pearl. It always reads your own inventory.",
+        "Checks whether your inventory holds an item, anywhere: hotbar, main inventory, armour slots and offhand. Items are written as item type words like diamond, golden apple or minecraft:ender_pearl. It reads your own inventory unless you name the current inventory, as in current inventory has diamond.",
         "Like Skript, an amount can go in front: player has 3 diamonds (or 64 of stone) is true when you have at least that many in total. The amount is written as a number, as in Skript's item types. A name ending in s is also tried without it, so diamonds and torches count diamond and torch. With several items joined by and you need all of them; joined by or, one is enough. One amount counts for every item in the list, as in player has 2 of diamond and emerald. It can also be written player's inventory has stone, player has stone in their inventory, or player's inventory contains stone.",
         "An item name is up to four words. Words the language uses itself, such as of, on, in or the, cannot appear in it, so write those names with underscores: totem_of_undying."
 })
@@ -47,7 +48,7 @@ import java.util.Set;
         "	if player's inventory doesn't contain 64 of cobblestone:",
         "		send \"mine some more\""
 })
-@Since({"1.0.0-alpha.2", "1.0.0-alpha.11"})
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.17"})
 public final class CondHasItem implements Condition {
     private static final String HOLDER = "%players/inventories% ";
     private static final String IN = " [in [(the|their|his|her|its)] inventory]";
@@ -60,11 +61,13 @@ public final class CondHasItem implements Condition {
     private static final Set<Integer> NEGATED = Set.of(2, 3, 6, 7);
     private static final int FIRST_CONTAINS = 4;
 
+    private final Expression holder;
     private final Expression amount;
     private final Expression items;
     private final boolean negate;
 
-    private CondHasItem(Expression amount, Expression items, boolean negate) {
+    private CondHasItem(Expression holder, Expression amount, Expression items, boolean negate) {
+        this.holder = holder;
         this.amount = amount;
         this.items = items;
         this.negate = negate;
@@ -93,7 +96,7 @@ public final class CondHasItem implements Condition {
         if (counted && !(amount instanceof ConstantExpression)) {
             return Optional.empty();
         }
-        return Optional.of(new CondHasItem(amount, items, NEGATED.contains(index)));
+        return Optional.of(new CondHasItem(match.slot(0), amount, items, NEGATED.contains(index)));
     }
 
     @Override
@@ -102,13 +105,14 @@ public final class CondHasItem implements Condition {
         Object value = items.evaluate(context);
         List<?> wanted = value instanceof List<?> list ? list : List.of(value);
         boolean any = items instanceof ListExpression list && list.disjunctive();
+        InventoryRef inventory = Inventories.inventory(holder, context);
         boolean result = any
-                ? wanted.stream().anyMatch(item -> enough(item, needed, context))
-                : !wanted.isEmpty() && wanted.stream().allMatch(item -> enough(item, needed, context));
+                ? wanted.stream().anyMatch(item -> enough(item, needed, inventory, context))
+                : !wanted.isEmpty() && wanted.stream().allMatch(item -> enough(item, needed, inventory, context));
         return negate != result;
     }
 
-    private static boolean enough(Object item, int needed, Context context) {
-        return item instanceof BlockType type && Inventories.count(context.world(), type) >= needed;
+    private static boolean enough(Object item, int needed, InventoryRef inventory, Context context) {
+        return item instanceof BlockType type && Inventories.count(context.world(), inventory, type) >= needed;
     }
 }

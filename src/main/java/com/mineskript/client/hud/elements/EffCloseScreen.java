@@ -12,12 +12,12 @@ import java.util.Optional;
 
 @Name("Close Screen")
 @Description({"Closes whatever screen is open: an inventory, a chest, a crafting table, the chat box or the pause menu, just as pressing Escape would. Does nothing when no screen is open.",
-        "Needs a world."})
+        "Skript's close the inventory of player works too. Needs a world."})
 @Examples({"on screen open:",
         "	if event-screen title contains \"Vote\":",
         "		wait 1 tick",
         "		close screen"})
-@Since("1.0.0-alpha.2")
+@Since({"1.0.0-alpha.2", "1.0.0-alpha.17"})
 public final class EffCloseScreen implements Statement {
     private final int line;
 
@@ -28,7 +28,8 @@ public final class EffCloseScreen implements Statement {
     public static void register(SyntaxRegistry registry) {
         registry.addEffect((match, scope) -> Optional.of(new EffCloseScreen(scope.line())),
                 "close [the] screen",
-                "close [the] (inventory|gui)");
+                "close [the] (inventory|gui)",
+                "close [the] inventory [view] (to|of|for) %players%");
     }
 
     @Override

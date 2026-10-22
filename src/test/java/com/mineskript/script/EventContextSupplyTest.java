@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.mineskript.game.BlockChange;
 import com.mineskript.game.FakeGameBridge;
 import com.mineskript.lang.ast.EntityValue;
+import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.parse.EventInfo;
@@ -123,6 +124,7 @@ class EventContextSupplyTest {
         game.dimension = "minecraft:the_nether";
         game.onlineNames.add("Bob");
         game.screenOpen = true;
+        game.inventoryScreen = true;
         game.screenTitle = "Chest";
         game.screenType = "ContainerScreen";
         game.gamemode = "creative";
@@ -132,8 +134,11 @@ class EventContextSupplyTest {
         game.vehicle = null;
         game.onlineNames.remove("Bob");
         game.screenOpen = false;
+        game.inventoryScreen = false;
         game.dayTime = 5000;
         tick();
+        dispatcher.onInventoryClick(Map.of("slot", 3.0, "item", ItemValue.empty(), "click type", "left mouse button",
+                "inventory", InventoryRef.OPEN));
         dispatcher.onBlockBreak(new BlockChange("minecraft:dirt", 1, 64, -2));
         dispatcher.onBlockPlace(new BlockChange("minecraft:stone", 0, 0, 0));
         dispatcher.onChat("hello");
