@@ -10,6 +10,7 @@ public final class NamedValues {
         return switch (type) {
             case GAMEMODE -> GameMode.parse(words).map(Object.class::cast);
             case WEATHERTYPE -> WeatherType.parse(words).map(Object.class::cast);
+            case DAMAGECAUSE -> DamageCause.parse(words).map(Object.class::cast);
             case POTIONEFFECTTYPE -> PotionEffectType.parse(words).map(Object.class::cast);
             case ENCHANTMENT -> Enchantment.parse(words).map(Object.class::cast);
             case ENCHANTMENTTYPE -> EnchantmentType.parse(words).map(Object.class::cast);
@@ -20,7 +21,7 @@ public final class NamedValues {
 
     public static boolean isNamed(SkType type) {
         return switch (type) {
-            case GAMEMODE, WEATHERTYPE, POTIONEFFECTTYPE, ENCHANTMENT, ENCHANTMENTTYPE, ENTITYTYPE -> true;
+            case GAMEMODE, WEATHERTYPE, DAMAGECAUSE, POTIONEFFECTTYPE, ENCHANTMENT, ENCHANTMENTTYPE, ENTITYTYPE -> true;
             default -> false;
         };
     }

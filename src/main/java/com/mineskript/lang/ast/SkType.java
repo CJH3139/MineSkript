@@ -17,6 +17,7 @@ public enum SkType {
     ENCHANTMENTTYPE,
     ENTITYTYPE,
     WEATHERTYPE,
+    DAMAGECAUSE,
     INVENTORY,
     OBJECT;
 

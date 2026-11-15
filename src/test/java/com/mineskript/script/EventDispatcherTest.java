@@ -77,6 +77,14 @@ class EventDispatcherTest {
     }
 
     @Test
+    void chatGivesTheSenderOfPlayerChat() {
+        load("on chat:\n    if event-sender is set:\n        send \"from %event-sender%\"\n    else:\n        send \"system\"\n");
+        dispatcher.onChat("<Alex> hi", "Alex");
+        dispatcher.onChat("Alex joined the game");
+        assertEquals(List.of("from Alex", "system"), game.messages);
+    }
+
+    @Test
     void loadFiresEvenWithoutAWorld() {
         game.hasWorld = false;
         load("on load:\n    send \"loaded\"\nevery tick:\n    send \"never\"\n");

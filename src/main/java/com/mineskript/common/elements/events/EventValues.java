@@ -41,6 +41,12 @@ public final class EventValues {
                 "The chat message, or the command without its leading slash."));
         add(registry, "damage", SkType.NUMBER,
                 "Health lost in this hit, in health points (1 point is half a heart, 20 is a full bar without bonuses). Always positive.");
+        add(registry, "damage cause", SkType.DAMAGECAUSE,
+                "What hurt you, with Skript's damage cause names: fall, lava, fire, burning, drowning, entity attack, projectile, entity explosion, magic, wither, void and so on. Compare it as in event-damage cause is fall. Not set when the server did not report the hit.");
+        add(registry, "attacker", SkType.ENTITY,
+                "The entity that hurt you: the mob or player that hit you, or the one that shot the arrow. Not set for damage no entity caused, such as falling or lava, or when the attacker is out of view.");
+        add(registry, "death message", SkType.TEXT,
+                "The death message the server sent for your death, such as Alex fell from a high place, with formatting removed. Not set when the server sent none.");
         add(registry, "healed", SkType.NUMBER,
                 "Health gained, in health points (1 point is half a heart). Always positive.");
         add(registry, "health change", SkType.NUMBER,
@@ -52,9 +58,9 @@ public final class EventValues {
         add(registry, "block", SkType.BLOCKTYPE,
                 "The block type that was broken or placed, for example stone. Compare it with a block name such as event-block is stone.");
         add(registry, "screen title", SkType.TEXT,
-                "The title text of the screen that opened, such as Chest or Crafting. Can be empty for screens without a title.");
+                "The title text of the screen that opened or closed, such as Chest or Crafting. Can be empty for screens without a title.");
         add(registry, "screen type", SkType.TEXT,
-                "The name of the kind of screen that opened, as its class name, such as InventoryScreen or ChatScreen.");
+                "The name of the kind of screen that opened or closed, as its class name, such as InventoryScreen or ChatScreen.");
         add(registry, "hunger change", SkType.NUMBER,
                 "Signed change in food level, in food points (the bar holds 20, 2 per drumstick). Negative when hunger drops.");
         add(registry, "level change", SkType.NUMBER,
@@ -97,8 +103,12 @@ public final class EventValues {
                 "The new game mode: survival, creative, adventure or spectator. Compare it with a game mode, as in event-gamemode is creative; text such as \"creative\" works too.");
         add(registry, "effect", SkType.POTIONEFFECTTYPE,
                 "The potion effect type, such as speed or night vision. Compare it with an effect, as in event-effect is night vision; text such as \"night_vision\" works too. Printed in text it shows the name with spaces, such as night vision.");
+        add(registry, "effect duration", SkType.TIMESPAN,
+                "How long the new effect lasts. Not set for an effect with infinite duration.");
         add(registry, "effect level", SkType.NUMBER,
                 "The level of the new effect, where 1 means level I.");
+        add(registry, "sender", SkType.TEXT,
+                "The name of the player who sent the chat message. Not set for system messages, or when the server sends player chat as a system message, as many servers with their own chat format do.");
         add(registry, "weather", SkType.WEATHERTYPE,
                 "The new weather: clear, rain or thunder. Compare it with a weather type, as in event-weather is rain.");
         add(registry, "entity", SkType.ENTITY,

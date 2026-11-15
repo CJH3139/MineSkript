@@ -10,17 +10,22 @@ public final class ChatEvents {
 
     public static void register(SyntaxRegistry registry) {
         registry.addEvent("Chat", (match, scope) -> Optional.of(new Event.Chat()), "on chat")
-                .values("message")
+                .values("message", "sender")
                 .description("Fires for every message that appears in your chat from the server: player chat and system messages. Action bar (overlay) messages are not included. The text is available as message, with colours and formatting removed. Nothing fires while no world is loaded.",
-                        "For player chat the text is the message as displayed, which normally includes the sender name, so match with contains rather than is.")
+                        "For player chat the text is the message as displayed, which normally includes the sender name, so match with contains rather than is.",
+                        "event-sender is the name of the player who sent the message. It is only set for player chat the server sends as player chat; system messages, and the chat of many servers that format chat themselves, have no sender, so check if event-sender is set.")
                 .examples("on chat:",
                         "	if message contains \"has joined\":",
                         "		send \"someone joined\"",
                         "",
                         "on chat:",
                         "	if message contains \"your name\":",
-                        "		play sound \"minecraft:block.note_block.pling\"")
-                .since("1.0.0-alpha");
+                        "		play sound \"minecraft:block.note_block.pling\"",
+                        "",
+                        "on chat:",
+                        "	if event-sender is set:",
+                        "		send \"%event-sender% said something\"")
+                .since("1.0.0-alpha", "1.0.0-alpha.18");
         registry.addEvent("Chat Send", (match, scope) -> Optional.of(new Event.ChatSend()), "on chat send")
                 .values("message")
                 .cancellable()

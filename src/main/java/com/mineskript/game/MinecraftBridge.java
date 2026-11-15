@@ -895,6 +895,30 @@ public final class MinecraftBridge implements GameBridge {
     }
 
     @Override
+    public int effectDuration(String id) {
+        for (MobEffectInstance instance : minecraft().player.getActiveEffects()) {
+            if (effectKey(instance.getEffect()).equals(id)) {
+                return instance.isInfiniteDuration() ? -1 : instance.getDuration();
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public CombatHit takeHit() {
+        String type = CombatLog.takeDamageType();
+        if (type == null) {
+            return null;
+        }
+        return new CombatHit(type, entity(minecraft().level.getEntity(CombatLog.attackerId())));
+    }
+
+    @Override
+    public String takeDeathMessage() {
+        return CombatLog.takeDeathMessage();
+    }
+
+    @Override
     public String blockAt(double x, double y, double z) {
         Minecraft minecraft = minecraft();
         BlockPos pos = BlockPos.containing(x, y, z);

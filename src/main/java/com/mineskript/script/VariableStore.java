@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
+import com.mineskript.lang.ast.DamageCause;
 import com.mineskript.lang.ast.Enchantment;
 import com.mineskript.lang.ast.EnchantmentType;
 import com.mineskript.lang.ast.EntityType;
@@ -139,6 +140,7 @@ public final class VariableStore {
             }
             case GameMode mode -> named(object, "gamemode", mode.id());
             case WeatherType weather -> named(object, "weathertype", weather.toString());
+            case DamageCause cause -> named(object, "damagecause", cause.toString());
             case PotionEffectType effect -> named(object, "potioneffecttype", effect.id());
             case Enchantment enchantment -> named(object, "enchantment", enchantment.id());
             case EnchantmentType type -> {
@@ -197,6 +199,7 @@ public final class VariableStore {
             }
             case "gamemode" -> GameMode.parse(value.getAsString()).orElseThrow(() -> unknown(type));
             case "weathertype" -> WeatherType.parse(value.getAsString()).orElseThrow(() -> unknown(type));
+            case "damagecause" -> DamageCause.parse(value.getAsString()).orElseThrow(() -> unknown(type));
             case "potioneffecttype" -> new PotionEffectType(value.getAsString());
             case "enchantment" -> new Enchantment(value.getAsString());
             case "enchantmenttype" -> {

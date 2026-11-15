@@ -114,18 +114,18 @@ public final class InventoryEvents {
                         "	if clicked inventory is the current inventory:",
                         "		send \"slot %clicked slot% of %screen title%\"")
                 .since("1.0.0-alpha.17");
-        states(registry, "Inventory Open", "inventory open", "on inventory (open|opening)")
+        states(registry, "Inventory Open", "inventory open", "on inventory (open|opened|opening)")
                 .values("inventory", "screen title")
                 .description("Fires when an inventory screen opens: your own inventory, a chest, a furnace, a villager's trades and so on, but not chat, signs or menus (use on screen open for every screen). Checked once per tick. event-inventory is the current inventory and event-screen title its title.")
                 .examples("on inventory open:",
                         "	send \"opened %event-screen title% with %rows of current inventory% rows\"")
                 .since("1.0.0-alpha.17");
-        states(registry, "Inventory Close", "inventory close", "on inventory (close|closing)")
-                .values("inventory")
-                .description("Fires when the inventory screen closes, checked once per tick. Moving straight from one inventory screen to another does not fire it.")
+        states(registry, "Inventory Close", "inventory close", "on inventory (close|closed|closing)")
+                .values("inventory", "screen title")
+                .description("Fires when the inventory screen closes, checked once per tick. Moving straight from one inventory screen to another does not fire it. event-screen title is the title of the inventory that was open last.")
                 .examples("on inventory close:",
-                        "	send \"inventory closed\"")
-                .since("1.0.0-alpha.17");
+                        "	send \"closed %event-screen title%\"")
+                .since("1.0.0-alpha.17", "1.0.0-alpha.18");
         registry.addEvent("Durability Below", InventoryEvents::durability, "on [held item] durability (below|under|less than) %number%")
                 .values("durability", "item")
                 .description("Fires when the durability left on the item in your main hand drops below the given number, checked once per tick. It fires only on the crossing, from at least the number to below it, for the same item in the same slot; switching to an item that is already low does not fire it. event-item is the item and event-durability the uses left.",

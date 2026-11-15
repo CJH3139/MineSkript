@@ -220,6 +220,12 @@ public interface GameBridge {
 
     Map<String, Integer> activeEffects();
 
+    int effectDuration(String id);
+
+    CombatHit takeHit();
+
+    String takeDeathMessage();
+
     String blockAt(double x, double y, double z);
 
     int[] targetBlockPosition();

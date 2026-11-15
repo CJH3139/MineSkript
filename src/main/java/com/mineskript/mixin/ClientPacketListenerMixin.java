@@ -1,13 +1,17 @@
 package com.mineskript.mixin;
 
 import com.mineskript.game.BossBarWatcher;
+import com.mineskript.game.CombatLog;
 import com.mineskript.game.GameSignals;
 import java.util.Map;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -90,5 +94,19 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handlePlayerInfoRemove", at = @At("TAIL"))
     private void mineskript$tabRemove(ClientboundPlayerInfoRemovePacket packet, CallbackInfo info) {
         GameSignals.emitOnce("tab list");
+    }
+
+    @Inject(method = "handleDamageEvent", at = @At("TAIL"))
+    private void mineskript$damage(ClientboundDamageEventPacket packet, CallbackInfo info) {
+        if (Minecraft.getInstance().player != null && packet.entityId() == Minecraft.getInstance().player.getId()) {
+            CombatLog.hit(packet.sourceType().getRegisteredName(), packet.sourceCauseId());
+        }
+    }
+
+    @Inject(method = "handlePlayerCombatKill", at = @At("TAIL"))
+    private void mineskript$death(ClientboundPlayerCombatKillPacket packet, CallbackInfo info) {
+        if (Minecraft.getInstance().player != null && packet.playerId() == Minecraft.getInstance().player.getId()) {
+            CombatLog.died(packet.message().getString());
+        }
     }
 }

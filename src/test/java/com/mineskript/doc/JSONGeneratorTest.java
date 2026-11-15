@@ -34,7 +34,7 @@ class JSONGeneratorTest {
     @Test
     void eventsListTheirDeclaredValues() {
         JsonObject damage = event("Damage");
-        assertEquals(List.of("event-damage", "event-old health"),
+        assertEquals(List.of("event-damage", "event-damage cause", "event-attacker", "event-old health"),
                 strings(damage.getAsJsonArray("eventValues"), "name"));
         JsonObject value = damage.getAsJsonArray("eventValues").get(0).getAsJsonObject();
         assertEquals("number", value.get("type").getAsString());
@@ -53,7 +53,8 @@ class JSONGeneratorTest {
     void chatEventsListTheMessage() {
         for (String name : List.of("Chat", "Chat Send", "Command Send")) {
             JsonArray values = event(name).getAsJsonArray("eventValues");
-            assertEquals(List.of("message"), strings(values, "name"), name);
+            assertEquals(name.equals("Chat") ? List.of("message", "event-sender") : List.of("message"),
+                    strings(values, "name"), name);
             assertEquals("The chat message, or the command without its leading slash.",
                     values.get(0).getAsJsonObject().get("description").getAsString());
         }

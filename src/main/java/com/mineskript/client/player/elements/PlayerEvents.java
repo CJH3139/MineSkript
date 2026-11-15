@@ -81,8 +81,9 @@ public final class PlayerEvents {
                         "		show action bar \"sprinting\"")
                 .since("1.0.0-alpha.11");
         state(registry, "Damage", "on (damage|damage taken|take damage)", "damage")
-                .values("damage", "old health")
+                .values("damage", "old health", "damage cause", "attacker")
                 .description("Fires when your health goes down but stays above zero. Health is polled once per tick, so several hits in the same tick arrive as one event, and changes smaller than 0.01 are ignored. damage (or event-damage) is the health lost in health points (1 point is half a heart), and past health (or event-old health) your health before the hit.",
+                        "damage cause (or event-damage cause) is what hurt you, with Skript's names such as fall, lava or entity attack, and attacker (or event-attacker) the entity that did it. Both come from the hit the server reports, so check that they are set: neither is set when the server reported no hit, and attacker is not set when no entity caused the damage.",
                         "The hit that kills you fires on death instead, and damage soaked up by absorption hearts does not lower health, so it does not fire.")
                 .examples("on damage:",
                         "	send \"took %event-damage% damage\"",
@@ -92,8 +93,14 @@ public final class PlayerEvents {
                         "",
                         "on take damage:",
                         "	if health of player is less than 6:",
-                        "		show title \"low health\"")
-                .since("1.0.0-alpha.2", "1.0.0-alpha.11");
+                        "		show title \"low health\"",
+                        "",
+                        "on damage:",
+                        "	if damage cause is fall:",
+                        "		send \"ouch, my legs\"",
+                        "	else if attacker is set:",
+                        "		send \"hit by %attacker%\"")
+                .since("1.0.0-alpha.2", "1.0.0-alpha.11", "1.0.0-alpha.18");
         states(registry, "Heal", "heal", "on (heal|healing)")
                 .values("healed", "old health")
                 .description("Fires when your health goes up while you are alive, polled once per tick. event-healed is the health gained in health points (1 point is half a heart), and past health (or event-old health) your health before. Coming back to life fires on respawn instead.")
@@ -114,11 +121,16 @@ public final class PlayerEvents {
                         "		send \"hit while healthy\"")
                 .since("1.0.0-alpha.5");
         state(registry, "Death", "on death", "death")
-                .description("Fires when your health reaches zero, checked once per tick.")
+                .values("death message")
+                .description("Fires when your health reaches zero, checked once per tick. death message (or event-death message) is the message the server sent with the death screen, such as Alex fell from a high place; it is not set when the server sent none.")
                 .examples("on death:",
                         "	add 1 to {deaths}",
-                        "	send \"deaths so far: %{deaths}%\"")
-                .since("1.0.0-alpha.2");
+                        "	send \"deaths so far: %{deaths}%\"",
+                        "",
+                        "on death:",
+                        "	if death message is set:",
+                        "		send \"%death message%\"")
+                .since("1.0.0-alpha.2", "1.0.0-alpha.18");
         states(registry, "Respawn", "respawn", "on [player] (respawn|respawning)")
                 .description("Fires when your health goes from zero back above zero, which is when you respawn. It is detected from health, polled once per tick. Also written on player respawn, like Skript.")
                 .examples("on respawn:",
@@ -172,15 +184,18 @@ public final class PlayerEvents {
                         "	send \"%level progress of player% of the way to the next level\"")
                 .since("1.0.0-alpha.2", "1.0.0-alpha.11");
         filtered(registry, "Effect Gain", "effect gain", "effect", "on effect gain [of %-potioneffecttypes%]")
-                .values("effect", "effect level")
-                .description("Fires for each status effect that becomes active on you, checked once per tick. event-effect is the potion effect type (it prints as its name, such as night vision) and event-effect level its level, where 1 means level I.",
+                .values("effect", "effect level", "effect duration")
+                .description("Fires for each status effect that becomes active on you, checked once per tick. event-effect is the potion effect type (it prints as its name, such as night vision), event-effect level its level, where 1 means level I, and event-effect duration how long it lasts (not set for an infinite effect).",
                         "on effect gain of speed only fires for that effect; the effects must be written out, not taken from a variable. An effect that only changes level while it stays active does not fire this.")
                 .examples("on effect gain:",
                         "	send \"got %event-effect% %event-effect level%\"",
                         "",
                         "on effect gain of poison or wither:",
-                        "	send \"drink milk\"")
-                .since("1.0.0-alpha.2", "1.0.0-alpha.11");
+                        "	send \"drink milk\"",
+                        "",
+                        "on effect gain of speed:",
+                        "	send \"fast for %event-effect duration%\"")
+                .since("1.0.0-alpha.2", "1.0.0-alpha.11", "1.0.0-alpha.18");
         filtered(registry, "Effect Lose", "effect lose", "effect",
                 "on (effect lose|effect loss) [of %-potioneffecttypes%]")
                 .values("effect")

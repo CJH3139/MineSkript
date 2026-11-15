@@ -33,7 +33,7 @@ class EventsTest {
         assertEquals(new Event.Load(), event("on script load").orElseThrow());
         Event chat = event("on chat").orElseThrow();
         assertInstanceOf(Event.Chat.class, chat);
-        assertEquals(List.of("message"), chat.context().names());
+        assertEquals(List.of("message", "sender"), chat.context().names());
         assertEquals(new Event.KeyPress("key.keyboard.r"), event("on key press of \"r\"").orElseThrow());
         assertEquals(new Event.KeyPress("key.keyboard.f6"), event("on press of \"F6\"").orElseThrow());
         assertEquals(new Event.KeyRelease("key.keyboard.left.shift"), event("on key release of \"left shift\"").orElseThrow());

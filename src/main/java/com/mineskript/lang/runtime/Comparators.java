@@ -3,6 +3,7 @@ package com.mineskript.lang.runtime;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.DamageCause;
 import com.mineskript.lang.ast.Enchantment;
 import com.mineskript.lang.ast.EnchantmentType;
 import com.mineskript.lang.ast.EntityType;
@@ -116,6 +117,8 @@ public final class Comparators {
                     Optional.of(mode.id().equalsIgnoreCase(text.strip()));
             case WeatherType weather when other instanceof String text ->
                     Optional.of(WeatherType.parse(text).map(weather::equals).orElse(false));
+            case DamageCause cause when other instanceof String text ->
+                    Optional.of(DamageCause.parse(text).map(cause::equals).orElse(false));
             case PotionEffectType effect when other instanceof String text -> Optional.of(effect.matches(text));
             case Enchantment enchantment when other instanceof String text -> Optional.of(enchantment.matches(text));
             case EnchantmentType type when other instanceof String text -> Optional.of(type.matches(text));

@@ -99,6 +99,9 @@ public final class FakeGameBridge implements GameBridge {
     public EntityValue vehicle;
     public final List<String> onlineNames = new ArrayList<>();
     public final Map<String, Integer> effects = new LinkedHashMap<>();
+    public final Map<String, Integer> effectDurations = new HashMap<>();
+    public CombatHit hit;
+    public String deathMessage;
     public int totalExperience;
     public int[] targetBlockPosition;
     public final Map<String, String> absoluteBlocks = new HashMap<>();
@@ -737,6 +740,25 @@ public final class FakeGameBridge implements GameBridge {
     @Override
     public Map<String, Integer> activeEffects() {
         return Collections.unmodifiableMap(new TreeMap<>(effects));
+    }
+
+    @Override
+    public int effectDuration(String id) {
+        return effectDurations.getOrDefault(id, effects.containsKey(id) ? 600 : 0);
+    }
+
+    @Override
+    public CombatHit takeHit() {
+        CombatHit taken = hit;
+        hit = null;
+        return taken;
+    }
+
+    @Override
+    public String takeDeathMessage() {
+        String taken = deathMessage;
+        deathMessage = null;
+        return taken;
     }
 
     @Override

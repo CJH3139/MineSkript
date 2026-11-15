@@ -31,7 +31,10 @@ import com.mineskript.common.elements.events.CommonEvents;
 import com.mineskript.common.elements.events.EventValues;
 import com.mineskript.common.elements.expressions.ExprAbsoluteValue;
 import com.mineskript.common.elements.expressions.ExprCeiling;
+import com.mineskript.common.elements.expressions.ExprAttacker;
 import com.mineskript.common.elements.expressions.ExprDamage;
+import com.mineskript.common.elements.expressions.ExprDamageCause;
+import com.mineskript.common.elements.expressions.ExprDeathMessage;
 import com.mineskript.common.elements.expressions.ExprDistance;
 import com.mineskript.common.elements.expressions.ExprEventValue;
 import com.mineskript.common.elements.expressions.ExprFloor;
@@ -80,6 +83,9 @@ public final class CommonModule implements SyntaxModule {
 
         ExprEventValue.register(registry);
         ExprDamage.register(registry);
+        ExprDamageCause.register(registry);
+        ExprAttacker.register(registry);
+        ExprDeathMessage.register(registry);
         ExprTimeState.register(registry);
         ExprLoopValue.register(registry);
         ExprLoopIteration.register(registry);

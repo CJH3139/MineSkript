@@ -1,6 +1,7 @@
 package com.mineskript.script;
 
 import com.mineskript.game.BlockChange;
+import com.mineskript.game.CombatHit;
 import com.mineskript.game.GameBridge;
 import com.mineskript.game.GameSignals;
 import com.mineskript.game.SnapshotNeeds;
@@ -8,14 +9,17 @@ import com.mineskript.game.WorldSnapshot;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.Condition;
+import com.mineskript.lang.ast.DamageCause;
 import com.mineskript.lang.ast.EntityValue;
 import com.mineskript.lang.ast.Event;
 import com.mineskript.lang.ast.GameMode;
 import com.mineskript.lang.ast.InventoryRef;
 import com.mineskript.lang.ast.ItemValue;
 import com.mineskript.lang.ast.Location;
+import com.mineskript.lang.ast.None;
 import com.mineskript.lang.ast.PotionEffectType;
 import com.mineskript.lang.ast.ScriptCommand;
+import com.mineskript.lang.ast.Timespan;
 import com.mineskript.lang.ast.TooltipLines;
 import com.mineskript.lang.ast.Trigger;
 import com.mineskript.lang.ast.WaitUntil;
@@ -115,6 +119,9 @@ public final class EventDispatcher {
     private boolean pendingSave;
     private boolean chatSending;
     private boolean inventoryScreenWasOpen;
+    private String openInventoryTitle = "";
+    private String openScreenTitle = "";
+    private String openScreenType = "";
     private boolean commandSending;
     private Rewrite chatRewrite;
     private Rewrite commandRewrite;
@@ -224,10 +231,15 @@ public final class EventDispatcher {
     }
 
     public void onChat(String message) {
+        onChat(message, null);
+    }
+
+    public void onChat(String message, String sender) {
         if (!game.hasWorld()) {
             return;
         }
-        fireAll(trigger -> trigger.event() instanceof Event.Chat, Map.of("message", message));
+        fireAll(trigger -> trigger.event() instanceof Event.Chat,
+                Map.of("message", message, "sender", sender == null ? None.NONE : sender));
     }
 
     public boolean onChatSend(String message) {
@@ -248,15 +260,19 @@ public final class EventDispatcher {
     private void trackInventoryScreen() {
         boolean open = game.inventoryScreenOpen();
         if (open == inventoryScreenWasOpen) {
+            if (open && eventNames.contains("inventory close")) {
+                openInventoryTitle = game.screenTitle();
+            }
             return;
         }
         inventoryScreenWasOpen = open;
         if (open) {
+            openInventoryTitle = game.screenTitle();
             fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("inventory open"),
-                    Map.of("inventory", InventoryRef.OPEN, "screen title", game.screenTitle()));
+                    Map.of("inventory", InventoryRef.OPEN, "screen title", openInventoryTitle));
         } else {
             fireAll(trigger -> trigger.event() instanceof Event.State state && state.name().equals("inventory close"),
-                    Map.of("inventory", InventoryRef.OPEN));
+                    Map.of("inventory", InventoryRef.OPEN, "screen title", openInventoryTitle));
         }
     }
 
@@ -738,7 +754,8 @@ public final class EventDispatcher {
         reportedHealth = now;
         fireState("health", Map.of("health change", now - was, "old health", was));
         if (now <= 0 && was > 0) {
-            fireState("death", Map.of());
+            String message = game.takeDeathMessage();
+            fireState("death", Map.of("death message", message == null ? None.NONE : message));
             return;
         }
         if (now > 0 && was <= 0) {
@@ -746,7 +763,10 @@ public final class EventDispatcher {
             return;
         }
         if (now < was) {
-            fireState("damage", Map.of("damage", was - now, "old health", was));
+            CombatHit hit = game.takeHit();
+            fireState("damage", Map.of("damage", was - now, "old health", was,
+                    "damage cause", hit == null ? None.NONE : DamageCause.fromDamageType(hit.damageType()),
+                    "attacker", hit == null || hit.attacker() == null ? None.NONE : hit.attacker()));
         } else if (now > was && was > 0) {
             fireState("heal", Map.of("healed", now - was, "old health", was));
         }
@@ -819,7 +839,9 @@ public final class EventDispatcher {
             Integer was = wasEffects.get(id);
             Integer now = after.effects().get(id);
             if (was == null && now != null) {
-                fireState("effect gain", Map.of("effect", PotionEffectType.fromId(id), "effect level", (double) now));
+                int duration = game.effectDuration(id);
+                fireState("effect gain", Map.of("effect", PotionEffectType.fromId(id), "effect level", (double) now,
+                        "effect duration", duration < 0 ? None.NONE : new Timespan(duration)));
             } else if (was != null && now == null) {
                 fireState("effect lose", Map.of("effect", PotionEffectType.fromId(id)));
             }
@@ -862,6 +884,11 @@ public final class EventDispatcher {
         }
     }
 
+    private void rememberOpenScreen() {
+        openScreenTitle = game.screenTitle();
+        openScreenType = game.screenType();
+    }
+
     private static Object gamemodeValue(String name) {
         return GameMode.parse(name).<Object>map(mode -> mode).orElse(name);
     }
@@ -869,10 +896,13 @@ public final class EventDispatcher {
     private void diffWorldState(WorldSnapshot before, WorldSnapshot after) {
         if (before.screenOpen() != after.screenOpen()) {
             if (after.screenOpen()) {
-                fireState("screen open", Map.of("screen title", game.screenTitle(), "screen type", game.screenType()));
+                rememberOpenScreen();
+                fireState("screen open", Map.of("screen title", openScreenTitle, "screen type", openScreenType));
             } else {
-                fireState("screen close", Map.of());
+                fireState("screen close", Map.of("screen title", openScreenTitle, "screen type", openScreenType));
             }
+        } else if (after.screenOpen() && eventNames.contains("screen close")) {
+            rememberOpenScreen();
         }
         if (!before.gamemode().equals(after.gamemode())) {
             fireState("gamemode", Map.of("gamemode", gamemodeValue(after.gamemode())));

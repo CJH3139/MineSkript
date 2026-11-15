@@ -49,6 +49,8 @@ public final class Pattern {
             Map.entry("entitydatas", SkType.ENTITYTYPE),
             Map.entry("weathertype", SkType.WEATHERTYPE),
             Map.entry("weathertypes", SkType.WEATHERTYPE),
+            Map.entry("damagecause", SkType.DAMAGECAUSE),
+            Map.entry("damagecauses", SkType.DAMAGECAUSE),
             Map.entry("inventory", SkType.INVENTORY),
             Map.entry("inventories", SkType.INVENTORY),
             Map.entry("object", SkType.OBJECT),

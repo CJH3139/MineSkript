@@ -96,7 +96,7 @@ class EventContextTest {
 
     @Test
     void parsedEventsCarryTheirDeclaredContext() {
-        assertEquals(List.of("message"), event("on chat").context().names());
+        assertEquals(List.of("message", "sender"), event("on chat").context().names());
         assertTrue(event("on chat send").context().cancellable());
         assertEquals(List.of("health change", "old health"), event("on health change").context().names());
         assertEquals(List.of("durability", "item"), event("on durability below 3").context().names());

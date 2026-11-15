@@ -4,6 +4,7 @@ import com.mineskript.game.GameBridge;
 import com.mineskript.lang.Language;
 import com.mineskript.lang.ast.BlockType;
 import com.mineskript.lang.ast.BlockValue;
+import com.mineskript.lang.ast.DamageCause;
 import com.mineskript.lang.ast.Enchantment;
 import com.mineskript.lang.ast.EnchantmentType;
 import com.mineskript.lang.ast.EntityType;
@@ -71,6 +72,7 @@ public final class Converters {
             case EnchantmentType ignored -> SkType.ENCHANTMENTTYPE;
             case EntityType ignored -> SkType.ENTITYTYPE;
             case WeatherType ignored -> SkType.WEATHERTYPE;
+            case DamageCause ignored -> SkType.DAMAGECAUSE;
             case InventoryRef ignored -> SkType.INVENTORY;
             case null, default -> SkType.OBJECT;
         };
@@ -162,6 +164,7 @@ public final class Converters {
             case ENCHANTMENTTYPE -> "enchantment type";
             case ENTITYTYPE -> "entity type";
             case WEATHERTYPE -> "weather type";
+            case DAMAGECAUSE -> "damage cause";
             default -> type.name().toLowerCase(Locale.ROOT);
         };
     }

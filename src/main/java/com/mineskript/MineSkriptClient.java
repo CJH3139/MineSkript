@@ -3,6 +3,7 @@ package com.mineskript;
 import com.mineskript.api.AddonLoader;
 import com.mineskript.api.MineSkriptAddon;
 import com.mineskript.game.BlockChange;
+import com.mineskript.game.CombatLog;
 import com.mineskript.game.GameSignals;
 import com.mineskript.game.MinecraftBridge;
 import com.mineskript.lang.ParseError;
@@ -102,6 +103,7 @@ public final class MineSkriptClient implements ClientModInitializer {
                 dispatcher.onSignal(signal);
             }
             dispatcher.tick();
+            CombatLog.tick();
         });
         GameSignals.onFrame(dispatcher::onFrame);
         ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
@@ -137,7 +139,8 @@ public final class MineSkriptClient implements ClientModInitializer {
             }
             return InteractionResult.PASS;
         });
-        ClientReceiveMessageEvents.CHAT.register((message, signed, profile, params, timestamp) -> dispatcher.onChat(message.getString()));
+        ClientReceiveMessageEvents.CHAT.register((message, signed, profile, params, timestamp) ->
+                dispatcher.onChat(message.getString(), profile == null ? null : profile.name()));
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!overlay) {
                 dispatcher.onChat(message.getString());

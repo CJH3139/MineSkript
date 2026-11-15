@@ -21,10 +21,15 @@ public final class HudEvents {
                         "	send \"%event-screen type%\"")
                 .since("1.0.0-alpha.2");
         state(registry, "Screen Close", "on screen close", "screen close")
-                .description("Fires when the last open screen closes and you are back in the game view, checked once per tick. It carries no values.")
+                .values("screen title", "screen type")
+                .description("Fires when the last open screen closes and you are back in the game view, checked once per tick. event-screen title and event-screen type are those of the screen that was open last.")
                 .examples("on screen close:",
-                        "	send \"back in game\"")
-                .since("1.0.0-alpha.2");
+                        "	send \"back in game\"",
+                        "",
+                        "on screen close:",
+                        "	if event-screen title is \"Chest\":",
+                        "		send \"closed a chest\"")
+                .since("1.0.0-alpha.2", "1.0.0-alpha.18");
         state(registry, "Toast", "on toast", "toast")
                 .values("text", "toast type")
                 .description("Fires when a toast pops up in the top right corner. event-toast type is the kind of toast, such as AdvancementToast, RecipeToast or SystemToast. event-text is the advancement title for advancement toasts and empty for every other kind. It is reported from a game hook, queued, and run at the end of the client tick, only while you are in a world. At most 256 queued signals of all kinds are kept per tick, so extra ones in a very busy tick are dropped.")
